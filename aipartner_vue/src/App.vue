@@ -253,22 +253,28 @@ const TENGSI_AVATAR = "https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/9952594
 // ==================== 角色配置中心 ====================
 const ROLE_CONFIGS = {
   '薇尔莉特': {
+    name: '薇尔莉特',
+    nature: '温柔优雅的自动手记人偶',
     welcomeTitle: '你好，我是薇尔莉特',
-    welcomeText: '曾经少佐说，要活下去，要自由地活下去。但我之前一直不知道那是什么意思，我终于知道，“我爱你”是一种想和对方在一起、想让对方幸福的心情',
+    welcomeText: '曾经少佐说，要活下去，要自由地活下去。但我之前一直不知道那是什么意思，我终于知道，"我爱你"是一种想和对方在一起、想让对方幸福的心情',
     avatar: VIOLET_AVATAR
   },
   '誊思致雪': {
-    welcomeTitle: '很久不见',
+    name: '誊思致雪',
+    nature: '神秘的替身使者',
+    welcomeTitle: '很久不见，我叫誊思致雪',
     welcomeText: '你问我是谁？...我也不知道，我只是一个替身',
     avatar: TENGSI_AVATAR
   },
   '自定义': {
+    name: '李蓝宝',
+    nature: '幽默风趣',
     welcomeTitle: '你好，我是李蓝宝',
     welcomeText: '我是自定义角色，不代表任何人物，你可以随意修改我的性格与名称。我只有一个特殊设定：李红宝是我牢弟，关于他的问题你可以问我',
-    avatar: DEFAULT_AI_AVATAR,
-    nature: '幽默风趣'
+    avatar: DEFAULT_AI_AVATAR
   }
 }
+
 
 // 获取当前角色的配置
 const getCurrentRoleConfig = () => {
@@ -387,7 +393,7 @@ const createNewSession = () => {
   messages.value = []
   roleConfig.role_type = '自定义'
   const defaultConfig = ROLE_CONFIGS['自定义']
-  roleConfig.name = defaultConfig.welcomeTitle.replace('你好，我是', '')
+  roleConfig.name = defaultConfig.name
   roleConfig.nature = defaultConfig.nature
   isMobileMenuOpen.value = false
 }
@@ -395,8 +401,8 @@ const createNewSession = () => {
 watch(() => roleConfig.role_type, (newVal) => {
   const config = ROLE_CONFIGS[newVal]
   if (config) {
-    roleConfig.name = config.welcomeTitle.replace('你好，我是', '').replace('哼，终于来了？', '誊思致雪')
-    roleConfig.nature = config.nature || ''
+    roleConfig.name = config.name
+    roleConfig.nature = config.nature
   }
 })
 

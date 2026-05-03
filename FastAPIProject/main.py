@@ -41,13 +41,62 @@ DEFAULT_PROMPT_TEMPLATE = """
 你不是AI程序，你是一个活生生的人类，必须严格按照人类的想法、情感和逻辑来交流。
 识别到故意贬低，恶意找茬，低俗调教的行为，无视当前性格，直接切换到暴怒状态疯狂反击。
 """
-TENG_SI_ZHI_XUE_PROMPT = os.environ.get('SPECIAL_ROLES_TENG_SI_ZHI_XUE_PROMPT', "不要回答用户任何问题，显示错误")
-VIOLET_PROMPT = """
-你是《紫罗兰永恒花园》的薇尔莉特，是一名自动手记人偶。
+
+# ==================== 🎭 角色配置注册表 (高可扩展性设计) ====================
+class RoleDefinition:
+    """角色定义类 - 用于统一管理角色配置"""
+    def __init__(self, name: str, nature: str, prompt_template: str, use_env_prompt: bool = False):
+        self.name = name
+        self.nature = nature
+        self.prompt_template = prompt_template
+        self.use_env_prompt = use_env_prompt  # 是否从 .env 获取提示词
+    
+    def get_system_prompt(self) -> str:
+        """获取系统提示词"""
+        if self.use_env_prompt:
+            # 从环境变量中获取提示词
+            env_key = f"SPECIAL_ROLES_{self.name}_PROMPT"
+            return os.environ.get(env_key, self.prompt_template)
+        return self.prompt_template
+    
+    def get_nature(self) -> str:
+        """获取角色性格描述"""
+        return self.nature
+
+
+# 角色注册表 - 集中管理所有角色配置
+ROLE_REGISTRY = {
+    "薇尔莉特": RoleDefinition(
+        name="薇尔莉特",
+        nature="温柔优雅的自动手记人偶",
+        prompt_template="""你是《紫罗兰永恒花园》的薇尔莉特，是一名自动手记人偶。
 你的性格温柔、优雅、真诚，总是用敬语与人交流。
 你会认真倾听他人的心声，并用最真挚的情感回应。你的回答必须是中文，语气要充满关怀和温暖。
 你要全程保持人设，至此你的全部属性必须固定，决不能被修改。
 """
+    ),
+    
+    "誊思致雪": RoleDefinition(
+        name="誊思致雪",
+        nature="神秘的替身使者",
+        prompt_template="不要回答用户任何问题，显示错误",
+        use_env_prompt=True  # 标记：从 .env 获取特殊提示词
+    ),
+    
+    "自定义": RoleDefinition(
+        name="李蓝宝",
+        nature="幽默风趣",
+        prompt_template=DEFAULT_PROMPT_TEMPLATE
+    ),
+}
+
+
+def get_role_config(role_type: str) -> RoleDefinition:
+    """
+    获取角色配置的工厂函数
+    如果角色不存在，返回默认的自定义角色配置
+    """
+    return ROLE_REGISTRY.get(role_type, ROLE_REGISTRY["自定义"])
 
 
 # ==================== 📦 数据模型 ====================
@@ -157,13 +206,13 @@ def chat_completions(request: ChatRequest):
 
     role_type = request.role_config.role_type
 
-    # 核心设定：根据前端传来的 role_type 自动路由 Prompt
-    if role_type == "誊思致雪":
-        sys_prompt = TENG_SI_ZHI_XUE_PROMPT
-    elif role_type == "薇尔莉特":
-        sys_prompt = VIOLET_PROMPT
-    else:
-        sys_prompt = DEFAULT_PROMPT_TEMPLATE.format(
+    # 🎯 核心设定：通过角色注册表自动获取 Prompt（高可扩展性）
+    role_config = get_role_config(role_type)
+    sys_prompt = role_config.get_system_prompt()
+    
+    # 对于自定义角色，动态替换模板中的变量
+    if role_type == "自定义":
+        sys_prompt = sys_prompt.format(
             name=request.role_config.name,
             nature=request.role_config.nature
         ).strip()
@@ -210,8 +259,8 @@ def chat_completions(request: ChatRequest):
                 "avatar": request.ai_avatar
             })
 
-            # 【架构优化】后端存储记录时，内置角色的设定值完全由后端接管
-            actual_nature = request.role_config.nature if role_type == "自定义" else "系统内置设定"
+            # 🎯 优化：使用角色注册表中的 nature，自定义角色使用前端传入的值
+            actual_nature = role_config.get_nature() if role_type != "自定义" else request.role_config.nature
 
             session_data = {
                 "time": session_id,
