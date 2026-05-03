@@ -1,0 +1,47 @@
+# PyCharm IDE 配置
+.idea/
+
+DeepseekTest/
+
+# Python 缓存
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# 虚拟环境
+venv/
+env/
+ENV/
+.venv
+.env
+
+# 分发/打包
+*.egg-info/
+dist/
+build/
+*.egg
+
+# 测试覆盖
+.coverage
+htmlcov/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# 环境变量
+#TODO env不能乱传
+.env.local
+
+# 操作系统
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 日志文件
+*.log
+
+# 临时文件
+*.tmp
+*.temp
+~*

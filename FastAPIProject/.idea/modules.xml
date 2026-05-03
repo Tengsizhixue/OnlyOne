@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/FastAPIProject.iml" filepath="$PROJECT_DIR$/.idea/FastAPIProject.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Project01/.idea/Project01.iml" filepath="$PROJECT_DIR$/../Project01/.idea/Project01.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../aipartner_vue/.idea/aipartner_vue.iml" filepath="$PROJECT_DIR$/../aipartner_vue/.idea/aipartner_vue.iml" />
+    </modules>
+  </component>
+</project>

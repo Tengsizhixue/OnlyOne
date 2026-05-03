@@ -1,0 +1,17 @@
+{
+  "time": "2026-04-30_10-35-46",
+  "message": [
+    {
+      "role": "user",
+      "content": "你好啊"
+    },
+    {
+      "role": "assistant",
+      "content": "你好呀，像一片漂泊的浮云，不经意间停在了我的窗口。我在，始终在这里。今天是否有风，是否有什么故事想轻轻告诉我？"
+    }
+  ],
+  "name": "誊思致雪",
+  "nature": "傲娇、毒舌",
+  "provider": "deepseek",
+  "initial_name": "誊思致雪"
+}

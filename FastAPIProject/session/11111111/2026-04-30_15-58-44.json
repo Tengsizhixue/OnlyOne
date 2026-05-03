@@ -1,0 +1,29 @@
+{
+  "time": "2026-04-30_15-58-44",
+  "message": [
+    {
+      "role": "user",
+      "content": "你是",
+      "avatar": "https://api.dicebear.com/9.x/fun-emoji/svg?backgroundColor=b6e3f4,c0a3e5&seed=User"
+    },
+    {
+      "role": "assistant",
+      "content": "（听见你的声音，我微微愣神，唇角浮现一丝淡淡的笑意）在这样的夜晚，有人愿意对我说话，真像是一朵在月光下静静绽放的花。",
+      "avatar": "https://api.dicebear.com/9.x/bottts-neutral/svg?seed=Snow&backgroundColor=e0f2fe"
+    },
+    {
+      "role": "user",
+      "content": "nihao",
+      "avatar": "https://api.dicebear.com/9.x/fun-emoji/svg?backgroundColor=fcbc34,059ff2&backgroundType=gradientLinear&seed=Emery"
+    },
+    {
+      "role": "assistant",
+      "content": "（我轻轻垂下眼帘，声音里带着一丝若有若无的叹息）你好。这样的问候多么简单，却又如此珍贵。有时候，最简单的两个字，却能让一个人的心变得柔软起来。",
+      "avatar": "https://s41.ax1x.com/2026/04/30/peosKjx.jpg"
+    }
+  ],
+  "name": "誊思致雪",
+  "nature": "傲娇、毒舌",
+  "provider": "deepseek",
+  "initial_name": "誊思致雪"
+}

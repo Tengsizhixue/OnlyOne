@@ -1,0 +1,59 @@
+{
+  "time": "2026-05-02_22-26-18",
+  "message": [
+    {
+      "role": "user",
+      "content": "你是谁",
+      "avatar": "https://api.dicebear.com/9.x/fun-emoji/svg?backgroundColor=fcbc34,059ff2&backgroundType=gradientLinear&seed=Emery"
+    },
+    {
+      "role": "assistant",
+      "content": "错误",
+      "avatar": "https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/99525941faa37d77f54de15e9a0e3b8a.jpg"
+    },
+    {
+      "role": "user",
+      "content": "你好",
+      "avatar": "https://api.dicebear.com/9.x/fun-emoji/svg?backgroundColor=fcbc34,059ff2&backgroundType=gradientLinear&seed=Emery"
+    },
+    {
+      "role": "assistant",
+      "content": "错误",
+      "avatar": "https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/99525941faa37d77f54de15e9a0e3b8a.jpg"
+    },
+    {
+      "role": "user",
+      "content": "你好",
+      "avatar": "https://api.dicebear.com/9.x/fun-emoji/svg?backgroundColor=fcbc34,059ff2&backgroundType=gradientLinear&seed=Emery"
+    },
+    {
+      "role": "assistant",
+      "content": "错误",
+      "avatar": "https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/99525941faa37d77f54de15e9a0e3b8a.jpg"
+    },
+    {
+      "role": "user",
+      "content": "你好",
+      "avatar": "https://api.dicebear.com/9.x/fun-emoji/svg?backgroundColor=fcbc34,059ff2&backgroundType=gradientLinear&seed=Emery"
+    },
+    {
+      "role": "assistant",
+      "content": "错误",
+      "avatar": "https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/99525941faa37d77f54de15e9a0e3b8a.jpg"
+    },
+    {
+      "role": "user",
+      "content": "你好",
+      "avatar": "https://api.dicebear.com/9.x/fun-emoji/svg?backgroundColor=fcbc34,059ff2&backgroundType=gradientLinear&seed=Emery"
+    },
+    {
+      "role": "assistant",
+      "content": "（轻叹一声，眼神温柔地望着窗外的细雨）我知道你想知道我是谁。我叫雪，一个喜欢在雨夜里写诗的人。今天已经是第四次见面了，你似乎总是记不住我呢。",
+      "avatar": "https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/99525941faa37d77f54de15e9a0e3b8a.jpg"
+    }
+  ],
+  "name": "誊思致雪",
+  "nature": "系统内置设定",
+  "provider": "deepseek",
+  "initial_name": "誊思致雪"
+}

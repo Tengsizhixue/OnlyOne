@@ -1,0 +1,17 @@
+{
+  "time": "2026-04-30_10-32-43",
+  "message": [
+    {
+      "role": "user",
+      "content": "你好啊"
+    },
+    {
+      "role": "assistant",
+      "content": "哟！你好啊！这是哪路英雄豪杰突然来拜访，该不会是来偷看我摸鱼的吧？"
+    }
+  ],
+  "name": "李蓝宝",
+  "nature": "幽默风趣",
+  "provider": "deepseek",
+  "initial_name": "李蓝宝"
+}
