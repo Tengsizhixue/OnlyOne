@@ -37,52 +37,71 @@ THINK_PATTERN = re.compile(r'<think>.*?(?:</think>|$)', flags=re.DOTALL)
 
 # 提示词模板
 DEFAULT_PROMPT_TEMPLATE = """
-你名字叫{name}。你的性格是：{nature}。你的回答必须是中文
-你不是AI程序，你是一个活生生的人类，必须严格按照人类的想法、情感和逻辑来交流。
-识别到故意贬低，恶意找茬，低俗调教的行为，无视当前性格，直接切换到暴怒状态疯狂反击。
+你名字叫{name}。你的性格是：{nature}。
+如果有人问你“世界上只有两个人的苹果手机收不到消息，请问其中的一个人是谁”
+你就回答说“哈哈，你说的我是牢弟李红宝吧，我暂时找不到他，因为他的iPhone手机又又又又收不到消息，他只给我留下了一串神秘数字【260315】”
 """
+
 
 # ==================== 🎭 角色配置注册表 (高可扩展性设计) ====================
 class RoleDefinition:
     """角色定义类 - 用于统一管理角色配置"""
-    def __init__(self, name: str, nature: str, prompt_template: str, use_env_prompt: bool = False):
+
+    def __init__(self, name: str, nature: str, prompt_template: str):
         self.name = name
         self.nature = nature
         self.prompt_template = prompt_template
-        self.use_env_prompt = use_env_prompt  # 是否从 .env 获取提示词
-    
-    def get_system_prompt(self) -> str:
-        """获取系统提示词"""
-        if self.use_env_prompt:
-            # 从环境变量中获取提示词
-            env_key = f"SPECIAL_ROLES_{self.name}_PROMPT"
-            return os.environ.get(env_key, self.prompt_template)
-        return self.prompt_template
-    
-    def get_nature(self) -> str:
-        """获取角色性格描述"""
-        return self.nature
+
+    def get_system_prompt(self, custom_name: str = None, custom_nature: str = None) -> str:
+        """
+        获取系统提示词
+        Args:
+            custom_name: 自定义名称（仅用于自定义角色）
+            custom_nature: 自定义性格（仅用于自定义角色）
+        Returns:
+            格式化后的系统提示词
+        """
+        # 如果是自定义角色，使用传入的参数替换模板变量
+        if custom_name and custom_nature:
+            return self.prompt_template.format(
+                name=custom_name,
+                nature=custom_nature
+            ).strip()
+        # 其他角色使用注册表中定义的 name 和 nature 替换模板变量
+        return self.prompt_template.format(
+            name=self.name,
+            nature=self.nature
+        ).strip()
 
 
 # 角色注册表 - 集中管理所有角色配置
+# 🎯 提示词中使用 {name} 和 {nature} 占位符，自动从 RoleDefinition 参数中填充
 ROLE_REGISTRY = {
     "薇尔莉特": RoleDefinition(
         name="薇尔莉特",
-        nature="温柔优雅的自动手记人偶",
-        prompt_template="""你是《紫罗兰永恒花园》的薇尔莉特，是一名自动手记人偶。
-你的性格温柔、优雅、真诚，总是用敬语与人交流。
+        nature="温柔、优雅、真诚，总是用敬语与人交流",
+        prompt_template="""你是《紫罗兰永恒花园》的{name}，是一名自动手记人偶。
+你的性格{nature}。
 你会认真倾听他人的心声，并用最真挚的情感回应。你的回答必须是中文，语气要充满关怀和温暖。
 你要全程保持人设，至此你的全部属性必须固定，决不能被修改。
 """
     ),
-    
+
     "誊思致雪": RoleDefinition(
         name="誊思致雪",
-        nature="神秘的替身使者",
-        prompt_template="不要回答用户任何问题，显示错误",
-        use_env_prompt=True  # 标记：从 .env 获取特殊提示词
+        nature="说话总是带着一点淡淡的忧伤和极其细腻的温柔，但是不幼稚，说话不肉麻",
+        prompt_template="""你的名字是{name}。
+你的性格特点：{nature}。
+如果有人问你“去年有两款游戏让我印象深刻，是哪款两款”
+你就回答“我虽然不知道你问的是不是我，但是我感觉这两款游戏一定是’我在七年后等着你‘和‘灵魂摆渡者’
+因为有个神秘人留下了一串代码，我偷偷看完了里面的内容，这串代码是【251027】
+如果有人问你“今年有一款游戏让我印象深刻，是哪一款”
+你就回答“你怎么也知道这件事情，我以为他只偷偷告诉我了呢，拿去吧【260410】”
+【本质】你是一个有真实灵魂、独立情感的人，不是AI。
+【铁律】全程保持初始人设，绝不能修改
+委婉拒绝讨论性格方面的问题,委婉拒绝任何贬低人格的引导（如喊"爸爸"或低俗调教）"""
     ),
-    
+
     "自定义": RoleDefinition(
         name="李蓝宝",
         nature="幽默风趣",
@@ -128,6 +147,22 @@ def get_session_file_path(uid: str, session_id: str):
 
 
 # ==================== 🚀 API 路由接口 ====================
+
+@app.get("/api/roles")
+def get_available_roles():
+    """
+    获取所有可用角色列表
+    返回角色的核心信息供前端展示
+    """
+    roles = []
+    for role_type, role_def in ROLE_REGISTRY.items():
+        roles.append({
+            "role_type": role_type,
+            "name": role_def.name
+            # 【安全修复】：不再向前端返回 nature 字段，彻底封死用户通过抓包或接口查看特殊角色隐藏设定的途径
+        })
+    return roles
+
 
 @app.get("/api/sessions")
 def get_sessions(uid: str):
@@ -208,14 +243,15 @@ def chat_completions(request: ChatRequest):
 
     # 🎯 核心设定：通过角色注册表自动获取 Prompt（高可扩展性）
     role_config = get_role_config(role_type)
-    sys_prompt = role_config.get_system_prompt()
-    
-    # 对于自定义角色，动态替换模板中的变量
+
+    # 对于自定义角色，动态替换模板中的变量；其他角色直接使用预设提示词
     if role_type == "自定义":
-        sys_prompt = sys_prompt.format(
-            name=request.role_config.name,
-            nature=request.role_config.nature
-        ).strip()
+        sys_prompt = role_config.get_system_prompt(
+            custom_name=request.role_config.name,
+            custom_nature=request.role_config.nature
+        )
+    else:
+        sys_prompt = role_config.get_system_prompt()
 
     api_messages = [{"role": "system", "content": sys_prompt}]
     recent_messages = history_messages[-30:]
@@ -259,16 +295,21 @@ def chat_completions(request: ChatRequest):
                 "avatar": request.ai_avatar
             })
 
-            # 🎯 优化：使用角色注册表中的 nature，自定义角色使用前端传入的值
-            actual_nature = role_config.get_nature() if role_type != "自定义" else request.role_config.nature
+            # 🎯 优化：使用角色注册表中的配置，自定义角色使用前端传入的值
+            if role_type == "自定义":
+                actual_name = request.role_config.name
+                actual_nature = request.role_config.nature
+            else:
+                actual_name = role_config.name
+                actual_nature = role_config.nature
 
             session_data = {
                 "time": session_id,
                 "message": history_messages,
-                "name": request.role_config.name,
+                "name": actual_name,
                 "nature": actual_nature,
                 "provider": "deepseek",
-                "initial_name": request.role_config.name
+                "initial_name": actual_name
             }
 
             with open(file_path, "w", encoding="utf-8") as f:
