@@ -148,7 +148,7 @@
             <div class="locked-status" v-else>
               <div class="status-badge">
                 <span class="dot connected"></span>
-                当前连接: <span class="badge-text">{{ roleConfig.name }}</span>
+                当前角色: <span class="badge-text">{{ roleConfig.name }}</span>
               </div>
               <span class="lock-tip mobile-hide"><el-icon><Lock /></el-icon> 记忆已锁定，需新建以更改</span>
             </div>
@@ -207,7 +207,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, nextTick, watch, computed } from 'vue'
+import { ref, reactive, nextTick, computed, watch } from 'vue'
 import {
   Plus,
   Delete,
@@ -250,31 +250,25 @@ const DEFAULT_AI_AVATAR = "https://api.dicebear.com/9.x/bottts-neutral/svg?seed=
 const VIOLET_AVATAR = "https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/IMG_20260426_121950.png"
 const TENGSI_AVATAR = "https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/99525941faa37d77f54de15e9a0e3b8a.jpg"
 
-// ==================== 角色配置中心 ====================
+// ==================== 角色前端 UI 纯净配置中心 ====================
+// 前端仅保留 UI 展示所需的内容，特殊角色的性格严格不保存在前端
 const ROLE_CONFIGS = {
   '薇尔莉特': {
-    name: '薇尔莉特',
-    nature: '温柔优雅的自动手记人偶',
     welcomeTitle: '你好，我是薇尔莉特',
     welcomeText: '曾经少佐说，要活下去，要自由地活下去。但我之前一直不知道那是什么意思，我终于知道，"我爱你"是一种想和对方在一起、想让对方幸福的心情',
     avatar: VIOLET_AVATAR
   },
   '誊思致雪': {
-    name: '誊思致雪',
-    nature: '神秘的替身使者',
     welcomeTitle: '很久不见，我叫誊思致雪',
     welcomeText: '你问我是谁？...我也不知道，我只是一个替身',
     avatar: TENGSI_AVATAR
   },
   '自定义': {
-    name: '李蓝宝',
-    nature: '幽默风趣',
     welcomeTitle: '你好，我是李蓝宝',
     welcomeText: '我是自定义角色，不代表任何人物，你可以随意修改我的性格与名称。我只有一个特殊设定：李红宝是我牢弟，关于他的问题你可以问我',
     avatar: DEFAULT_AI_AVATAR
   }
 }
-
 
 // 获取当前角色的配置
 const getCurrentRoleConfig = () => {
@@ -289,12 +283,10 @@ const themeClass = computed(() => {
   return 'theme-default'
 })
 
-// 控制是否具有需要壁纸的特殊角色
 const hasCustomBg = computed(() => {
   return roleConfig.role_type === '薇尔莉特' || roleConfig.role_type === '誊思致雪'
 })
 
-// 预加载配置好对应的壁纸，防闪现
 const customBgStyle = computed(() => {
   if (roleConfig.role_type === '薇尔莉特') {
     return { backgroundImage: `url('https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=2000&q=80')` }
@@ -343,8 +335,6 @@ const formatText = (text) => {
   return text.replace(/\n/g, '<br/>')
 }
 
-onMounted(() => {})
-
 const fetchSessions = async () => {
   try {
     const res = await fetch(`/api/sessions?uid=${uid.value}`)
@@ -367,13 +357,19 @@ const loadSession = async (id) => {
     isMobileMenuOpen.value = false
 
     const savedName = data.name || '李蓝宝'
+    const savedNature = data.nature || ''
+
+    // 🎯 直接根据特殊角色的特征名称反推，彻底移除冗余的向后端获取名单逻辑
+    let detectedRoleType = '自定义'
+    if (savedName === '薇尔莉特') {
+      detectedRoleType = '薇尔莉特'
+    } else if (savedName === '誊思致雪') {
+      detectedRoleType = '誊思致雪'
+    }
+
+    roleConfig.role_type = detectedRoleType
     roleConfig.name = savedName
-
-    roleConfig.nature = data.nature || '系统内置设定'
-
-    if (savedName === '薇尔莉特') roleConfig.role_type = '薇尔莉特'
-    else if (savedName === '誊思致雪') roleConfig.role_type = '誊思致雪'
-    else roleConfig.role_type = '自定义'
+    roleConfig.nature = savedNature
 
     const currentAiAvatar = getCurrentRoleConfig().avatar
 
@@ -392,17 +388,26 @@ const createNewSession = () => {
   currentSessionId.value = ''
   messages.value = []
   roleConfig.role_type = '自定义'
-  const defaultConfig = ROLE_CONFIGS['自定义']
-  roleConfig.name = defaultConfig.name
-  roleConfig.nature = defaultConfig.nature
+  // 🎯 保证新建连接时状态绝对干净
+  roleConfig.name = '李蓝宝'
+  roleConfig.nature = '幽默风趣'
   isMobileMenuOpen.value = false
 }
 
+// 🎯 防泄露核心处理：切换角色时自动更新名称与性格
 watch(() => roleConfig.role_type, (newVal) => {
-  const config = ROLE_CONFIGS[newVal]
-  if (config) {
-    roleConfig.name = config.name
-    roleConfig.nature = config.nature
+  if (newVal === '自定义') {
+    // 切换到自定义角色时，重置为默认配置
+    roleConfig.name = '李蓝宝'
+    roleConfig.nature = '幽默风趣'
+  } else if (newVal === '薇尔莉特') {
+    // 切换到薇尔莉特时，使用预设的名称和性格
+    roleConfig.name = '薇尔莉特'
+    roleConfig.nature = '温柔、优雅、真诚，总是用敬语与人交流'
+  } else if (newVal === '誊思致雪') {
+    // 切换到誊思致雪时，使用预设的名称和性格
+    roleConfig.name = '誊思致雪'
+    roleConfig.nature = '说话总是带着一点淡淡的忧伤和极其细腻的温柔，但是不幼稚，说话不肉麻'
   }
 })
 
