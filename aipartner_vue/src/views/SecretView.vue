@@ -65,8 +65,8 @@
     </div>
 
     <div v-else class="secret-content">
-      <h1 class="highlight-text">🎉 欢迎来到神秘空间！</h1>
-      <p>未知代码验证成功，进入基础展示层。</p>
+      <h1 class="highlight-text">🎉 恭喜你找到了第一个特殊页面！</h1>
+      <p>但是这里什么都没有，如果你后面发现了其他特殊的数字，可以试一试在对话框里输入</p>
       <button class="enter-btn shimmer-btn" @click="$emit('back')">返回聊天</button>
     </div>
 

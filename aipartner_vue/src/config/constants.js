@@ -3,11 +3,8 @@ export const USER_AVATAR = "https://api.dicebear.com/9.x/fun-emoji/svg?backgroun
 export const DEFAULT_AI_AVATAR = "https://api.dicebear.com/9.x/bottts-neutral/svg?seed=AI"
 export const VIOLET_AVATAR = "https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/IMG_20260426_121950.png"
 export const TENGSI_AVATAR = "https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/99525941faa37d77f54de15e9a0e3b8a.jpg"
-
-// 新增角色的占位头像（你可以随时修改为你自己的图片链接）
-export const MUSIC_AVATAR = "https://api.dicebear.com/9.x/bottts-neutral/svg?seed=MusicBot&backgroundColor=ffdfbf"
-// [修改] 将游戏助手头像改为暗黑/青铜色调
-export const GAME_AVATAR = "https://api.dicebear.com/9.x/bottts-neutral/svg?seed=KnightBot&backgroundColor=2A1D14"
+export const MUSIC_AVATAR = "https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/musicAvatar.png"
+export const GAME_AVATAR = "https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/gameAvatar.png"
 
 export const ROLE_CONFIGS = {
   '薇尔莉特': {

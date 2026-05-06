@@ -273,7 +273,7 @@ html, body, #app {
 
 
 /* -------- 🎵 主题 5：音乐推荐助手 (红粉暖色系) -------- */
-.theme-music .main-layout.glass-panel { background: rgba(56, 20, 35, 0.45) !important; backdrop-filter: blur(14px) !important; -webkit-backdrop-filter: blur(14px) !important; border-color: rgba(244, 114, 182, 0.3) !important; box-shadow: 0 25px 50px -12px rgba(159, 18, 57, 0.6); }
+.theme-music .main-layout.glass-panel { background: rgba(56, 20, 35, 0.45) !important; backdrop-filter: blur(4px) !important; -webkit-backdrop-filter: blur(14px) !important; border-color: rgba(244, 114, 182, 0.3) !important; box-shadow: 0 25px 50px -12px rgba(159, 18, 57, 0.6); }
 .theme-music .chat-header { background-color: rgba(56, 20, 35, 0.35); border-bottom-color: rgba(244, 114, 182, 0.2); }
 .theme-music .sidebar { background: rgba(33, 10, 18, 0.6); border-right-color: rgba(244, 114, 182, 0.2); }
 .theme-music .logo, .theme-music .session-name, .theme-music .empty-title, .theme-music .list-title { color: #fdf2f8; }
@@ -303,7 +303,7 @@ html, body, #app {
 .theme-music .recover-input .el-input-group__append { background-color: rgba(236, 72, 153, 0.4); color: #fff; border:none;}
 
 /* -------- 🎮 主题 6：游戏聊天助手 (暗黑史诗/中世纪青铜系) -------- */
-.theme-game .main-layout.glass-panel { background: rgba(20, 12, 8, 0.6) !important; backdrop-filter: blur(10px) !important; -webkit-backdrop-filter: blur(10px) !important; border-color: rgba(184, 142, 81, 0.35) !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); }
+.theme-game .main-layout.glass-panel { background: rgba(20, 12, 8, 0.6) !important; backdrop-filter: blur(4px) !important; -webkit-backdrop-filter: blur(10px) !important; border-color: rgba(184, 142, 81, 0.35) !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); }
 .theme-game .chat-header { background-color: rgba(20, 12, 8, 0.45); border-bottom-color: rgba(184, 142, 81, 0.25); }
 .theme-game .sidebar { background: rgba(12, 8, 5, 0.75); border-right-color: rgba(184, 142, 81, 0.25); }
 .theme-game .logo, .theme-game .session-name, .theme-game .empty-title, .theme-game .list-title { color: #f5eedc; }
