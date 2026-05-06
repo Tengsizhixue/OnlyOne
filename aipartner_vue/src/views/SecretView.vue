@@ -9,12 +9,16 @@
     />
 
     <!-- 兜底页面：当代码是 111111 或找不到对应页面时，显示默认界面 -->
-    <div v-else class="secret-page glass-panel shadow-2xl">
-      <div class="secret-content">
-        <h1 class="highlight-text">🎉 恭喜你找到了特殊页面！</h1>
-        <p>但是这里什么都没有，如果你后面发现了其他特殊的数字，可以试一试在对话框里输入</p>
-        <br/>
-        <button class="enter-btn shimmer-btn" @click="handleBack">返回聊天</button>
+    <div v-else class="secret-view-container">
+      <div class="secret-bg fallback-bg"></div>
+      <div class="secret-page glass-panel shadow-2xl">
+        <div class="secret-content">
+          <h1 class="highlight-text">🎉 恭喜你找到了特殊页面！</h1>
+          <div class="content-box">
+            <p>但是这里什么都没有，如果你后面发现了其他特殊的数字，可以试一试在对话框里输入</p>
+          </div>
+          <button class="enter-btn shimmer-btn" @click="handleBack">返回聊天</button>
+        </div>
       </div>
     </div>
 
@@ -63,26 +67,51 @@ const currentComponent = computed(() => {
 </script>
 
 <style scoped>
-/* 💡 核心修复：添加根容器样式，确保不会影响内部元素的绝对居中与排版，且动画执行时不会挤压空间 */
+/* 💡 核心修复：使用 fixed 将整个系统提到最高层，免疫一切底层 App.vue 的背景影响 */
 .secret-root-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
-  height: 100%;
-  position: absolute; /* 防止切换时占据文档流 */
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
   top: 0;
   left: 0;
+  z-index: 999;
 }
 
 /* 兜底界面的独立样式 */
+.secret-view-container {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  display: flex; justify-content: center; align-items: center;
+}
+.fallback-bg {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background-color: #0f172a; z-index: -1;
+}
 .secret-page {
-  width: 90vw; max-width: 800px; padding: 60px;
-  text-align: center; border-radius: 24px; z-index: 100;
-  color: white;
+  width: 95vw; max-width: 1200px; height: 90vh; padding: 40px 60px;
+  text-align: center; border-radius: 24px; z-index: 1; color: #f8fafc;
+  background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  display: flex; flex-direction: column;
 }
-.secret-content {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
+.secret-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; }
+.highlight-text { color: #a78bfa; margin-bottom: 20px; font-size: 32px; font-weight: bold; flex-shrink: 0;}
+.content-box {
+  background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 40px; border-radius: 16px; margin-bottom: 30px; width: 100%;
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  font-size: 18px;
 }
-.highlight-text { color: #a78bfa; margin-bottom: 20px; }
+.enter-btn { flex-shrink: 0; }
+
+@media (max-width: 768px) {
+  .secret-page {
+    width: 100vw; height: 100dvh; border-radius: 0; padding: 50px 20px 30px; border: none;
+    background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
+  .content-box { padding: 18px; font-size: 14px; margin-bottom: 20px; border-radius: 12px; line-height: 1.8; }
+  .highlight-text { font-size: 24px; margin-bottom: 6px; }
+}
 </style>
