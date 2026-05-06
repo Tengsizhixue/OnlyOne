@@ -334,11 +334,10 @@ const sendMessage = async () => {
   const userText = inputText.value.trim()
 
   // ★★★ 在这里新增了 薇尔莉特、音乐助手 和 游戏助手 的暗号验证拦截
-  const secretCodes = ['260315', '251027', '260410', '19xxxx', '240802', '180818']
+  const secretCodes = ['260315', '251027', '260410', '19xxxx', '240802', '180818','111111']
   if (secretCodes.includes(userText)) {
     inputText.value = ''
     emit('enter-secret', userText)
-    ElMessage.success("身份验证通过，正在开启专属神秘空间...")
     return
   }
 

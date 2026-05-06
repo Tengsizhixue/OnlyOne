@@ -13,12 +13,12 @@
           <div class="feature-card glass-card hover-lift">
             <el-icon class="feature-icon"><User /></el-icon>
             <h3>角色丰富</h3>
-            <p>这次的每个人物我都设计了特殊问答，问对问题会带有独特身份码</p>
+            <p>这次的每个人物我都设计了特殊问答，问对问题会给特殊数字</p>
           </div>
           <div class="feature-card glass-card hover-lift">
             <el-icon class="feature-icon"><ColdDrink /></el-icon>
-            <h3>特殊会话</h3>
-            <p>我会把以前我没删掉并且也没发过的内容放进特殊会话里</p>
+            <h3>额外页面</h3>
+            <p>例如你看到【111111】，你在对话框输入特殊数字然后点发送消息会进入特殊页面</p>
           </div>
           <div class="feature-card glass-card hover-lift">
             <el-icon class="feature-icon"><Sugar /></el-icon>
@@ -35,6 +35,8 @@
             <span class="scenario-tag">没什么更好的想法</span>
             <span class="scenario-tag">功能多了代码太复杂</span>
             <span class="scenario-tag">没什么能分享的</span>
+            <span class="scenario-tag">如果你会看前端源码，数字非常好找</span>
+            <span class="scenario-tag">不过不建议</span>
           </div>
         </div>
 
