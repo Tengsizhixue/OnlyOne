@@ -8,17 +8,13 @@
       :custom-bg-style="customBgStyle"
     />
 
-    <!-- 页面切换路由动画 -->
+    <!-- 页面切换路由动画 (注意：内部不能有注释节点分隔 v-if，以防破坏 transition 动画机制) -->
     <transition name="fade-transform" mode="out-in">
-
-      <!-- 首页视图 -->
       <LandingView
         v-if="currentPage === 'landing'"
         key="landing"
         @enter-chat="currentPage = 'chat'"
       />
-
-      <!-- 核心聊天视图 -->
       <ChatView
         v-else-if="currentPage === 'chat'"
         key="chat"
@@ -26,15 +22,12 @@
         @enter-secret="(code) => { currentSecretCode = code; currentPage = 'secret' }"
         @update:roleType="currentRoleType = $event"
       />
-
-      <!-- 神秘特殊视图 -->
       <SecretView
         v-else-if="currentPage === 'secret'"
         key="secret"
         :secret-code="currentSecretCode"
         @back="currentPage = 'chat'"
       />
-
     </transition>
 
   </div>
