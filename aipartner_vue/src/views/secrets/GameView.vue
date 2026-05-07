@@ -5,7 +5,7 @@
     <div class="secret-page shadow-2xl">
       <div class="secret-content">
         <h1 class="highlight-text" style="color: #fbbf24;">⚔️ 游戏冒险的彼岸</h1>
-        <p class="subtitle">特殊代码认证：180818</p>
+        <p class="subtitle">恭喜你找到：180818</p>
         <div class="content-box">
           <p>这里是游戏的专属展示页面。</p>
           <p>（后续内容待设计：留给这款让你印象深刻的游戏...）</p>

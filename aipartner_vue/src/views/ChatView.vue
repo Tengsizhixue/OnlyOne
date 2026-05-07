@@ -2,7 +2,6 @@
   <el-container class="main-layout glass-panel">
     <div class="sidebar-overlay" v-show="isMobileMenuOpen" @click="isMobileMenuOpen = false"></div>
 
-    <!-- 左侧边栏 -->
     <el-aside width="280px" class="sidebar" :class="{ 'mobile-open': isMobileMenuOpen }">
       <div class="mobile-close-btn" @click="isMobileMenuOpen = false">
         <el-icon><Close /></el-icon>
@@ -56,7 +55,6 @@
       </div>
     </el-aside>
 
-    <!-- 右侧聊天区域 -->
     <el-container class="chat-container">
       <el-header class="chat-header">
         <button class="mobile-menu-btn" @click="isMobileMenuOpen = true">
@@ -94,8 +92,14 @@
               <el-avatar :src="msg.avatar" class="avatar" />
             </div>
             <div class="bubble">
-              <div class="text-content" v-html="formatText(msg.content)"></div>
-              <span v-if="msg.role === 'assistant' && isGenerating && index === messages.length - 1" class="cursor-blink"></span>
+
+              <div v-if="msg.isThinking" class="thinking-state">
+                <el-icon class="is-loading"><Loading /></el-icon> 大脑正在烧烤，请稍后...
+              </div>
+
+              <div v-else class="text-content" v-html="formatText(msg.content)"></div>
+
+              <span v-if="msg.role === 'assistant' && isGenerating && index === messages.length - 1 && !msg.isThinking" class="cursor-blink"></span>
             </div>
           </div>
 
@@ -134,7 +138,7 @@
 
 <script setup>
 import { ref, reactive, nextTick, watch, onMounted } from 'vue'
-import { Plus, Delete, Position, Lock, DocumentCopy, House, Menu, Close } from '@element-plus/icons-vue'
+import { Plus, Delete, Position, Lock, DocumentCopy, House, Menu, Close, Loading } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { USER_AVATAR, getCurrentRoleConfig } from '../config/constants.js'
 
@@ -151,19 +155,12 @@ const isGenerating = ref(false)
 const chatMainRef = ref(null)
 
 const roleConfig = reactive({
-  role_type: '自定义',
-  name: '李蓝宝',
-  nature: '幽默风趣'
+  role_type: '',
+  name: '',
+  nature: ''
 })
 
-// ★★★ 在这里新增了两位新助手角色
-const availableRoles = ref([
-  { role_type: '自定义', name: '李蓝宝' },
-  { role_type: '誊思致雪', name: '誊思致雪' },
-  { role_type: '薇尔莉特', name: '薇尔莉特' },
-  { role_type: '音乐推荐助手', name: '音乐推荐助手' },
-  { role_type: '游戏聊天助手', name: '游戏聊天助手' }
-])
+const availableRoles = ref([])
 
 const getRoleInfo = () => getCurrentRoleConfig(roleConfig.role_type)
 
@@ -173,7 +170,18 @@ const fetchRoles = async () => {
     if (res.ok) {
       const data = await res.json()
       if (data && data.length > 0) {
+        // 确保李蓝宝排在第一位
+        const liLanbaoIndex = data.findIndex(r => r.role_type === '李蓝宝')
+        if (liLanbaoIndex > 0) {
+          const liLanbao = data.splice(liLanbaoIndex, 1)[0]
+          data.unshift(liLanbao)
+        }
         availableRoles.value = data
+
+        // 初始化默认角色为李蓝宝
+        if (!roleConfig.role_type) {
+          roleConfig.role_type = '李蓝宝'
+        }
       }
     }
   } catch (error) {
@@ -256,7 +264,8 @@ const loadSession = async (id) => {
 
     messages.value = (data.message || []).map(msg => ({
       ...msg,
-      avatar: msg.avatar || (msg.role === 'user' ? USER_AVATAR : currentAiAvatar)
+      avatar: msg.avatar || (msg.role === 'user' ? USER_AVATAR : currentAiAvatar),
+      isThinking: false // 确保历史记录中没有思考状态
     }))
 
     scrollToBottom()
@@ -268,24 +277,15 @@ const loadSession = async (id) => {
 const createNewSession = () => {
   currentSessionId.value = ''
   messages.value = []
-  roleConfig.role_type = '自定义'
-
-  const customRole = availableRoles.value.find(r => r.role_type === '自定义')
-  roleConfig.name = customRole ? customRole.name : '李蓝宝'
-  roleConfig.nature = '幽默风趣'
-
-  emit('update:roleType', '自定义')
+  roleConfig.role_type = '李蓝宝'
+  emit('update:roleType', '李蓝宝')
   isMobileMenuOpen.value = false
 }
 
 watch(() => roleConfig.role_type, (newVal) => {
   const selectedRole = availableRoles.value.find(r => r.role_type === newVal)
-
-  if (newVal === '自定义') {
-    roleConfig.name = selectedRole?.name || '李蓝宝'
-    roleConfig.nature = '幽默风趣'
-  } else {
-    roleConfig.name = selectedRole?.name || newVal
+  if (selectedRole) {
+    roleConfig.name = selectedRole.name
     roleConfig.nature = ''
   }
   emit('update:roleType', newVal)
@@ -333,7 +333,6 @@ const sendMessage = async () => {
   if (!inputText.value.trim() || isGenerating.value) return
   const userText = inputText.value.trim()
 
-  // ★★★ 在这里新增了 薇尔莉特、音乐助手 和 游戏助手 的暗号验证拦截
   const secretCodes = ['260315', '251027', '260410', '19xxxx', '240802', '180818','111111']
   if (secretCodes.includes(userText)) {
     inputText.value = ''
@@ -352,9 +351,16 @@ const sendMessage = async () => {
   scrollToBottom()
 
   const aiAvatar = getRoleInfo().avatar
-  messages.value.push({ role: 'assistant', content: '', avatar: aiAvatar })
+  // 💡 新增：推入一条带有 isThinking 标识的空消息
+  messages.value.push({ role: 'assistant', content: '', avatar: aiAvatar, isThinking: true })
   isGenerating.value = true
   scrollToBottom()
+
+  // 💡 新增：配置超时中断控制器 (45秒超时)
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => {
+    controller.abort()
+  }, 10000)
 
   try {
     const response = await fetch(`/api/chat/completions`, {
@@ -364,23 +370,41 @@ const sendMessage = async () => {
         uid: uid.value, session_id: currentSessionId.value,
         role_config: roleConfig, content: userText,
         user_avatar: USER_AVATAR, ai_avatar: aiAvatar
-      })
+      }),
+      signal: controller.signal
     })
 
     if (!response.ok) throw new Error("服务端异常")
     const reader = response.body.getReader()
     const decoder = new TextDecoder('utf-8')
+    let isFirstChunk = true
 
     while (true) {
       const { value, done } = await reader.read()
       if (done) break
+
+      // 💡 当收到第一波文字时，关掉思考状态，并清除超时器
+      if (isFirstChunk) {
+        messages.value[messages.value.length - 1].isThinking = false
+        clearTimeout(timeoutId)
+        isFirstChunk = false
+      }
+
       messages.value[messages.value.length - 1].content += decoder.decode(value, { stream: true })
       scrollToBottom()
     }
   } catch (error) {
-    messages.value[messages.value.length - 1].content = "（伙伴似乎走神了，没听到你说的话。请检查网络或后端服务）"
+    // 💡 捕获超时或断开错误
+    messages.value[messages.value.length - 1].isThinking = false
+    if (error.name === 'AbortError') {
+      messages.value[messages.value.length - 1].content = "（大脑烧坏了...等得太久没有回应，连线已断开，请稍后重试）"
+    } else {
+      messages.value[messages.value.length - 1].content = "（伙伴似乎走神了，没听到你说的话。请检查网络或后端服务）"
+    }
   } finally {
+    messages.value[messages.value.length - 1].isThinking = false
     isGenerating.value = false
+    clearTimeout(timeoutId)
     fetchSessions()
   }
 }
@@ -452,6 +476,23 @@ const sendMessage = async () => {
 .message-wrapper.user .bubble { border-radius: 20px 4px 20px 20px; }
 .message-wrapper.assistant .bubble { border-radius: 4px 20px 20px 20px; }
 
+/* 💡 新增思考状态的动画和布局样式 */
+.thinking-state {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #94a3b8;
+  font-size: 14px;
+  font-style: italic;
+}
+.is-loading {
+  animation: rotating 2s linear infinite;
+}
+@keyframes rotating {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .cursor-blink { display: inline-block; width: 8px; height: 16px; margin-left: 6px; vertical-align: text-bottom; animation: blink 1s step-end infinite; }
 
 .fixed-footer { position: absolute; bottom: 32px; left: 0; right: 0; display: flex; justify-content: center; padding: 0 24px; pointer-events: none; }
@@ -489,6 +530,3 @@ const sendMessage = async () => {
   .input-container { border-radius: 20px; padding: 6px 12px 6px 16px; }
 }
 </style>
-
-
-

@@ -1,14 +1,12 @@
 <template>
   <div class="app-wrapper" :class="themeClass">
 
-    <!-- 动态背景组件，根据状态和角色改变 -->
     <DynamicBackground
       :is-landing="currentPage === 'landing'"
       :has-custom-bg="hasCustomBg"
       :custom-bg-style="customBgStyle"
     />
 
-    <!-- 页面切换路由动画 (注意：内部不能有注释节点分隔 v-if，以防破坏 transition 动画机制) -->
     <transition name="fade-transform" mode="out-in">
       <LandingView
         v-if="currentPage === 'landing'"
@@ -42,8 +40,8 @@ import SecretView from './views/SecretView.vue'
 
 // 总控状态：当前处于哪个页面
 const currentPage = ref('landing')
-// 总控状态：当前选中的角色（为了渲染全局背景壁纸）
-const currentRoleType = ref('自定义')
+// 总控状态：当前选中的角色（默认锁定为李蓝宝）
+const currentRoleType = ref('李蓝宝')
 const currentSecretCode = ref('')
 
 // 根据状态计算当前主题 Class
@@ -66,17 +64,17 @@ const hasCustomBg = computed(() => {
 const customBgStyle = computed(() => {
   if (currentRoleType.value === '薇尔莉特') {
     return {
-      backgroundImage: `url('https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=2000&q=80')`,
-      backgroundPosition: 'center center' // 居中
+      backgroundImage: `url('https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E8%96%87%E5%B0%94%E8%8E%89%E7%89%B9%E8%83%8C%E6%99%AF.jpg')`,
+      backgroundPosition: '85% 50%' // 居中
     }
   } else if (currentRoleType.value === '誊思致雪') {
     return {
-      backgroundImage: `url('https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/1118416.jpg')`,
+      backgroundImage: `url('https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E8%AA%8A%E6%80%9D%E8%87%B4%E9%9B%AA%E8%83%8C%E6%99%AF%E5%9B%BE.png')`,
       backgroundPosition: 'center top' // 如果是人物立绘，用 center top 可以防止手机端头部被裁掉
     }
   } else if (currentRoleType.value === '音乐推荐助手') {
     return {
-      backgroundImage: `url('https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/%E9%9F%B3%E4%B9%90%E5%8A%A9%E6%89%8B%E8%83%8C%E6%99%AF.jpg')`,
+      backgroundImage: `url('https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E9%9F%B3%E4%B9%90%E5%8A%A9%E6%89%8B%E5%9B%BE%E7%89%87.jpg')`,
       backgroundPosition: 'center center'
     }
   } else if (currentRoleType.value === '游戏聊天助手') {
@@ -160,7 +158,7 @@ html, body, #app {
 /* 🎨 主题核心渲染引擎                                                       */
 /* ========================================================================= */
 
-/* -------- 🎨 主题 1：自定义角色 (Default 极光深色) -------- */
+/* -------- 🎨 主题 1：默认角色 (Default 极光深色) -------- */
 .theme-default .app-wrapper { background-color: #0f172a; }
 .theme-default .orb-1 { background: #3b82f6; }
 .theme-default .orb-2 { background: #8b5cf6; }
@@ -235,7 +233,7 @@ html, body, #app {
 .theme-landing .scenario-tag:hover { background: rgba(99, 102, 241, 0.4); color: #ffffff; }
 
 /* -------- 🎨 主题 4：紫罗兰专属 (Violet) -------- */
-.theme-violet .main-layout.glass-panel { background: rgba(46, 22, 84, 0.4) !important; backdrop-filter: blur(12px) !important; -webkit-backdrop-filter: blur(12px) !important; border-color: rgba(167, 139, 250, 0.3) !important; box-shadow: 0 25px 50px -12px rgba(76, 29, 149, 0.6); }
+.theme-violet .main-layout.glass-panel { background: rgba(46, 22, 84, 0.4) !important; backdrop-filter: blur(2px) !important; -webkit-backdrop-filter: blur(2px) !important; border-color: rgba(167, 139, 250, 0.3) !important; box-shadow: 0 25px 50px -12px rgba(76, 29, 149, 0.6); }
 .theme-violet .chat-header { background-color: rgba(46, 22, 84, 0.3); border-bottom-color: rgba(167, 139, 250, 0.2); }
 .theme-violet .sidebar { background: rgba(23, 11, 43, 0.6); border-right-color: rgba(167, 139, 250, 0.2); }
 .theme-violet .logo, .theme-violet .session-name, .theme-violet .empty-title, .theme-violet .list-title { color: #f8fafc; }
@@ -266,7 +264,7 @@ html, body, #app {
 
 
 /* -------- 🎵 主题 5：音乐推荐助手 (红粉暖色系) -------- */
-.theme-music .main-layout.glass-panel { background: rgba(56, 20, 35, 0.45) !important; backdrop-filter: blur(4px) !important; -webkit-backdrop-filter: blur(14px) !important; border-color: rgba(244, 114, 182, 0.3) !important; box-shadow: 0 25px 50px -12px rgba(159, 18, 57, 0.6); }
+.theme-music .main-layout.glass-panel { background: rgba(56, 20, 35, 0.45) !important; backdrop-filter: blur(4px) !important; -webkit-backdrop-filter: blur(4px) !important; border-color: rgba(244, 114, 182, 0.3) !important; box-shadow: 0 25px 50px -12px rgba(159, 18, 57, 0.6); }
 .theme-music .chat-header { background-color: rgba(56, 20, 35, 0.35); border-bottom-color: rgba(244, 114, 182, 0.2); }
 .theme-music .sidebar { background: rgba(33, 10, 18, 0.6); border-right-color: rgba(244, 114, 182, 0.2); }
 .theme-music .logo, .theme-music .session-name, .theme-music .empty-title, .theme-music .list-title { color: #fdf2f8; }
@@ -296,7 +294,7 @@ html, body, #app {
 .theme-music .recover-input .el-input-group__append { background-color: rgba(236, 72, 153, 0.4); color: #fff; border:none;}
 
 /* -------- 🎮 主题 6：游戏聊天助手 (暗黑史诗/中世纪青铜系) -------- */
-.theme-game .main-layout.glass-panel { background: rgba(20, 12, 8, 0.6) !important; backdrop-filter: blur(4px) !important; -webkit-backdrop-filter: blur(10px) !important; border-color: rgba(184, 142, 81, 0.35) !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); }
+.theme-game .main-layout.glass-panel { background: rgba(20, 12, 8, 0.6) !important; backdrop-filter: blur(4px) !important; -webkit-backdrop-filter: blur(4px) !important; border-color: rgba(184, 142, 81, 0.35) !important; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); }
 .theme-game .chat-header { background-color: rgba(20, 12, 8, 0.45); border-bottom-color: rgba(184, 142, 81, 0.25); }
 .theme-game .sidebar { background: rgba(12, 8, 5, 0.75); border-right-color: rgba(184, 142, 81, 0.25); }
 .theme-game .logo, .theme-game .session-name, .theme-game .empty-title, .theme-game .list-title { color: #f5eedc; }
@@ -337,36 +335,33 @@ html, body, #app {
     transform: translateZ(0); -webkit-transform: translateZ(0);
   }
 
-  /* 👇 在这里修改各个角色（主题）在手机端的专属背景模糊度 (调整 blur 后面的数字即可) 👇 */
-
   .theme-violet .main-layout.glass-panel {
     background: rgba(46, 22, 84, 0.4) !important;
-    -webkit-backdrop-filter: blur(12px) !important; /* 紫罗兰专属 */
-    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(2px) !important;
+    backdrop-filter: blur(2px) !important;
     transform: translateZ(0) !important; -webkit-transform: translateZ(0) !important;
   }
 
   .theme-snow .main-layout.glass-panel {
     background: rgba(255, 255, 255, 0.15) !important;
-    -webkit-backdrop-filter: blur(2px) !important;  /* 誊思致雪专属 */
-    backdrop-filter: blur(1px) !important;
+    -webkit-backdrop-filter: blur(2px) !important;
+    backdrop-filter: blur(2px) !important;
     transform: translateZ(0) !important; -webkit-transform: translateZ(0) !important;
   }
 
   .theme-music .main-layout.glass-panel {
     background: rgba(56, 20, 35, 0.45) !important;
-    -webkit-backdrop-filter: blur(12px) !important; /* 音乐推荐助手专属 */
+    -webkit-backdrop-filter: blur(3px) !important;
     backdrop-filter: blur(3px) !important;
     transform: translateZ(0) !important; -webkit-transform: translateZ(0) !important;
   }
 
   .theme-game .main-layout.glass-panel {
     background: rgba(20, 12, 8, 0.55) !important;
-    -webkit-backdrop-filter: blur(10px) !important; /* 游戏聊天助手专属 */
+    -webkit-backdrop-filter: blur(3px) !important;
     backdrop-filter: blur(3px) !important;
     transform: translateZ(0) !important; -webkit-transform: translateZ(0) !important;
   }
-  /* 👆 修改上面这些 blur(12px)、blur(2px) 等数值即可调整手机端背景的模糊程度 👆 */
 
   .theme-default .main-layout.glass-panel, .theme-landing .landing-content { transform: translateZ(0) !important; -webkit-transform: translateZ(0) !important; }
 

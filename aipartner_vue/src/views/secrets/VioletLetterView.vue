@@ -4,8 +4,8 @@
 
     <div class="secret-page shadow-2xl">
       <div class="secret-content">
-        <h1 class="highlight-text" style="color: #c084fc;">✉️ 无名信件的归宿</h1>
-        <p class="subtitle">特殊代码认证：19xxxx</p>
+        <h1 class="highlight-text" style="color: #c084fc;">无名信件总有寄件人</h1>
+        <p class="subtitle">恭喜你找到：19xxxx</p>
         <div class="content-box">
           <p>这里是薇尔莉特为你寄来的专属信件空间。</p>
           <p>（后续内容待设计：可以放入你想展示的动漫截图、感人信件文本等...）</p>

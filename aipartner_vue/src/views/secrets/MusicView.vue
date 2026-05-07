@@ -7,8 +7,8 @@
 
     <div class="secret-page shadow-2xl">
       <div class="secret-content music-room">
-        <h1 class="highlight-text" style="color: #f472b6;">🎧 灵魂的音乐电台</h1>
-        <p class="subtitle">特殊代码认证：240802</p>
+        <h1 class="highlight-text" style="color: #f472b6;">音乐，陪伴我很多年</h1>
+        <p class="subtitle">恭喜你找到：240802</p>
 
         <!-- 文字区：使用了 flex: 1 撑满剩余高度 -->
         <div class="story-box">
@@ -28,16 +28,12 @@
           <!-- 新增：附加图片链接区 -->
           <div class="extra-links">
             <span class="links-label">附加内容（图片加载慢，因为我懒得找图床）：</span>
-            <!-- target="_blank" 保证在新标签页打开，不中断背景音乐播放 -->
-            <a href="https://s41.ax1x.com/2026/05/06/pebGmTA.jpg" target="_blank" class="img-link">
-              <el-icon><Picture /></el-icon> 音乐助手背景
-            </a>
-            <a href="https://s41.ax1x.com/2026/05/07/pebxusH.jpg" target="_blank" class="img-link">
+            <span @click="openImage('https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E5%8E%BB%E5%B9%B4%E5%90%AC%E7%9A%84%E6%AD%8C%E5%8D%95.png')" class="img-link">
               <el-icon><Picture /></el-icon> 去年听的歌单
-            </a>
-             <a href="https://s41.ax1x.com/2026/05/07/pebxnQe.jpg" target="_blank" class="img-link">
+            </span>
+             <span @click="openImage('https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E5%89%8D%E5%B9%B4%E5%90%AC%E7%9A%84%E6%AD%8C%E5%8D%95.png')" class="img-link">
               <el-icon><Picture /></el-icon> 前年听的歌单
-            </a>
+            </span>
           </div>
         </div>
 
@@ -73,12 +69,20 @@
         <button class="enter-btn shimmer-btn" @click="handleBack">返回聊天</button>
       </div>
     </div>
+
+    <!-- 💡 新增：图片全屏预览遮罩 -->
+    <transition name="fade">
+      <div v-if="showPreview" class="image-preview-overlay" @click="closeImage">
+        <el-icon class="close-preview-btn"><Close /></el-icon>
+        <img :src="previewImage" class="preview-img" />
+      </div>
+    </transition>
   </div>
 </template>
 
 <script setup>
 import { ref, onUnmounted } from 'vue'
-import { Picture, VideoPlay, VideoPause } from '@element-plus/icons-vue'
+import { Picture, VideoPlay, VideoPause, Close } from '@element-plus/icons-vue'
 
 const againAudio = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/again.aac'
 const xuniAudio = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/%E8%99%9A%E6%8B%9F.aac'
@@ -96,6 +100,20 @@ const playlist = ref([
   { id: 2, title: '虚拟', artist: '陈粒', src: xuniAudio, cover: 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/xuniAvatar.png' },
   { id: 3, title: '会呼吸的痛', artist: '梁静茹', src: huxiAudio, cover: 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/hhxdtAvatar.png' }
 ])
+
+// 💡 新增：图片预览状态控制
+const showPreview = ref(false)
+const previewImage = ref('')
+
+const openImage = (url) => {
+  previewImage.value = url
+  showPreview.value = true
+}
+
+const closeImage = () => {
+  showPreview.value = false
+  previewImage.value = ''
+}
 
 const togglePlay = (song) => {
   if (!audioRef.value) return
@@ -224,6 +242,7 @@ onUnmounted(() => {
   border-radius: 20px;
   font-size: 13px;
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 .img-link:hover {
   background: rgba(244, 114, 182, 0.25);
@@ -289,6 +308,32 @@ onUnmounted(() => {
 
 .enter-btn { flex-shrink: 0; }
 @keyframes bounce { 0% { height: 3px; } 100% { height: 12px; } }
+
+/* 💡 新增：图片预览遮罩与动画样式 */
+.image-preview-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+  z-index: 9999; display: flex; justify-content: center; align-items: center;
+  cursor: zoom-out;
+}
+.preview-img {
+  max-width: 90%; max-height: 90%; border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.close-preview-btn {
+  position: absolute; top: 30px; right: 30px; font-size: 36px;
+  color: rgba(255, 255, 255, 0.7); cursor: pointer; transition: all 0.3s;
+}
+.close-preview-btn:hover { transform: scale(1.1); color: #f472b6; }
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 
 /* 💡 移动端减负排版 */
 @media (max-width: 768px) {
