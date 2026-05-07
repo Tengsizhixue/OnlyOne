@@ -27,14 +27,14 @@ export const ROLE_CONFIGS = {
     welcomeText: '哼，既然你诚心诚意地发问了，那我就勉为其难地陪你聊聊吧！',
     avatar: GAME_AVATAR
   },
-  '自定义': {
+  '李蓝宝': {
     welcomeTitle: '你好，我是李蓝宝',
-    welcomeText: '我是自定义角色，不代表任何人物，你可以随意修改我的性格与名称。我只有一个特殊设定：李红宝是我牢弟，关于他的问题你可以问我',
+    welcomeText: '我是你的好朋友李蓝宝。对了，关于我牢弟李红宝的问题你可以随时问我哦！',
     avatar: DEFAULT_AI_AVATAR
   }
 }
 
 // 导出一个获取配置的方法
 export const getCurrentRoleConfig = (roleType) => {
-  return ROLE_CONFIGS[roleType] || ROLE_CONFIGS['自定义']
+  return ROLE_CONFIGS[roleType] || ROLE_CONFIGS['李蓝宝']
 }

@@ -5,7 +5,7 @@
     <div class="secret-page shadow-2xl">
       <div class="secret-content">
         <h1 class="highlight-text" style="color: #34d399;">⏳ 时空与灵魂的交界处</h1>
-        <p class="subtitle">特殊代码认证：251027</p>
+        <p class="subtitle">恭喜你找到：251027</p>
         <div class="content-box">
           <p>这里是《我在七年后等着你》与《灵魂摆渡者》的专属回忆页面。</p>
           <p>（后续内容待设计：可以放游戏截图、音频、或者你对这两款游戏的感悟...）</p>

@@ -4,8 +4,8 @@
 
     <div class="secret-page shadow-2xl">
       <div class="secret-content">
-        <h1 class="highlight-text" style="color: #60a5fa;">📱 李红宝的失联空间</h1>
-        <p class="subtitle">特殊代码认证：260315</p>
+        <h1 class="highlight-text" style="color: #60a5fa;">你发现了李红宝的失联空间</h1>
+        <p class="subtitle">恭喜你找到：260315</p>
 
         <!-- 替换为带有段落格式和链接区域的 story-box -->
         <div class="story-box">
@@ -18,25 +18,48 @@
           <!-- 附加图片链接区（失联主题蓝色系） -->
           <div class="extra-links">
             <span class="links-label">🔗 附加内容：</span>
-            <a href="https://s41.ax1x.com/2026/05/07/pebzlX4.jpg" target="_blank" class="img-link">
+            <span @click="openImage('https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E6%A1%88%E5%8F%91%E7%8E%B0%E5%9C%BA1.png')" class="img-link">
               <el-icon><Picture /></el-icon> 案发现场1
-            </a>
-            <a href="https://s41.ax1x.com/2026/05/07/pebzQcF.jpg" target="_blank" class="img-link">
+            </span>
+            <span @click="openImage('https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E6%A1%88%E5%8F%91%E7%8E%B0%E5%9C%BA2.png')" class="img-link">
               <el-icon><Picture /></el-icon> 案发现场2
-            </a>
+            </span>
           </div>
         </div>
 
         <button class="enter-btn shimmer-btn" @click="$emit('back')">返回聊天</button>
       </div>
     </div>
+
+    <!-- 💡 新增：图片全屏预览遮罩 -->
+    <transition name="fade">
+      <div v-if="showPreview" class="image-preview-overlay" @click="closeImage">
+        <el-icon class="close-preview-btn"><Close /></el-icon>
+        <img :src="previewImage" class="preview-img" />
+      </div>
+    </transition>
   </div>
 </template>
 
 <script setup>
-import { Picture } from '@element-plus/icons-vue'
+import { ref } from 'vue'
+import { Picture, Close } from '@element-plus/icons-vue'
 
 defineEmits(['back'])
+
+// 💡 新增：图片预览状态控制
+const showPreview = ref(false)
+const previewImage = ref('')
+
+const openImage = (url) => {
+  previewImage.value = url
+  showPreview.value = true
+}
+
+const closeImage = () => {
+  showPreview.value = false
+  previewImage.value = ''
+}
 </script>
 
 <style scoped>
@@ -104,6 +127,7 @@ defineEmits(['back'])
   border-radius: 20px;
   font-size: 13px;
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 .img-link:hover {
   background: rgba(96, 165, 250, 0.25);
@@ -114,6 +138,32 @@ defineEmits(['back'])
 }
 
 .enter-btn { flex-shrink: 0; }
+
+/* 💡 新增：图片预览遮罩与动画样式 */
+.image-preview-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+  z-index: 9999; display: flex; justify-content: center; align-items: center;
+  cursor: zoom-out;
+}
+.preview-img {
+  max-width: 90%; max-height: 90%; border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.close-preview-btn {
+  position: absolute; top: 30px; right: 30px; font-size: 36px;
+  color: rgba(255, 255, 255, 0.7); cursor: pointer; transition: all 0.3s;
+}
+.close-preview-btn:hover { transform: scale(1.1); color: #60a5fa; }
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 
 @media (max-width: 768px) {
   .secret-page {
