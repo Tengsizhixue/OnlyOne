@@ -24,6 +24,21 @@
           <p>
             最近几年听的最多的是梁静茹的 <strong>会呼吸的痛</strong>，这歌是作者写给母亲的，感染力还是很强的，现在我已经听了快900遍，再听个两年应该就超过虚拟了。
           </p>
+
+          <!-- 新增：附加图片链接区 -->
+          <div class="extra-links">
+            <span class="links-label">附加内容（图片加载慢，因为我懒得找图床）：</span>
+            <!-- target="_blank" 保证在新标签页打开，不中断背景音乐播放 -->
+            <a href="https://s41.ax1x.com/2026/05/06/pebGmTA.jpg" target="_blank" class="img-link">
+              <el-icon><Picture /></el-icon> 音乐助手背景
+            </a>
+            <a href="https://s41.ax1x.com/2026/05/07/pebxusH.jpg" target="_blank" class="img-link">
+              <el-icon><Picture /></el-icon> 去年听的歌单
+            </a>
+             <a href="https://s41.ax1x.com/2026/05/07/pebxnQe.jpg" target="_blank" class="img-link">
+              <el-icon><Picture /></el-icon> 前年听的歌单
+            </a>
+          </div>
         </div>
 
         <!-- 播放器区域：放置在底部 -->
@@ -182,6 +197,43 @@ onUnmounted(() => {
 .music-room .story-box p:last-child { margin-bottom: 0; }
 .music-room .story-box strong { color: #f472b6; font-weight: 600; padding: 0 4px; }
 
+/* ======== 附加图片链接样式 ======== */
+.extra-links {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px dashed rgba(244, 114, 182, 0.3);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.links-label {
+  font-size: 14px;
+  color: #fbcfe8;
+  font-weight: 600;
+}
+.img-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(244, 114, 182, 0.1);
+  border: 1px solid rgba(244, 114, 182, 0.3);
+  color: #fdf2f8;
+  text-decoration: none;
+  border-radius: 20px;
+  font-size: 13px;
+  transition: all 0.3s ease;
+}
+.img-link:hover {
+  background: rgba(244, 114, 182, 0.25);
+  border-color: rgba(244, 114, 182, 0.6);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(244, 114, 182, 0.2);
+}
+
+/* ======== 播放器样式 ======== */
 .music-player { width: 100%; display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; flex-shrink: 0; }
 .music-item { display: flex; align-items: center; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 14px 20px; border-radius: 16px; cursor: pointer; transition: all 0.3s ease; }
 .music-item:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-2px); border-color: rgba(244, 114, 182, 0.3); }
@@ -256,6 +308,14 @@ onUnmounted(() => {
     margin-bottom: 20px;
     border-radius: 12px;
     line-height: 1.1;
+  }
+  .extra-links {
+    margin-top: 16px;
+    padding-top: 12px;
+  }
+  .img-link {
+    padding: 5px 12px;
+    font-size: 12px;
   }
   .highlight-text { font-size: 24px; margin-bottom: 6px; }
   .subtitle { font-size: 12px; margin-bottom: 16px; }
