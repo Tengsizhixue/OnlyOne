@@ -175,6 +175,22 @@ def get_session_file_path(uid: str, session_id: str):
     os.makedirs(user_dir, exist_ok=True)
     return os.path.join(user_dir, f"{session_id}.json")
 
+# ==================== 🛠️ 新增：JSON 文件存取工具 ====================
+def read_session_data(file_path: str):
+    """安全读取会话数据"""
+    if not os.path.exists(file_path):
+        return None
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return None
+
+def write_session_data(file_path: str, data: dict):
+    """统一写入会话数据"""
+    with open(file_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2, ensure_ascii=False)
+
 
 @app.get("/api/roles")
 def get_available_roles():
@@ -195,25 +211,22 @@ def get_sessions(uid: str):
         for filename in os.listdir(user_dir):
             if filename.endswith(".json"):
                 file_path = os.path.join(user_dir, filename)
-                try:
-                    with open(file_path, "r", encoding="utf-8") as f:
-                        data = json.load(f)
-                        raw_time = data.get("time", "")
-                        try:
-                            dt = datetime.strptime(raw_time, "%Y-%m-%d_%H-%M-%S")
-                            display_time = dt.strftime("%m-%d %H:%M")
-                        except:
-                            display_time = raw_time
+                data = read_session_data(file_path)
+                if data:
+                    raw_time = data.get("time", "")
+                    try:
+                        dt = datetime.strptime(raw_time, "%Y-%m-%d_%H-%M-%S")
+                        display_time = dt.strftime("%m-%d %H:%M")
+                    except:
+                        display_time = raw_time
 
-                        sessions.append({
-                            "session_id": raw_time,
-                            "display_time": display_time,
-                            "name": data.get("initial_name", data.get("name", "李蓝宝")),
-                            "message_count": len(data.get("message", [])),
-                            "file_mtime": os.path.getmtime(file_path)
-                        })
-                except Exception:
-                    continue
+                    sessions.append({
+                        "session_id": raw_time,
+                        "display_time": display_time,
+                        "name": data.get("initial_name", data.get("name", "李蓝宝")),
+                        "message_count": len(data.get("message", [])),
+                        "file_mtime": os.path.getmtime(file_path)
+                    })
     sessions.sort(key=lambda x: x["file_mtime"], reverse=True)
     return sessions
 
@@ -221,13 +234,10 @@ def get_sessions(uid: str):
 @app.get("/api/sessions/{session_id}")
 def get_single_session(session_id: str, uid: str):
     file_path = get_session_file_path(uid, session_id)
-    if os.path.exists(file_path):
-        try:
-            with open(file_path, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception:
-            raise HTTPException(status_code=500, detail="文件读取错误")
-    raise HTTPException(status_code=404, detail="会话不存在")
+    data = read_session_data(file_path)
+    if data:
+        return data
+    raise HTTPException(status_code=404, detail="会话不存在或读取错误")
 
 
 @app.delete("/api/sessions/{session_id}")
@@ -248,10 +258,9 @@ def chat_completions(request: ChatRequest):
     file_path = get_session_file_path(request.uid, session_id)
 
     history_messages = []
-    if os.path.exists(file_path):
-        with open(file_path, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            history_messages = data.get("message", [])
+    data = read_session_data(file_path)
+    if data:
+        history_messages = data.get("message", [])
 
     history_messages.append({
         "role": "user",
@@ -318,8 +327,8 @@ def chat_completions(request: ChatRequest):
                 "initial_name": actual_name
             }
 
-            with open(file_path, "w", encoding="utf-8") as f:
-                json.dump(session_data, f, indent=2, ensure_ascii=False)
+            # ====== 简化后的写入 ======
+            write_session_data(file_path, session_data)
 
     return StreamingResponse(
         generate_stream(),
