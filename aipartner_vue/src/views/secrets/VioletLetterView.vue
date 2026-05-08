@@ -3,7 +3,7 @@
     bg-image="https://images.unsplash.com/photo-1577401239170-897942555fb3?auto=format&fit=crop&w=2000&q=80"
     title="无名信件总有寄件人"
     title-color="#c084fc"
-    code="19xxxx"
+    code="191001"
     @back="$emit('back')"
   >
     <div class="content-box">
