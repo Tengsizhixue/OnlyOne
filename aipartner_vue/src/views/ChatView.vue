@@ -26,6 +26,15 @@
         <span>新建对话</span>
       </button>
 
+      <!-- 新增：解密任务进度栏 -->
+      <div class="quest-section">
+        <div class="list-title">命运指引</div>
+        <div class="quest-card glass-panel">
+          <p v-if="currentQuest" class="quest-text">{{ currentQuest.question }}</p>
+          <p v-else class="quest-text success">所有谜题已解开！</p>
+        </div>
+      </div>
+
       <div class="history-list">
         <div class="list-title">记忆宝匣</div>
         <el-scrollbar height="calc(100vh - 320px)" class="custom-scrollbar">
@@ -140,9 +149,12 @@
 <script setup>
 import { ref, reactive, nextTick, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router' // 引入路由
-import { Plus, Delete, Position, Lock, DocumentCopy, House, Menu, Close, Loading } from '@element-plus/icons-vue'
+import { Plus, Delete, Position, Lock, DocumentCopy, House, Menu, Close, Loading, Compass } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { USER_AVATAR, getCurrentRoleConfig } from '../config/constants.js'
+
+// 引入我们的任务系统
+import { SECRET_QUESTS, currentQuest } from '../store/questState.js'
 
 // 移除了 'go-home' 和 'enter-secret'，只保留角色更新的事件
 const emit = defineEmits(['update:roleType'])
@@ -337,10 +349,11 @@ const sendMessage = async () => {
   if (!inputText.value.trim() || isGenerating.value) return
   const userText = inputText.value.trim()
 
-  const secretCodes = ['260315', '251027', '260410', '19xxxx', '240802', '180818','111111']
-  if (secretCodes.includes(userText)) {
+  // 核心修改：不再写死各种密码，而是直接从 SECRET_QUESTS 配置中读取所有密码，外加兜底的 111111
+  const validCodes = [...SECRET_QUESTS.map(q => q.code), '111111']
+  
+  if (validCodes.includes(userText)) {
     inputText.value = ''
-    // 核心修改：输入密码后直接推送到 /secret/密码 这个URL地址
     router.push({ name: 'secret', params: { secretCode: userText } })
     return
   }
@@ -437,6 +450,17 @@ const sendMessage = async () => {
 
 .history-list { flex: 1; overflow: hidden; }
 .list-title { font-size: 13px; font-weight: 600; margin-bottom: 12px; letter-spacing: 1px; }
+
+/* 添加在 .history-list 样式上面 */
+.quest-section { margin-bottom: 24px; }
+.quest-card {
+  background: rgba(99, 102, 241, 0.1) !important;
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+  padding: 14px; border-radius: 12px; transition: all 0.3s;
+}
+.quest-text { font-size: 13px; color: #e0e7ff; margin: 0; line-height: 1.5; }
+.quest-text.success { color: #34d399; font-weight: bold; }
+
 .history-item { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; border-radius: 12px; cursor: pointer; transition: all 0.2s; margin-bottom: 6px; border-style: solid; border-width: 1px; border-color: transparent;}
 .session-info { display: flex; flex-direction: column; overflow: hidden; }
 .session-name { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
