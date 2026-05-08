@@ -12,37 +12,36 @@
         <div class="features-grid">
           <div class="feature-card glass-card hover-lift">
             <el-icon class="feature-icon"><User /></el-icon>
-            <h3>角色丰富</h3>
-            <p>这次的每个人物我都设计了特殊问答，问对问题会给特殊数字</p>
+            <h3>角色优化</h3>
+            <p>这次的每个人物我都进行了特殊的设计</p>
           </div>
           <div class="feature-card glass-card hover-lift">
             <el-icon class="feature-icon"><ColdDrink /></el-icon>
-            <h3>额外页面</h3>
-            <p>例如你看到【111111】，你在对话框输入特殊数字然后点发送消息会进入特殊页面</p>
+            <h3>额外内容</h3>
+            <p>加的内容已经完全脱离了我最开始的初衷</p>
           </div>
           <div class="feature-card glass-card hover-lift">
             <el-icon class="feature-icon"><Sugar /></el-icon>
             <h3>ui优化</h3>
-            <p>换了个前端，这次的ui设计会比上次稍微好看些</p>
+            <p>ui设计会比上次好看，但是我不确定会有什么bug，我一个人测试是不会卡的</p>
           </div>
         </div>
 
         <div class="scenario-section">
           <h3 class="scenario-title">我的一些想法</h3>
           <div class="scenario-tags">
-            <span class="scenario-tag">后面不一定更</span>
             <span class="scenario-tag">太耗时间</span>
-            <span class="scenario-tag">没什么更好的想法</span>
+            <span class="scenario-tag">想不到还能加什么</span>
             <span class="scenario-tag">功能多了代码太复杂</span>
             <span class="scenario-tag">没什么能分享的</span>
-            <span class="scenario-tag">如果你会看前端源码，数字非常好找</span>
-            <span class="scenario-tag">不过不建议</span>
+            <span class="scenario-tag">如果你会看源码，就能直接看到我加了什么</span>
+            <span class="scenario-tag">不过我不推荐</span>
           </div>
         </div>
 
         <!-- 点击后使用路由跳转到聊天页面 -->
         <button class="enter-btn shimmer-btn" @click="goToChat">
-          <span class="btn-text">打开交流界面</span>
+          <span class="btn-text">进入聊天界面</span>
           <el-icon class="enter-icon"><ArrowRight /></el-icon>
         </button>
       </div>

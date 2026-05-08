@@ -2,7 +2,6 @@
   <div class="secret-view-container">
     <div class="secret-bg" :style="{ backgroundImage: `url(${bgImage})` }"></div>
 
-    <!-- 💡 新增的浮动任务面板 -->
     <div class="quest-floating-widget glass-panel shadow-lg">
       <div class="quest-header">
         <el-icon><Compass /></el-icon> 命运的指引
@@ -20,7 +19,6 @@
 
         <slot :openImage="openImage"></slot>
 
-        <!-- 💡 动态按钮文案：如果全通关了，按钮变成前往结局 -->
         <button class="enter-btn shimmer-btn" @click="$emit('back')">
           {{ isAllUnlocked ? '开启终局之门 ✨' : '返回聊天' }}
         </button>
@@ -39,7 +37,6 @@
 <script setup>
 import { ref } from 'vue'
 import { Close, Compass } from '@element-plus/icons-vue'
-// 💡 引入解密状态
 import { currentQuest, isAllUnlocked } from '../store/questState.js'
 
 defineProps({
@@ -57,14 +54,26 @@ const closeImage = () => { previewImage.value = '' }
 </script>
 
 <style scoped>
-/* ========== 原有样式保持不变 ========== */
 .secret-view-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; }
 .secret-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #050505; background-size: cover; background-position: center; filter: brightness(0.65); z-index: -1; pointer-events: none; }
-.secret-page { width: 95vw; max-width: 1200px; height: 90vh; padding: 40px 60px; text-align: center; border-radius: 24px; z-index: 1; color: #f8fafc; background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3); display: flex; flex-direction: column; }
-.secret-content { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; }
+
+.secret-page {
+  width: 95vw; max-width: 1200px; height: 90vh; padding: 40px 60px; text-align: center; border-radius: 24px; z-index: 1; color: #f8fafc;
+  background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  display: flex; flex-direction: column;
+  box-sizing: border-box; /* 💡 核心修复：防止 padding 撑爆高度 */
+}
+
+.secret-content {
+  flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%;
+  width: 100%; overflow: hidden; /* 💡 核心修复：防止内部元素把容器撑开 */
+}
+
 .highlight-text { margin-bottom: 10px; font-size: 32px; font-weight: bold; flex-shrink: 0; }
 .subtitle { color: #94a3b8; font-family: monospace; margin-bottom: 20px; letter-spacing: 2px; flex-shrink: 0; }
-.enter-btn { flex-shrink: 0; }
+.enter-btn { flex-shrink: 0; margin-top: 10px; margin-bottom: 10px; } /* 💡 给按钮下方留一点安全距离 */
+
 .image-preview-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 9999; display: flex; justify-content: center; align-items: center; cursor: zoom-out; }
 .preview-img { max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 .close-preview-btn { position: absolute; top: 30px; right: 30px; font-size: 36px; color: rgba(255, 255, 255, 0.7); cursor: pointer; transition: all 0.3s; }
@@ -72,7 +81,6 @@ const closeImage = () => { previewImage.value = '' }
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 
-/* 💡 新增的悬浮任务面板样式 */
 .quest-floating-widget {
   position: absolute; top: 30px; right: 30px; width: 300px; padding: 16px 20px;
   border-radius: 16px; z-index: 50; background: rgba(15, 23, 42, 0.6);
@@ -83,11 +91,16 @@ const closeImage = () => { previewImage.value = '' }
 .quest-text.success { color: #34d399; font-weight: bold;}
 
 @media (max-width: 768px) {
-  .secret-page { width: 100vw; height: 100dvh; border-radius: 0; padding: 90px 20px 80px; border: none; background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  .secret-page {
+    width: 100%; height: 100dvh; /* 💡 使用 dvh 以适配手机浏览器下方工具栏 */
+    border-radius: 0;
+    padding: 70px 20px 20px; /* 💡 调整 Padding，不要留太大以免内容越界 */
+    border: none; background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  }
   .highlight-text { font-size: 24px; margin-bottom: 6px; }
   .subtitle { font-size: 12px; margin-bottom: 16px; }
+  .enter-btn { padding: 12px 30px; font-size: 15px; margin-bottom: env(safe-area-inset-bottom, 15px); } /* 💡 适配 iOS 底边安全区 */
 
-  /* 移动端悬浮框置顶 */
   .quest-floating-widget {
     top: 10px; left: 10px; right: 10px; width: auto; padding: 12px 16px;
   }

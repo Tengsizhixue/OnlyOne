@@ -28,7 +28,7 @@
 
       <!-- 新增：解密任务进度栏 -->
       <div class="quest-section">
-        <div class="list-title">命运指引</div>
+        <div class="list-title">神秘指引</div>
         <div class="quest-card glass-panel">
           <p v-if="currentQuest" class="quest-text">{{ currentQuest.question }}</p>
           <p v-else class="quest-text success">所有谜题已解开！</p>
@@ -349,8 +349,8 @@ const sendMessage = async () => {
   if (!inputText.value.trim() || isGenerating.value) return
   const userText = inputText.value.trim()
 
-  // 核心修改：不再写死各种密码，而是直接从 SECRET_QUESTS 配置中读取所有密码，外加兜底的 111111
-  const validCodes = [...SECRET_QUESTS.map(q => q.code), '111111']
+  // 核心修改：不再写死各种密码，而是直接从 SECRET_QUESTS 配置中读取所有密码，外加兜底的 160615
+  const validCodes = [...SECRET_QUESTS.map(q => q.code), '160615']
   
   if (validCodes.includes(userText)) {
     inputText.value = ''
