@@ -1,7 +1,7 @@
 <template>
   <!-- 💡 核心修复：添加 v-slot="{ openImage }" 接收布局组件暴露的开图方法 -->
   <SecretLayout
-    bg-image="https://images.unsplash.com/photo-1510936111840-65e151ad71bb?auto=format&fit=crop&w=2000&q=80"
+    bg-image="https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E6%9D%8E%E7%BA%A2%E5%AE%9D%E8%83%8C%E6%99%AF%E5%9B%BE.png"
     title="你发现了李红宝的失联空间"
     title-color="#60a5fa"
     code="260315"
@@ -10,6 +10,7 @@
   >
     <div class="story-box">
       <p>这件事让我印象比较深，因为有次给他发消息，半天不回，然后说是苹果手机问题没信息提醒，说下次要@他。结果后面@他了，到第二天才回，还说是苹果手机问题，收不到消息，真的不是他的问题。</p>
+      <img src="https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E6%9D%8E%E7%BA%A2%E5%AE%9D%E6%8F%92%E5%9B%BE1.png" alt="李红宝插图" class="content-img" />
       <p>我现在基本都是在群聊里面说话，很少和别人私聊。就算在现实里面关系很好的朋友，我也几乎不在网上聊天，因为我有点轻度焦虑，只要别人不回我消息，我就会越来越急，在群里面发消息，就算一个人有事，其他人也会回我。</p>
       <p>你可能会跟我说，别人不发消息可能是因为有事在忙。我当然知道，道理我都懂，不然我怎么和朋友都不在网上单独聊，我单纯就是急，和别人是怎么想的完全没关系。</p>
       <p>对我来说，这就是一种本能反应，就和我之前的失眠一样，应该很多人都不知道，我差不多4，5年睡眠都很不稳定，就不知道什么原因，在那几年有时候就是一整夜都睡不着，但根本就不知道为什么，感觉一到晚上就对附近的事物非常敏感，后面实在受不了，去医院开药，吃了半年的药才彻底好。</p>
@@ -49,6 +50,11 @@ defineEmits(['back'])
 
 .story-box p { font-size: 16px; line-height: 2; margin-bottom: 16px; color: #f8fafc; text-indent: 2em; }
 .story-box p:last-child { margin-bottom: 0; }
+
+.content-img {
+  width: 100%; max-width: 600px; border-radius: 12px;
+  margin: 16px auto; display: block; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
 
 .extra-links {
   margin-top: 24px; padding-top: 16px; border-top: 1px dashed rgba(96, 165, 250, 0.3);
