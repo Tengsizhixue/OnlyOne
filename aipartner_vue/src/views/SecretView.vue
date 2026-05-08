@@ -27,6 +27,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useRouter } from 'vue-router' // 引入路由
 
 // 1. 引入我们刚刚分离出去的独立组件
 import LiHongBaoView from './secrets/LiHongBaoView.vue'
@@ -36,6 +37,7 @@ import VioletLetterView from './secrets/VioletLetterView.vue'
 import MusicView from './secrets/MusicView.vue'
 import GameView from './secrets/GameView.vue'
 
+// 由于路由中开启了 props: true，这个 secretCode 现在会直接从 URL 里面被提取过来！
 const props = defineProps({
   secretCode: {
     type: String,
@@ -43,11 +45,11 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['back'])
+const router = useRouter()
 
-// 💡 规范化事件传递，确保必定触发外层的返回动作
+// 规范化事件传递：直接返回 /chat 页面
 const handleBack = () => {
-  emit('back')
+  router.push('/chat')
 }
 
 // 2. 核心路由表：密码对应的页面

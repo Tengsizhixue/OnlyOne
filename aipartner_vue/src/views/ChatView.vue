@@ -80,7 +80,8 @@
           <span class="lock-tip mobile-hide"><el-icon><Lock /></el-icon> 记忆已锁定，需新建以更改</span>
         </div>
 
-        <button class="exit-btn" @click="$emit('go-home')" title="返回首页">
+        <!-- 核心修改：返回首页按钮事件 -->
+        <button class="exit-btn" @click="router.push('/')" title="返回首页">
            <el-icon><House /></el-icon>
         </button>
       </el-header>
@@ -138,11 +139,14 @@
 
 <script setup>
 import { ref, reactive, nextTick, watch, onMounted } from 'vue'
+import { useRouter } from 'vue-router' // 引入路由
 import { Plus, Delete, Position, Lock, DocumentCopy, House, Menu, Close, Loading } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { USER_AVATAR, getCurrentRoleConfig } from '../config/constants.js'
 
-const emit = defineEmits(['go-home', 'enter-secret', 'update:roleType'])
+// 移除了 'go-home' 和 'enter-secret'，只保留角色更新的事件
+const emit = defineEmits(['update:roleType'])
+const router = useRouter() // 实例化路由
 
 const isMobileMenuOpen = ref(false)
 const uid = ref(localStorage.getItem('chat_uid') || generateUid())
@@ -336,7 +340,8 @@ const sendMessage = async () => {
   const secretCodes = ['260315', '251027', '260410', '19xxxx', '240802', '180818','111111']
   if (secretCodes.includes(userText)) {
     inputText.value = ''
-    emit('enter-secret', userText)
+    // 核心修改：输入密码后直接推送到 /secret/密码 这个URL地址
+    router.push({ name: 'secret', params: { secretCode: userText } })
     return
   }
 

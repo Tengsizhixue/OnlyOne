@@ -40,8 +40,8 @@
           </div>
         </div>
 
-        <!-- 点击后触发事件，通知外层 App.vue 切换页面 -->
-        <button class="enter-btn shimmer-btn" @click="$emit('enter-chat')">
+        <!-- 点击后使用路由跳转到聊天页面 -->
+        <button class="enter-btn shimmer-btn" @click="goToChat">
           <span class="btn-text">打开交流界面</span>
           <el-icon class="enter-icon"><ArrowRight /></el-icon>
         </button>
@@ -52,9 +52,15 @@
 
 <script setup>
 import { User, ColdDrink, Sugar, ArrowRight } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router' // 引入路由钩子
 
-// 声明对外暴露的事件
-defineEmits(['enter-chat'])
+// 实例化路由
+const router = useRouter()
+
+// 路由跳转方法
+const goToChat = () => {
+  router.push('/chat')
+}
 </script>
 
 <style scoped>

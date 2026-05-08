@@ -2,52 +2,41 @@
   <div class="app-wrapper" :class="themeClass">
 
     <DynamicBackground
-      :is-landing="currentPage === 'landing'"
+      :is-landing="route.name === 'landing'"
       :has-custom-bg="hasCustomBg"
       :custom-bg-style="customBgStyle"
     />
 
-    <transition name="fade-transform" mode="out-in">
-      <LandingView
-        v-if="currentPage === 'landing'"
-        key="landing"
-        @enter-chat="currentPage = 'chat'"
-      />
-      <ChatView
-        v-else-if="currentPage === 'chat'"
-        key="chat"
-        @go-home="currentPage = 'landing'"
-        @enter-secret="(code) => { currentSecretCode = code; currentPage = 'secret' }"
-        @update:roleType="currentRoleType = $event"
-      />
-      <SecretView
-        v-else-if="currentPage === 'secret'"
-        key="secret"
-        :secret-code="currentSecretCode"
-        @back="currentPage = 'chat'"
-      />
-    </transition>
+    <!-- 核心改变：使用 router-view 替代原本的一大堆 v-if -->
+    <!-- 我们保留了过渡动画，让页面切换依然柔顺 -->
+    <router-view v-slot="{ Component }">
+      <transition name="fade-transform" mode="out-in">
+        <component
+          :is="Component"
+          @update:roleType="currentRoleType = $event"
+        />
+      </transition>
+    </router-view>
 
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import DynamicBackground from './components/DynamicBackground.vue'
-import LandingView from './views/LandingView.vue'
-import ChatView from './views/ChatView.vue'
-import SecretView from './views/SecretView.vue'
 
-// 总控状态：当前处于哪个页面
-const currentPage = ref('landing')
-// 总控状态：当前选中的角色（默认锁定为李蓝宝）
+// 获取当前路由信息对象
+const route = useRoute()
+
+// 总控状态：当前选中的角色（依然需要保留，用来控制背景）
 const currentRoleType = ref('李蓝宝')
-const currentSecretCode = ref('')
 
-// 根据状态计算当前主题 Class
+// 根据当前路由状态和角色计算当前主题 Class
 const themeClass = computed(() => {
-  if (currentPage.value === 'landing') return 'theme-landing'
-  if (currentPage.value === 'secret') return 'theme-violet'
+  // 注意：原先判定 currentPage，现在变成了判定 route.name
+  if (route.name === 'landing') return 'theme-landing'
+  if (route.name === 'secret') return 'theme-violet'
   if (currentRoleType.value === '薇尔莉特') return 'theme-violet'
   if (currentRoleType.value === '誊思致雪') return 'theme-snow'
   if (currentRoleType.value === '音乐推荐助手') return 'theme-music'
