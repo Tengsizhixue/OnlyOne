@@ -1,5 +1,4 @@
 <template>
-  <!-- 💡 核心修复：添加 v-slot="{ openImage }" -->
   <SecretLayout
     bg-image="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=2000&q=80"
     title="音乐，陪伴我很多年"
@@ -127,17 +126,26 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-.music-room { width: 100%; flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+/* 💡 核心修改：让 music-room 整体变成可滚动的容器 */
+.music-room {
+  width: 100%; flex: 1; display: flex; flex-direction: column;
+  overflow-y: auto; overflow-x: hidden;
+  padding-right: 4px; /* 为滚动条留出空间 */
+}
+
+/* 移动滚动条样式到整个容器上 */
+.music-room::-webkit-scrollbar { width: 6px; }
+.music-room::-webkit-scrollbar-track { background: transparent; }
+.music-room::-webkit-scrollbar-thumb { background: rgba(244, 114, 182, 0.3); border-radius: 4px; }
+.music-room::-webkit-scrollbar-thumb:hover { background: rgba(244, 114, 182, 0.6); }
 
 .story-box {
   background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(244, 114, 182, 0.2);
   padding: 30px; border-radius: 16px; margin-bottom: 24px; width: 100%; text-align: left;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1); flex: 1; overflow-y: auto;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  flex: none; /* 💡 核心修改：不再限制高度，让文字自由撑开 */
+  overflow: visible;
 }
-.story-box::-webkit-scrollbar { width: 8px; }
-.story-box::-webkit-scrollbar-track { background: transparent; }
-.story-box::-webkit-scrollbar-thumb { background: rgba(244, 114, 182, 0.3); border-radius: 4px; }
-.story-box::-webkit-scrollbar-thumb:hover { background: rgba(244, 114, 182, 0.6); }
 
 .story-box p { font-size: 16px; line-height: 2; margin-bottom: 16px; color: #fdf2f8; text-indent: 2em; }
 .story-box p:last-child { margin-bottom: 0; }
@@ -182,10 +190,24 @@ onUnmounted(() => {
 @keyframes bounce { 0% { height: 3px; } 100% { height: 12px; } }
 
 @media (max-width: 768px) {
-  .story-box { padding: 1px; font-size: 14px; margin-bottom: 20px; border-radius: 12px; line-height: 1.1; }
+  /* 💡 移动端全面优化：去掉极端压缩的 padding，恢复优雅阅读体验 */
+  .story-box {
+    padding: 16px 20px;
+    font-size: 15px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+  }
+  .story-box p {
+    line-height: 1.7; /* 恢复阅读行高 */
+    margin-bottom: 12px;
+  }
   .extra-links { margin-top: 16px; padding-top: 12px; }
   .img-link { padding: 5px 12px; font-size: 12px; }
-  .music-item { padding: 12px 20px; border-radius: 12px; }
+  .music-player {
+    gap: 8px; /* 减小歌曲列表的间距 */
+    margin-bottom: 16px;
+  }
+  .music-item { padding: 12px 16px; border-radius: 12px; }
   .song-cover { width: 40px; height: 40px; margin-right: 12px; }
 }
 </style>
