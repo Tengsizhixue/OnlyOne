@@ -131,6 +131,7 @@ onUnmounted(() => {
   width: 100%; flex: 1; display: flex; flex-direction: column;
   overflow-y: auto; overflow-x: hidden;
   padding-right: 4px; /* 为滚动条留出空间 */
+  box-sizing: border-box; /* 💡 新增：强制内边距不撑开容器宽度 */
 }
 
 /* 移动滚动条样式到整个容器上 */
@@ -145,6 +146,8 @@ onUnmounted(() => {
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
   flex: none; /* 💡 核心修改：不再限制高度，让文字自由撑开 */
   overflow: visible;
+  box-sizing: border-box; /* 💡 新增：核心修复，防止 padding 导致宽度超过 100% 从而文字溢出 */
+  word-wrap: break-word; /* 💡 新增：确保过长的英文或数字也能自动换行 */
 }
 
 .story-box p { font-size: 16px; line-height: 2; margin-bottom: 16px; color: #fdf2f8; text-indent: 2em; }
