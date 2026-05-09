@@ -15,7 +15,6 @@
             <p>回到侧边框后，你会看到其他的一些问题，你可以尝试着去问ai里面的问题，如果你觉得问的角色没错，但是ai却没给你正确的答案</p>
             <p>要么是ai抽风了，要么就是你在瞎**问</p>
           </div>
-          <!-- 💡 兜底页面也支持去往终局 -->
           <button class="enter-btn shimmer-btn" @click="handleBack">
              {{ isAllUnlocked ? '开启终局之门 ✨' : '返回聊天' }}
           </button>
