@@ -1,15 +1,15 @@
 <template>
   <SecretLayout
-    title="⏳ 时空与灵魂的交界处"
+    title="⏳ 时空“穿越”"
     title-color="#7dd3fc"
     code="251027"
     @back="handleBack"
     v-slot="{ openImage }"
   >
     <!-- 隐藏的音频标签 -->
-    <audio ref="audio1" :src="audioZhanHuo" @ended="onEnded(1)"></audio>
-    <audio ref="audio2" :src="audioJieJu" @ended="onEnded(2)"></audio>
-    <audio ref="audio3" :src="audioMoon" @ended="onEnded(3)"></audio>
+    <audio ref="audio1" :src="audioZhanHuo" preload="metadata" @ended="onEnded(1)"></audio>
+    <audio ref="audio2" :src="audioJieJu" preload="metadata" @ended="onEnded(2)"></audio>
+    <audio ref="audio3" :src="audioMoon" preload="metadata" @ended="onEnded(3)"></audio>
 
     <div class="ethereal-room">
       <div class="memory-box moonlight-theme">
