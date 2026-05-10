@@ -1,15 +1,15 @@
 <template>
   <SecretLayout
     bg-image="https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E7%A5%9E%E4%B9%8B%E5%A4%A9%E5%B9%B3%E8%83%8C%E6%99%AF.png"
-    title="⚖️ 神之天平的隐秘画卷"
+    title="⚖️ 你找到了神之天平的隐秘画卷"
     title-color="#fbbf24"
     code="260410"
     @back="handleBack"
     v-slot="{ openImage }"
   >
     <!-- 隐藏的原生音频标签，通过 Vite 打包引入 -->
-    <audio ref="audio1" :src="startAudioSrc" @ended="onEnded(1)"></audio>
-    <audio ref="audio2" :src="endAudioSrc" @ended="onEnded(2)"></audio>
+    <audio ref="audio1" :src="startAudioSrc" preload="metadata" @ended="onEnded(1)"></audio>
+    <audio ref="audio2" :src="endAudioSrc" preload="metadata" @ended="onEnded(2)"></audio>
 
     <!-- 独立的滚动容器，防止手机端内容溢出 -->
     <div class="epic-room">

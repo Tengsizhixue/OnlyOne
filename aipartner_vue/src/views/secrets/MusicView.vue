@@ -1,13 +1,13 @@
 <template>
   <SecretLayout
     bg-image="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=2000&q=80"
-    title="音乐，陪伴我很多年"
+    title="🎶 你找到了音乐的力量"
     title-color="#f472b6"
     code="240802"
     @back="handleBack"
     v-slot="{ openImage }"
   >
-    <audio ref="audioRef" :src="currentAudioSrc" @ended="onAudioEnded"></audio>
+    <audio ref="audioRef" :src="currentAudioSrc" preload="metadata" @ended="onAudioEnded"></audio>
 
     <div class="music-room">
       <div class="story-box">
@@ -17,7 +17,7 @@
         <p>最近几年听的最多的是梁静茹的 <strong>会呼吸的痛</strong>，这歌是作者写给母亲的，感染力还是很强的，现在我已经听了快900遍，再听个两年应该就超过虚拟了。</p>
 
         <div class="extra-links">
-          <span class="links-label">附加内容（图片加载慢，因为我懒得找图床）：</span>
+          <span class="links-label">附加内容：</span>
           <span @click="openImage('https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E5%8E%BB%E5%B9%B4%E5%90%AC%E7%9A%84%E6%AD%8C%E5%8D%95.png')" class="img-link">
             <el-icon><Picture /></el-icon> 去年听的歌单
           </span>

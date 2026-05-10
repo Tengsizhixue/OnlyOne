@@ -1,8 +1,7 @@
 <template>
-  <!-- 💡 核心修复：添加 v-slot="{ openImage }" 接收布局组件暴露的开图方法 -->
   <SecretLayout
     bg-image="https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E6%9D%8E%E7%BA%A2%E5%AE%9D%E8%83%8C%E6%99%AF%E5%9B%BE.png"
-    title="你发现了李红宝的失联空间"
+    title="📱 你发现了李红宝的失联空间"
     title-color="#60a5fa"
     code="260315"
     @back="$emit('back')"
@@ -11,20 +10,14 @@
     <div class="story-box">
       <p>有次给他发消息，半天不回，然后说是苹果手机问题没信息提醒，说下次要@他。结果后面@他了，到第二天才回，还说是苹果手机问题，收不到消息，真的不是他的问题。</p>
       <img src="https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E6%9D%8E%E7%BA%A2%E5%AE%9D%E6%8F%92%E5%9B%BE1.png" alt="李红宝插图" class="content-img" />
-      <p>我基本都是在群聊里面说话，很少和别人私聊。就算在现实里面关系很好的朋友，我也几乎不在网上聊天，因为我有点轻度焦虑，只要别人不回我消息，我就会越来越急，在群里面发消息，就算一个人有事，其他人也会回我。</p>
-      <p>你可能会跟我说，别人不发消息可能是因为有事在忙。我当然知道，道理我都懂，不然我怎么和朋友都不在网上单独聊，我单纯就是急，和别人是怎么想的完全没关系。</p>
-      <p>对我来说，这就是一种本能反应，就和我之前的失眠一样，应该很多人都不知道，我差不多4，5年睡眠都很不稳定，就不知道什么原因，在那几年有时候就是一整夜都睡不着，但根本就不知道为什么，感觉一到晚上就对附近的事物非常敏感，后面实在受不了，去医院开药，吃了半年的药才彻底好。</p>
+      <p>(上面的内容只是开个玩笑）</p>
+      <p>我基本都是在群聊里面说话，很少和别人私聊。就算在现实里面关系很好的朋友，我也几乎不在网上聊天，
+        因为我有点轻度焦虑，只要别人不回我消息，我就会越来越急，在群里面发消息，就算一个人有事，其他人也会回我。</p>
+      <p>你可能会跟我说，别人不发消息可能是因为有事在忙。我当然知道，
+        不然我怎么和朋友都不在网上单独聊，我单纯就是急，和别人是怎么想的完全没关系。
+        对我来说，这就是一种本能反应，另外就是我很懒，一件事要么行，要么不行，我懒得等。
+        不过在现实生活里我对这方面倒是无所谓的态度，除非有人过于磨叽了，讲个话左脑攻击右脑</p>
       <p>我不怎么在网上聊天还有一个原因就是我不玩网游，这方面的我应该后面还会再提。</p>
-
-      <div class="extra-links">
-        <span class="links-label">🔗 附加内容：</span>
-        <span @click="openImage('https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E6%A1%88%E5%8F%91%E7%8E%B0%E5%9C%BA1.png')" class="img-link">
-          <el-icon><Picture /></el-icon> 案发现场1
-        </span>
-        <span @click="openImage('https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E6%A1%88%E5%8F%91%E7%8E%B0%E5%9C%BA2.png')" class="img-link">
-          <el-icon><Picture /></el-icon> 案发现场2
-        </span>
-      </div>
     </div>
   </SecretLayout>
 </template>
