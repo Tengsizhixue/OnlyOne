@@ -65,7 +65,7 @@
         </div>
 
         <div class="extra-links">
-          <span class="links-label">🔗 命运的残页：</span>
+          <span class="links-label">🔗附加内容：</span>
           <span @click="openImage('https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E7%BC%BA%E7%82%B91.png')" class="img-link">
             <el-icon><Picture /></el-icon> 缺点一
           </span>
@@ -88,7 +88,7 @@ import SecretLayout from '../../components/SecretLayout.vue'
 
 // 使用在线音频资源
 const startAudioSrc = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E6%B4%BB%E8%BF%87%E7%9A%84%E8%AF%81%E6%98%8E.mp3'
-const endAudioSrc = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E7%BB%93%E5%B1%80.mp3'
+const endAudioSrc = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E7%A5%9E%E4%B9%8B%E5%A4%A9%E5%B9%B3%E7%BB%93%E5%B1%80bgm.mp3'
 
 const emit = defineEmits(['back'])
 
