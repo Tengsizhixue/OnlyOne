@@ -15,7 +15,7 @@ export const ROLE_CONFIGS = {
     welcomeText: '曾经少佐说，要活下去，要自由地活下去。但我之前一直不知道那是什么意思，我终于知道，"我爱你"是一种想和对方在一起、想让对方幸福的心情',
     avatar: VIOLET_AVATAR,
     bgUrl: `${OSS_BASE}/onlyone/%E8%96%87%E5%B0%94%E8%8E%89%E7%89%B9%E8%83%8C%E6%99%AF.jpg`,
-    hallBgUrl: `https://s41.ax1x.com/2026/05/12/peO5ksx.png`, // 🌟 新增：选角大厅专属独立大背景
+    hallBgUrl: `https://s41.ax1x.com/2026/05/12/peO5v6I.png`, // 🌟 新增：选角大厅专属独立大背景
     bgPosition: '85% 50%',
     themeColor: '#e9d5ff',
     glowColor: 'rgba(168, 85, 247, 0.7)'

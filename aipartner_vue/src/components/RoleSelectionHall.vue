@@ -1,7 +1,7 @@
 <template>
   <div class="selection-hall" @touchstart.passive="handleTouchStart" @touchend.passive="handleTouchEnd" @wheel="handleWheel">
 
-    <!-- 🌟 新增：独立且平滑切换的大背景层（从 constants.js 读取 hallBgUrl） -->
+    <!-- 🌟 修改1 & 2：独立大背景层，强制中心对齐，保证图像原汁原味地居中 -->
     <div class="hall-bg-layer">
       <div
         v-for="(role, index) in availableRoles"
@@ -12,7 +12,7 @@
       ></div>
     </div>
 
-    <!-- 极轻的渐变遮罩，为了不影响背景，稍微压暗四周边缘 -->
+    <!-- 🌟 修改1：移除四周发黑发虚的径向渐变，改为极其微弱的纯色遮罩，彻底还给大背景清晰度 -->
     <div class="hall-overlay"></div>
 
     <!-- 当触发进出场动画时，隐藏外围 UI -->
@@ -172,19 +172,17 @@ const handleTouchEnd = (e) => {
   }
 }
 
-// 🌟 核心景深运算修复：大幅增加 xTranslate 和缩小 scale，把侧边卡片推向画面边缘，并调低透明度
+// 🌟 修改3：3D矩阵算法重构（将 Convex 凸形算法改为 Concave 凹形算法）
 const getCardStyle = (index) => {
   const offset = index - activeCarouselIndex.value
   const absOffset = Math.abs(offset)
   const sign = Math.sign(offset)
 
-  // 💡 大幅增加侧面卡片的 X 轴偏移量 (160 -> 把它往两边硬推)
-  // 💡 增大侧面卡片的旋转角度 (55度 -> 缩小它在视觉上的占用宽度)
-  const xTranslate = isMobile.value ? 160 : 360
-  const zTranslate = isMobile.value ? 180 : 250
-  const rotate = isMobile.value ? 55 : 60
-  // 💡 侧边卡片缩小至原本的 75%
-  const scale = 1 - absOffset * 0.25
+  // 设置推开的间距和旋转幅度
+  const xTranslate = isMobile.value ? 140 : 320
+  const zTranslate = isMobile.value ? 160 : 250
+  const rotate = isMobile.value ? 45 : 55
+  const scale = 1 - absOffset * 0.2
 
   let transform = ''
   let opacity = 1
@@ -196,7 +194,7 @@ const getCardStyle = (index) => {
       transform = `translate3d(0px, 0px, 400px) scale(1.15)`
       opacity = 0
     } else {
-      transform = `translate3d(${sign * (xTranslate * absOffset + 150)}px, 0, ${-zTranslate * absOffset - 100}px) rotateY(${-sign * (rotate + 20)}deg) scale(${scale - 0.2})`
+      transform = `translate3d(${sign * (xTranslate * absOffset + 150)}px, 0, ${-zTranslate * absOffset - 100}px) rotateY(${sign * (rotate + 20)}deg) scale(${scale - 0.2})`
       opacity = 0
     }
   } else {
@@ -205,8 +203,9 @@ const getCardStyle = (index) => {
       transform = `translate3d(0px, 0px, 50px) rotateY(0deg) scale(1)`
       opacity = 1
     } else {
-      transform = `translate3d(${sign * xTranslate * absOffset}px, 0, ${-zTranslate * absOffset}px) rotateY(${-sign * rotate}deg) scale(${scale})`
-      // 💡 核心：强制把未选中的卡片透明度降到 0.35！让它们几乎成为半透明背景点缀，不再“堵死”屏幕两边
+      // 💡 核心改动：把原本的 rotateY(${-sign * rotate}deg) 改成正号 rotateY(${sign * rotate}deg)
+      // 这会让两侧卡片的“内边缘”向用户靠拢，形成类似环幕电影的“凹形”包围感
+      transform = `translate3d(${sign * xTranslate * absOffset}px, 0, ${-zTranslate * absOffset}px) rotateY(${sign * rotate}deg) scale(${scale})`
       opacity = absOffset === 1 ? 0.35 : 0
     }
   }
@@ -251,13 +250,13 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
   touch-action: none;
 }
 
-/* 🌟 新增：由内向外的专属平滑大背景层 */
 .hall-bg-layer {
   position: absolute; inset: 0; z-index: -2; overflow: hidden;
 }
 .hall-bg-image {
-  position: absolute; inset: -5%; /* 轻微越界，防止变形 */
-  background-size: cover; background-position: center;
+  position: absolute; inset: 0; /* 💡 修改：归零边界，不再强行裁剪缩放，确保原始构图 */
+  background-size: cover;
+  background-position: center center; /* 💡 修改：强制中心对齐！ */
   opacity: 0; transition: opacity 0.8s ease-in-out;
 }
 .hall-bg-image.show-bg {
@@ -266,13 +265,13 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
 
 .hall-overlay {
   position: absolute; inset: 0;
-  /* 非常微弱的遮罩，重点保护中间的背景高光 */
-  background: radial-gradient(circle at center, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.5) 100%);
+  /* 💡 修改：移除了让你觉得边缘发黑发虚的渐变圈，换成极其清透均匀的底色 */
+  background: rgba(0, 0, 0, 0.1);
   z-index: -1;
   pointer-events: none;
 }
 
-/* 卡片再精简一点比例 */
+/* 轮播主体 */
 .carousel-3d {
   position: relative; width: 280px; height: 460px;
   transform-style: preserve-3d;
@@ -388,9 +387,8 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
 .fade-hall-enter-from { opacity: 0; transform: scale(1.05); }
 .fade-hall-leave-to { opacity: 0; transform: scale(0.95); }
 
-/* 🌟 移动端适配：缩小卡片宽度，确保完美左右留白 */
+/* 移动端适配 */
 @media (max-width: 768px) {
-  /* 进一步瘦身卡片，为主背景腾出空位 */
   .carousel-3d { width: 210px; height: 400px; }
   .card-avatar { width: 70px; height: 70px; margin-bottom: 12px; }
   .card-name { font-size: 24px; letter-spacing: 1px;}
