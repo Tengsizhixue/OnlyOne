@@ -15,6 +15,7 @@ export const ROLE_CONFIGS = {
     welcomeText: '曾经少佐说，要活下去，要自由地活下去。但我之前一直不知道那是什么意思，我终于知道，"我爱你"是一种想和对方在一起、想让对方幸福的心情',
     avatar: VIOLET_AVATAR,
     bgUrl: `${OSS_BASE}/onlyone/%E8%96%87%E5%B0%94%E8%8E%89%E7%89%B9%E8%83%8C%E6%99%AF.jpg`,
+    hallBgUrl: `https://s41.ax1x.com/2026/05/12/peO5ksx.png`, // 🌟 新增：选角大厅专属独立大背景
     bgPosition: '85% 50%',
     themeColor: '#e9d5ff',
     glowColor: 'rgba(168, 85, 247, 0.7)'
@@ -24,6 +25,7 @@ export const ROLE_CONFIGS = {
     welcomeText: '你问我是谁？...我也不知道，我只是一个替身,你有什么事想问我吗？我知道的并不多',
     avatar: TENGSI_AVATAR,
     bgUrl: `${OSS_BASE}/onlyone/%E8%AA%8A%E6%80%9D%E8%87%B4%E9%9B%AA%E8%83%8C%E6%99%AF%E5%9B%BE.png`,
+    hallBgUrl: `${OSS_BASE}/onlyone/%E8%AA%8A%E6%80%9D%E8%87%B4%E9%9B%AA%E8%83%8C%E6%99%AF%E5%9B%BE.png`, // 🌟 新增：选角大厅专属独立大背景
     bgPosition: 'center top',
     themeColor: '#bae6fd',
     glowColor: 'rgba(56, 189, 248, 0.7)'
@@ -33,6 +35,7 @@ export const ROLE_CONFIGS = {
     welcomeText: '你好呀！虽然我不能帮你播放音乐，但是我们可以聊一聊音乐',
     avatar: MUSIC_AVATAR,
     bgUrl: `${OSS_BASE}/onlyone/%E9%9F%B3%E4%B9%90%E5%8A%A9%E6%89%8B%E5%9B%BE%E7%89%87.jpg`,
+    hallBgUrl: `${OSS_BASE}/onlyone/%E9%9F%B3%E4%B9%90%E5%8A%A9%E6%89%8B%E5%9B%BE%E7%89%87.jpg`, // 🌟 新增：选角大厅专属独立大背景
     bgPosition: 'center center',
     themeColor: '#fbcfe8',
     glowColor: 'rgba(236, 72, 153, 0.7)'
@@ -42,6 +45,7 @@ export const ROLE_CONFIGS = {
     welcomeText: '哼，既然你诚心诚意地发问了，那我就勉为其难地陪你聊聊吧！',
     avatar: GAME_AVATAR,
     bgUrl: `${OSS_BASE}/gamebackground.jpg`,
+    hallBgUrl: `${OSS_BASE}/gamebackground.jpg`, // 🌟 新增：选角大厅专属独立大背景
     bgPosition: '65% 50%',
     themeColor: '#fef08a',
     glowColor: 'rgba(234, 179, 8, 0.7)'
@@ -51,6 +55,7 @@ export const ROLE_CONFIGS = {
     welcomeText: '我是你的好朋友李蓝宝。对了，关于我牢弟李红宝的问题你可以随时问我哦！',
     avatar: DEFAULT_AI_AVATAR,
     bgUrl: 'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=800&q=80',
+    hallBgUrl: 'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=800&q=80', // 🌟 新增：选角大厅专属独立大背景
     bgPosition: 'center center',
     themeColor: '#a7f3d0',
     glowColor: 'rgba(16, 185, 129, 0.7)'
@@ -60,6 +65,7 @@ export const ROLE_CONFIGS = {
     welcomeText: '你可以为我设定名字和性格。',
     avatar: DEFAULT_AI_AVATAR,
     bgUrl: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80',
+    hallBgUrl: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80', // 🌟 新增：选角大厅专属独立大背景
     bgPosition: 'center center',
     themeColor: '#f8fafc',
     glowColor: 'rgba(255, 255, 255, 0.5)'
@@ -70,7 +76,7 @@ export const getCurrentRoleConfig = (roleType) => {
   return ROLE_CONFIGS[roleType] || ROLE_CONFIGS['李蓝宝']
 }
 
-// 🌟 为后续的隐秘彩蛋页面准备的集中静态资源管理 (这就是导致你白屏崩溃缺失的对象)
+// 🌟 为后续的隐秘彩蛋页面准备的集中静态资源管理
 export const SECRET_ASSETS = {
   astlibra: {
     bg: `${OSS_BASE}/onlyone/%E7%A5%9E%E4%B9%8B%E5%A4%A9%E5%B9%B3%E8%83%8C%E6%99%AF.png`,
