@@ -27,7 +27,7 @@ export const ROLE_CONFIGS = {
     avatar: TENGSI_AVATAR,
     bgUrl: `${OSS_BASE}/onlyone/%E8%AA%8A%E6%80%9D%E8%87%B4%E9%9B%AA%E8%83%8C%E6%99%AF%E5%9B%BE.png`,
     bgPosition: 'center top', // 卡片内部背景位置
-    hallBgUrl: ``, // 🌟 新增：选角大厅专属独立大背景
+    hallBgUrl: `https://s41.ax1x.com/2026/05/12/peOHwqI.png`, // 🌟 新增：选角大厅专属独立大背景
     hallBgPosition: 'center center', // 🌟 新增：外层大背景位置（可单独调整）
     themeColor: '#bae6fd',
     glowColor: 'rgba(56, 189, 248, 0.7)'
