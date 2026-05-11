@@ -16,8 +16,10 @@ export const ROLE_CONFIGS = {
     avatar: VIOLET_AVATAR,
     bgUrl: `${OSS_BASE}/onlyone/%E8%96%87%E5%B0%94%E8%8E%89%E7%89%B9%E8%83%8C%E6%99%AF.jpg`,
     bgPosition: '85% 50%', // 卡片内部背景位置
-    hallBgUrl: `https://s41.ax1x.com/2026/05/12/peO5v6I.png`, // 🌟 新增：选角大厅专属独立大背景
-    hallBgPosition: '52.4% 50%', // 🌟 新增：外层大背景位置（可单独调整）
+    hallBgUrl: `${OSS_BASE}/onlyone/%E8%96%87%E5%B0%94%E8%8E%89%E7%89%B9%E7%94%B5%E8%84%91%E6%89%8B%E6%9C%BA%E8%83%8C%E6%99%AF.png`, // 电脑端专属独立大背景
+    hallBgPosition: '60% 50%',
+    hallBgUrlMobile: `${OSS_BASE}/onlyone/%E8%96%87%E5%B0%94%E8%8E%89%E7%89%B9%E7%94%B5%E8%84%91%E6%89%8B%E6%9C%BA%E8%83%8C%E6%99%AF.png`, // 📱手机端专属竖屏大背景 (在此替换链接)
+    hallBgPositionMobile: '52.4% 50%', // 📱手机端背景位置
     themeColor: '#e9d5ff',
     glowColor: 'rgba(168, 85, 247, 0.7)'
   },
@@ -26,9 +28,11 @@ export const ROLE_CONFIGS = {
     welcomeText: '你问我是谁？...我也不知道，我只是一个替身,你有什么事想问我吗？我知道的并不多',
     avatar: TENGSI_AVATAR,
     bgUrl: `${OSS_BASE}/onlyone/%E8%AA%8A%E6%80%9D%E8%87%B4%E9%9B%AA%E8%83%8C%E6%99%AF%E5%9B%BE.png`,
-    bgPosition: 'center top', // 卡片内部背景位置
-    hallBgUrl: `https://s41.ax1x.com/2026/05/12/peOHwqI.png`, // 🌟 新增：选角大厅专属独立大背景
-    hallBgPosition: 'center center', // 🌟 新增：外层大背景位置（可单独调整）
+    bgPosition: 'center top',
+    hallBgUrl: `${OSS_BASE}/onlyone/%E8%AA%8A%E6%80%9D%E8%87%B4%E9%9B%AA%E7%94%B5%E8%84%91%E7%AB%AF%E8%83%8C%E6%99%AF.png`,
+    hallBgPosition: 'center center',
+    hallBgUrlMobile: `${OSS_BASE}/onlyone/%E8%AA%8A%E6%80%9D%E8%87%B4%E9%9B%AA%E6%89%8B%E6%9C%BA%E7%AB%AF%E8%83%8C%E6%99%AF.jpg`, // 📱手机端专属竖屏大背景 (在此替换链接)
+    hallBgPositionMobile: 'center center', // 📱手机端背景位置
     themeColor: '#bae6fd',
     glowColor: 'rgba(56, 189, 248, 0.7)'
   },
@@ -37,9 +41,11 @@ export const ROLE_CONFIGS = {
     welcomeText: '你好呀！虽然我不能帮你播放音乐，但是我们可以聊一聊音乐',
     avatar: MUSIC_AVATAR,
     bgUrl: `${OSS_BASE}/onlyone/%E9%9F%B3%E4%B9%90%E5%8A%A9%E6%89%8B%E5%9B%BE%E7%89%87.jpg`,
-    bgPosition: 'center center', // 卡片内部背景位置
-    hallBgUrl: `${OSS_BASE}/onlyone/%E9%9F%B3%E4%B9%90%E5%8A%A9%E6%89%8B%E5%9B%BE%E7%89%87.jpg`, // 🌟 新增：选角大厅专属独立大背景
-    hallBgPosition: 'center center', // 🌟 新增：外层大背景位置（可单独调整）
+    bgPosition: 'center center',
+    hallBgUrl: `${OSS_BASE}/onlyone/%E9%9F%B3%E4%B9%90%E5%8A%A9%E6%89%8B%E5%9B%BE%E7%89%87.jpg`,
+    hallBgPosition: 'center center',
+    hallBgUrlMobile: `${OSS_BASE}`, // 📱手机端专属竖屏大背景 (在此替换链接)
+    hallBgPositionMobile: 'center center', // 📱手机端背景位置
     themeColor: '#fbcfe8',
     glowColor: 'rgba(236, 72, 153, 0.7)'
   },
@@ -48,9 +54,11 @@ export const ROLE_CONFIGS = {
     welcomeText: '哼，既然你诚心诚意地发问了，那我就勉为其难地陪你聊聊吧！',
     avatar: GAME_AVATAR,
     bgUrl: `${OSS_BASE}/gamebackground.jpg`,
-    bgPosition: '65% 50%', // 卡片内部背景位置
-    hallBgUrl: `${OSS_BASE}/gamebackground.jpg`, // 🌟 新增：选角大厅专属独立大背景
-    hallBgPosition: 'center center', // 🌟 新增：外层大背景位置（可单独调整）
+    bgPosition: '65% 50%',
+    hallBgUrl: `${OSS_BASE}/onlyone/%E9%AA%91%E9%A9%AC%E4%B8%8E%E7%A0%8D%E6%9D%80%E5%8A%A0%E8%BD%BD.jpg`,
+    hallBgPosition: 'center center',
+    hallBgUrlMobile: `${OSS_BASE}/onlyone/%E6%B8%B8%E6%88%8F%E8%A7%92%E8%89%B2%E6%89%8B%E6%9C%BA%E7%AB%AF%E8%83%8C%E6%99%AF.png`, // 📱手机端专属竖屏大背景 (在此替换链接)
+    hallBgPositionMobile: 'center center', // 📱手机端背景位置
     themeColor: '#fef08a',
     glowColor: 'rgba(234, 179, 8, 0.7)'
   },
@@ -59,9 +67,11 @@ export const ROLE_CONFIGS = {
     welcomeText: '我是你的好朋友李蓝宝。对了，关于我牢弟李红宝的问题你可以随时问我哦！',
     avatar: DEFAULT_AI_AVATAR,
     bgUrl: 'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=800&q=80',
-    bgPosition: 'center center', // 卡片内部背景位置
-    hallBgUrl: 'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=800&q=80', // 🌟 新增：选角大厅专属独立大背景
-    hallBgPosition: 'center center', // 🌟 新增：外层大背景位置（可单独调整）
+    bgPosition: 'center center',
+    hallBgUrl: 'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=800&q=80',
+    hallBgPosition: 'center center',
+    hallBgUrlMobile: `${OSS_BASE}/onlyone/%E6%9D%8E%E5%85%B0%E5%AE%9D%E6%89%8B%E6%9C%BA%E8%83%8C%E6%99%AF.jpg`, // 📱手机端专属竖屏大背景 (在此替换链接)
+    hallBgPositionMobile: 'center center', // 📱手机端背景位置
     themeColor: '#a7f3d0',
     glowColor: 'rgba(16, 185, 129, 0.7)'
   },
@@ -70,9 +80,11 @@ export const ROLE_CONFIGS = {
     welcomeText: '你可以为我设定名字和性格。',
     avatar: DEFAULT_AI_AVATAR,
     bgUrl: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80',
-    bgPosition: 'center center', // 卡片内部背景位置
-    hallBgUrl: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80', // 🌟 新增：选角大厅专属独立大背景
-    hallBgPosition: 'center center', // 🌟 新增：外层大背景位置（可单独调整）
+    bgPosition: 'center center',
+    hallBgUrl: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80',
+    hallBgPosition: 'center center',
+    hallBgUrlMobile: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80', // 📱手机端专属竖屏大背景 (在此替换链接)
+    hallBgPositionMobile: 'center center', // 📱手机端背景位置
     themeColor: '#f8fafc',
     glowColor: 'rgba(255, 255, 255, 0.5)'
   }
