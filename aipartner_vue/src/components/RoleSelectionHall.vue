@@ -296,16 +296,12 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
   z-index: 2;
 }
 
-.card-glow-layer {
+.card-glow-border {
   position: absolute; inset: 0;
   border-radius: 16px;
   pointer-events: none;
   z-index: 5;
-  transition: opacity 0.6s ease;
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  box-shadow:
-    0 0 20px var(--glow-color),
-    inset 0 0 15px var(--glow-color);
+  transition: all 0.4s ease;
 }
 
 .card-content {
