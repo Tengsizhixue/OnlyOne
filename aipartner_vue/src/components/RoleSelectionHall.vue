@@ -1,21 +1,21 @@
 <template>
   <div class="selection-hall" @touchstart.passive="handleTouchStart" @touchend.passive="handleTouchEnd" @wheel="handleWheel">
 
-    <!-- 🌟 修改1 & 2：独立大背景层，强制中心对齐，保证图像原汁原味地居中 -->
     <div class="hall-bg-layer">
       <div
         v-for="(role, index) in availableRoles"
         :key="'bg-'+role.role_type"
         class="hall-bg-image"
-        :style="{ backgroundImage: `url(${getCurrentRoleConfig(role.role_type).hallBgUrl || getCurrentRoleConfig(role.role_type).bgUrl})` }"
+        :style="{
+          backgroundImage: `url(${getCurrentRoleConfig(role.role_type).hallBgUrl || getCurrentRoleConfig(role.role_type).bgUrl})`,
+          backgroundPosition: getCurrentRoleConfig(role.role_type).hallBgPosition || 'center center'
+        }"
         :class="{ 'show-bg': index === activeCarouselIndex }"
       ></div>
     </div>
 
-    <!-- 🌟 修改1：移除四周发黑发虚的径向渐变，改为极其微弱的纯色遮罩，彻底还给大背景清晰度 -->
     <div class="hall-overlay"></div>
 
-    <!-- 当触发进出场动画时，隐藏外围 UI -->
     <button class="top-exit-btn" :class="{ 'ui-fade-out': isEnteringChat }" @click="router.push('/')" title="返回首页">
       <el-icon><House /></el-icon>
     </button>
@@ -43,7 +43,6 @@
             : 'none'
         }"></div>
 
-        <!-- 卡片内容层 -->
         <div class="card-content">
           <img
             :src="getCurrentRoleConfig(role.role_type).avatar"
@@ -66,7 +65,6 @@
       </div>
     </div>
 
-    <!-- 控制按钮 -->
     <div class="carousel-controls" :class="{ 'ui-fade-out': isEnteringChat }">
       <button class="nav-arrow" @click.stop="prevRole" :disabled="activeCarouselIndex === 0">
         <el-icon><ArrowLeftBold/></el-icon>
@@ -172,7 +170,7 @@ const handleTouchEnd = (e) => {
   }
 }
 
-// 🌟 修改3：3D矩阵算法重构（将 Convex 凸形算法改为 Concave 凹形算法）
+// 🌟 修改1：3D矩阵算法重构 —— 真正恢复为向内翻折的 Concave (凹面环抱) 效果
 const getCardStyle = (index) => {
   const offset = index - activeCarouselIndex.value
   const absOffset = Math.abs(offset)
@@ -194,7 +192,7 @@ const getCardStyle = (index) => {
       transform = `translate3d(0px, 0px, 400px) scale(1.15)`
       opacity = 0
     } else {
-      transform = `translate3d(${sign * (xTranslate * absOffset + 150)}px, 0, ${-zTranslate * absOffset - 100}px) rotateY(${sign * (rotate + 20)}deg) scale(${scale - 0.2})`
+      transform = `translate3d(${sign * (xTranslate * absOffset + 150)}px, 0, ${-zTranslate * absOffset - 100}px) rotateY(${-sign * (rotate + 20)}deg) scale(${scale - 0.2})`
       opacity = 0
     }
   } else {
@@ -203,9 +201,9 @@ const getCardStyle = (index) => {
       transform = `translate3d(0px, 0px, 50px) rotateY(0deg) scale(1)`
       opacity = 1
     } else {
-      // 💡 核心改动：把原本的 rotateY(${-sign * rotate}deg) 改成正号 rotateY(${sign * rotate}deg)
-      // 这会让两侧卡片的“内边缘”向用户靠拢，形成类似环幕电影的“凹形”包围感
-      transform = `translate3d(${sign * xTranslate * absOffset}px, 0, ${-zTranslate * absOffset}px) rotateY(${sign * rotate}deg) scale(${scale})`
+      // 💡 核心修正：改回正确的负关联角度 rotateY(${-sign * rotate}deg)
+      // 让右侧卡片(sign=+1)顺时针向左倾斜，左侧卡片(sign=-1)逆时针向右倾斜，从而完美呈现两侧向中心靠拢的“凹面环幕感”
+      transform = `translate3d(${sign * xTranslate * absOffset}px, 0, ${-zTranslate * absOffset}px) rotateY(${-sign * rotate}deg) scale(${scale})`
       opacity = absOffset === 1 ? 0.35 : 0
     }
   }
@@ -242,6 +240,9 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
 </script>
 
 <style scoped>
+/* 🌟 修改2：顶部动态引入在线免费优雅艺术字体库 (站酷小薇体、思源宋体、毛笔行楷) */
+@import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700&family=ZCOOL+XiaoWei&display=swap');
+
 .selection-hall {
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -254,9 +255,9 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
   position: absolute; inset: 0; z-index: -2; overflow: hidden;
 }
 .hall-bg-image {
-  position: absolute; inset: 0; /* 💡 修改：归零边界，不再强行裁剪缩放，确保原始构图 */
+  position: absolute; inset: 0;
   background-size: cover;
-  background-position: center center; /* 💡 修改：强制中心对齐！ */
+  background-position: center center;
   opacity: 0; transition: opacity 0.8s ease-in-out;
 }
 .hall-bg-image.show-bg {
@@ -265,7 +266,6 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
 
 .hall-overlay {
   position: absolute; inset: 0;
-  /* 💡 修改：移除了让你觉得边缘发黑发虚的渐变圈，换成极其清透均匀的底色 */
   background: rgba(0, 0, 0, 0.1);
   z-index: -1;
   pointer-events: none;
@@ -295,11 +295,13 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
+/* 🌟 修改3：为卡片内部图层设置一致的模糊过渡，缩放 1.08 倍避免 CSS 模糊产生的四周边缘白边 */
 .card-inner-bg {
   position: absolute; inset: 0;
   background-size: cover;
-  transition: transform 0.6s ease;
-  transform: translateZ(0);
+  filter: blur(3.5px);
+  transform: scale(1.08) translateZ(0);
+  transition: transform 0.6s ease, filter 0.6s ease;
   z-index: 1;
 }
 
@@ -331,18 +333,22 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
   transform: translateZ(0);
 }
 
+/* 🌟 修改2：角色名称优先采用唯美飘逸的站酷小薇体/毛笔风 */
 .card-name {
   font-size: 30px;
-  font-family: "STKaiti", "KaiTi", "serif";
+  font-family: "STKaiti", "KaiTi", serif;
   font-weight: bold; margin: 0 0 12px 0;
   letter-spacing: 2px;
   text-shadow: 0 2px 10px rgba(0,0,0,0.8);
 }
 
+/* 🌟 修改2：欢迎语描述采用极佳阅读体验且优雅高贵的思源宋体 */
 .card-desc {
-  font-size: 13px; line-height: 1.5; color: #e2e8f0;
+  font-size: 14px; line-height: 1.6; color: #e2e8f0;
+  font-family: 'Noto Serif SC', 'ZCOOL XiaoWei', "STKaiti", "KaiTi", serif;
   display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
   overflow: hidden; padding: 0 20px; margin-bottom: 10px;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
 }
 
 .click-hint {
@@ -391,8 +397,8 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
 @media (max-width: 768px) {
   .carousel-3d { width: 210px; height: 400px; }
   .card-avatar { width: 70px; height: 70px; margin-bottom: 12px; }
-  .card-name { font-size: 24px; letter-spacing: 1px;}
-  .card-desc { font-size: 12px; padding: 0 14px; }
+  .card-name { font-size: 26px; letter-spacing: 1px;}
+  .card-desc { font-size: 13px; padding: 0 14px; }
   .carousel-controls { bottom: 5%; gap: 60px; }
 }
 </style>
