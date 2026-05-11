@@ -17,11 +17,8 @@
         <h1 class="highlight-text" :style="{ color: titleColor }">{{ title }}</h1>
         <p class="subtitle">恭喜你找到：{{ code }}</p>
 
-        <slot :openImage="openImage"></slot>
-
-        <button class="enter-btn shimmer-btn" @click="$emit('back')">
-          {{ isAllUnlocked ? '开启终局之门 ✨' : '返回聊天' }}
-        </button>
+        <!-- 将控制逻辑下放到插槽中，以便在每个文本的最末尾使用按钮 -->
+        <slot :openImage="openImage" :isAllUnlocked="isAllUnlocked" :back="() => $emit('back')"></slot>
       </div>
     </div>
 
@@ -72,7 +69,6 @@ const closeImage = () => { previewImage.value = '' }
 
 .highlight-text { margin-bottom: 10px; font-size: 32px; font-weight: bold; flex-shrink: 0; }
 .subtitle { color: #94a3b8; font-family: monospace; margin-bottom: 20px; letter-spacing: 2px; flex-shrink: 0; }
-.enter-btn { flex-shrink: 0; margin-top: 10px; margin-bottom: 10px; } /* 💡 给按钮下方留一点安全距离 */
 
 .image-preview-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 9999; display: flex; justify-content: center; align-items: center; cursor: zoom-out; }
 .preview-img { max-width: 90%; max-height: 90%; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
@@ -99,7 +95,6 @@ const closeImage = () => { previewImage.value = '' }
   }
   .highlight-text { font-size: 24px; margin-bottom: 6px; }
   .subtitle { font-size: 12px; margin-bottom: 16px; }
-  .enter-btn { padding: 12px 30px; font-size: 15px; margin-bottom: env(safe-area-inset-bottom, 15px); } /* 💡 适配 iOS 底边安全区 */
 
   .quest-floating-widget {
     top: 10px; left: 10px; right: 10px; width: auto; padding: 12px 16px;

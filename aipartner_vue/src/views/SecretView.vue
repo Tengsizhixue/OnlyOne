@@ -14,10 +14,13 @@
             <p>这个数字是我网址的二级域名的。顶级域名.xyz单纯是因为便宜，1年就1刀乐。</p>
             <p>回到侧边框后，你会看到其他的一些问题，你可以尝试着去问ai里面的问题，如果你觉得问的角色没错，但是ai却没给你正确的答案</p>
             <p>要么是ai抽风了，要么就是你在瞎**问</p>
+
+            <div class="bottom-action">
+              <button class="shimmer-btn" @click="handleBack">
+                {{ isAllUnlocked ? '开启终局之门 ✨' : '返回聊天' }}
+              </button>
+            </div>
           </div>
-          <button class="enter-btn shimmer-btn" @click="handleBack">
-             {{ isAllUnlocked ? '开启终局之门 ✨' : '返回聊天' }}
-          </button>
         </div>
       </div>
     </div>
@@ -27,7 +30,7 @@
 <script setup>
 import { computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { unlockCode, isAllUnlocked } from '../store/questState.js'
+import { unlockCode, isAllUnlocked, resetQuestProgress } from '../store/questState.js'
 
 import LiHongBaoView from './secrets/LiHongBaoView.vue'
 import GameMemoryView from './secrets/GameMemoryView.vue'
@@ -57,6 +60,14 @@ const handleBack = () => {
     router.push('/final')
   } else {
     router.push('/chat')
+  }
+}
+
+const handleReset = () => {
+  if (confirm('确定要重置所有谜题进度吗？')) {
+    resetQuestProgress()
+    alert('✅ 已重置！页面将刷新...')
+    window.location.reload()
   }
 }
 
@@ -94,10 +105,10 @@ const currentComponent = computed(() => {
 .content-box {
   background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 40px; border-radius: 16px; margin-bottom: 20px; width: 100%;
-  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
   font-size: 18px; overflow-y: auto;
 }
-.enter-btn { flex-shrink: 0; margin-bottom: 10px; }
+.bottom-action { margin-top: 30px; display: flex; justify-content: center; }
 
 @media (max-width: 768px) {
   .secret-page {
@@ -107,6 +118,6 @@ const currentComponent = computed(() => {
   }
   .content-box { padding: 18px; font-size: 14px; margin-bottom: 16px; border-radius: 12px; line-height: 1.8; }
   .highlight-text { font-size: 24px; margin-bottom: 6px; }
-  .enter-btn { margin-bottom: env(safe-area-inset-bottom, 15px); }
+  .bottom-action { margin-top: 20px; }
 }
 </style>

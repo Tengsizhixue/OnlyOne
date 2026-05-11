@@ -5,7 +5,7 @@
     title-color="#60a5fa"
     code="260315"
     @back="$emit('back')"
-    v-slot="{ openImage }"
+    v-slot="{ openImage, isAllUnlocked, back }"
   >
     <div class="story-box">
       <p>有次给他发消息，半天不回，然后说是苹果手机问题没信息提醒，说下次要@他。结果后面@他了，到第二天才回，还说是苹果手机问题，收不到消息，真的不是他的问题。</p>
@@ -18,6 +18,12 @@
         对我来说，这就是一种本能反应，另外就是我很懒，一件事要么行，要么不行，我懒得等。
         不过在现实生活里我对这方面倒是无所谓的态度，除非有人过于磨叽了，讲个话左脑攻击右脑</p>
       <p>我不怎么在网上聊天还有一个原因就是我不玩网游，这方面的我应该后面还会再提。</p>
+
+      <div class="bottom-action">
+        <button class="shimmer-btn" @click="back">
+          {{ isAllUnlocked ? '开启终局之门 ✨' : '返回聊天' }}
+        </button>
+      </div>
     </div>
   </SecretLayout>
 </template>
@@ -67,6 +73,8 @@ defineEmits(['back'])
   background: rgba(96, 165, 250, 0.25); border-color: rgba(96, 165, 250, 0.6);
   color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(96, 165, 250, 0.2);
 }
+
+.bottom-action { margin-top: 40px; display: flex; justify-content: center; }
 
 @media (max-width: 768px) {
   .story-box { padding: 18px; font-size: 14px; margin-bottom: 20px; border-radius: 12px; line-height: 1.8; }

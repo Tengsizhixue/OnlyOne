@@ -5,7 +5,7 @@
     title-color="#f472b6"
     code="240802"
     @back="handleBack"
-    v-slot="{ openImage }"
+    v-slot="{ openImage, isAllUnlocked, back }"
   >
     <audio ref="audioRef" :src="currentAudioSrc" preload="metadata" @ended="onAudioEnded"></audio>
 
@@ -53,6 +53,13 @@
             </el-icon>
           </div>
         </div>
+      </div>
+
+      <!-- 🌟 将退出和通关按钮置于末尾 -->
+      <div class="bottom-action">
+        <button class="shimmer-btn" @click="back">
+          {{ isAllUnlocked ? '开启终局之门 ✨' : '返回聊天' }}
+        </button>
       </div>
     </div>
   </SecretLayout>
@@ -158,6 +165,8 @@ onUnmounted(() => {
 .playing-bars span:nth-child(2) { animation-delay: 0.3s; }
 .playing-bars span:nth-child(3) { animation-delay: 0.6s; }
 @keyframes bounce { 0% { height: 3px; } 100% { height: 12px; } }
+
+.bottom-action { margin-top: 20px; display: flex; justify-content: center; margin-bottom: 40px; }
 
 @media (max-width: 768px) {
   .story-box { padding: 16px 20px; font-size: 15px; margin-bottom: 20px; border-radius: 12px; }

@@ -5,7 +5,7 @@
     title-color="#fbbf24"
     code="260410"
     @back="handleBack"
-    v-slot="{ openImage }"
+    v-slot="{ openImage, isAllUnlocked, back }"
   >
     <audio ref="audio1" :src="audioStart" preload="metadata" @ended="onEnded(1)"></audio>
     <audio ref="audio2" :src="audioEnd" preload="metadata" @ended="onEnded(2)"></audio>
@@ -71,6 +71,12 @@
            <span @click="openImage(bg)" class="img-link">
             <el-icon><Picture /></el-icon> 此网页背景图片
           </span>
+        </div>
+
+        <div class="bottom-action">
+          <button class="shimmer-btn" @click="back">
+            {{ isAllUnlocked ? '开启终局之门 ✨' : '返回聊天' }}
+          </button>
         </div>
       </div>
     </div>
@@ -167,6 +173,8 @@ onUnmounted(() => {
 .links-label { font-size: 14px; color: #fde68a; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
 .img-link { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.4); color: #fef3c7; text-decoration: none; border-radius: 20px; font-size: 13px; transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(4px); }
 .img-link:hover { background: rgba(251, 191, 36, 0.3); border-color: #fbbf24; color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3); }
+
+.bottom-action { margin-top: 40px; display: flex; justify-content: center; }
 
 @media (max-width: 768px) {
   .story-box { padding: 18px; font-size: 15px; margin-bottom: 20px; border-radius: 12px; }
