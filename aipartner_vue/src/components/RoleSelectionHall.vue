@@ -1,5 +1,5 @@
 <template>
-  <div class="selection-hall" @touchstart.passive="handleTouchStart" @touchend.passive="handleTouchEnd">
+  <div class="selection-hall" @touchstart.passive="handleTouchStart" @touchend.passive="handleTouchEnd" @wheel="handleWheel">
 
     <!-- 背景层 -->
     <div class="hall-bg-container">
@@ -8,7 +8,7 @@
     <div class="hall-overlay"></div>
 
     <!-- 🌟 当触发进出场动画时，隐藏外围 UI -->
-    <button class="top-exit-btn" :class="{ 'ui-fade-out': isEnteringChat || isAppearing }" @click="router.push('/')" title="返回首页">
+    <button class="top-exit-btn" :class="{ 'ui-fade-out': isEnteringChat }" @click="router.push('/')" title="返回首页">
       <el-icon><House /></el-icon>
     </button>
 
@@ -51,7 +51,7 @@
 
           <p class="card-desc">{{ getCurrentRoleConfig(role.role_type).welcomeText }}</p>
 
-          <div class="click-hint" :class="{ visible: index === activeCarouselIndex && !isEnteringChat && !isAppearing }">
+          <div class="click-hint" :class="{ visible: index === activeCarouselIndex && !isEnteringChat }">
             <span class="shimmer-text">点击进入对话</span>
           </div>
         </div>
@@ -59,7 +59,7 @@
     </div>
 
     <!-- 控制按钮 -->
-    <div class="carousel-controls" :class="{ 'ui-fade-out': isEnteringChat || isAppearing }">
+    <div class="carousel-controls" :class="{ 'ui-fade-out': isEnteringChat }">
       <button class="nav-arrow" @click.stop="prevRole" :disabled="activeCarouselIndex === 0">
         <el-icon><ArrowLeftBold/></el-icon>
       </button>
@@ -69,7 +69,7 @@
     </div>
 
     <transition name="fade-hall">
-      <div class="custom-inputs-center" v-if="roleConfig.role_type === '自定义' && !isEnteringChat && !isAppearing">
+      <div class="custom-inputs-center" v-if="roleConfig.role_type === '自定义' && !isEnteringChat">
         <el-input v-model="roleConfig.name" placeholder="设定伙伴的称呼" class="glass-input custom-name-input" />
         <el-input v-model="roleConfig.nature" type="textarea" placeholder="设定TA的性格与世界观..." class="glass-textarea" />
       </div>
@@ -97,26 +97,21 @@ const isMobile = ref(false)
 
 // 🌟 沉浸式动画状态变量
 const isEnteringChat = ref(false) // 正在冲入聊天室
-const isAppearing = ref(true)     // 正在从聊天室返回大厅（刚加载）
 
 let touchStartX = 0
-let isAnimating = false
+let lastWheelTime = 0 // 🌟 新增滚轮节流控制
 
 const nextRole = () => {
-  if (isEnteringChat.value || isAppearing.value) return // 动画中禁止滑动
-  if (activeCarouselIndex.value < props.availableRoles.length - 1 && !isAnimating) {
-    isAnimating = true
+  if (isEnteringChat.value) return
+  if (activeCarouselIndex.value < props.availableRoles.length - 1) {
     activeCarouselIndex.value++
-    setTimeout(() => { isAnimating = false }, 400)
   }
 }
 
 const prevRole = () => {
-  if (isEnteringChat.value || isAppearing.value) return // 动画中禁止滑动
-  if (activeCarouselIndex.value > 0 && !isAnimating) {
-    isAnimating = true
+  if (isEnteringChat.value) return
+  if (activeCarouselIndex.value > 0) {
     activeCarouselIndex.value--
-    setTimeout(() => { isAnimating = false }, 400)
   }
 }
 
@@ -130,25 +125,40 @@ const handleCardClick = (index) => {
     // 🌟 触发冲向屏幕的景深动画
     isEnteringChat.value = true
 
-    // 延迟 450ms 让卡片放大到填满视线时，再触发页面路由跳转，实现无缝衔接！
+    // 💡 优化：缩短延迟！让卡片扑面的过程和聊天室进入的跨端动画同时交织，实现绝对无缝
     setTimeout(() => {
       emit('enter-chat')
-      // 预留重置时间，以备用户点击“新建对话”再次返回大厅时恢复原状
+      // 预留重置时间，以备用户在聊天室点击返回大厅时恢复原状
       setTimeout(() => { isEnteringChat.value = false }, 100)
-    }, 450)
+    }, 200)
 
   } else {
     activeCarouselIndex.value = index
   }
 }
 
+// 🌟 新增：鼠标滚轮切换功能
+const handleWheel = (e) => {
+  if (isEnteringChat.value) return
+  const now = Date.now()
+  if (now - lastWheelTime < 250) return // 🌟 控制切卡频率，防止滚轮一次滚动触发多张
+
+  if (e.deltaY > 30) {
+    nextRole()
+    lastWheelTime = now
+  } else if (e.deltaY < -30) {
+    prevRole()
+    lastWheelTime = now
+  }
+}
+
 const handleTouchStart = (e) => {
-  if (isEnteringChat.value || isAppearing.value) return
+  if (isEnteringChat.value) return
   touchStartX = e.touches[0].clientX
 }
 
 const handleTouchEnd = (e) => {
-  if (isEnteringChat.value || isAppearing.value) return
+  if (isEnteringChat.value) return
   const touchEndX = e.changedTouches[0].clientX
   const delta = touchStartX - touchEndX
   if (Math.abs(delta) > 30) {
@@ -172,7 +182,7 @@ const getCardStyle = (index) => {
   let opacity = 1
   let zIndex = 100 - absOffset
 
-  if (isEnteringChat.value || isAppearing.value) {
+  if (isEnteringChat.value) {
     // 🌟 电影级过场状态：
     // 当前激活卡片冲向屏幕 (Z轴大幅拉进)，其余卡片向两端飞散并后退
     if (offset === 0) {
@@ -196,7 +206,7 @@ const getCardStyle = (index) => {
     transform,
     zIndex,
     opacity,
-    pointerEvents: offset === 0 && !isEnteringChat.value && !isAppearing.value ? 'auto' : 'none'
+    pointerEvents: offset === 0 && !isEnteringChat.value ? 'auto' : 'none'
   }
 }
 
@@ -218,12 +228,6 @@ const checkMobile = () => { isMobile.value = window.innerWidth <= 768 }
 onMounted(() => {
   checkMobile()
   window.addEventListener('resize', checkMobile)
-
-  // 🌟 初次挂载时（或从聊天返回大厅时），稍微延迟 50ms 将 Appearing 状态解除
-  // 让卡片从屏幕外飞回到 Coverflow 位置，形成丝滑的回退动画
-  setTimeout(() => {
-    isAppearing.value = false
-  }, 50)
 })
 
 onUnmounted(() => window.removeEventListener('resize', checkMobile))
@@ -235,6 +239,7 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   perspective: 1000px; z-index: 50; user-select: none; overflow: hidden;
   background-color: #050505;
+  touch-action: none; /* 🌟 核心修复：彻底禁用移动端浏览器默认手势（如左右滑动返回、下拉刷新），避免滑动事件冲突 */
 }
 
 .hall-bg-container {
@@ -263,8 +268,8 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
   position: absolute; width: 100%; height: 100%;
   border-radius: 16px;
   background: rgba(30, 41, 59, 0.8);
-  /* 🌟 动画升华：拉长动画时间到 0.6s，并加入平滑缓冲曲线，体现阻尼与重量感 */
-  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.6s ease;
+  /* 🌟 动画升华：将 0.6s 缩短至 0.4s，提升滑动跟手感，去掉不必要的延迟 */
+  transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s ease;
   will-change: transform, opacity;
   backface-visibility: hidden;
   overflow: hidden;
