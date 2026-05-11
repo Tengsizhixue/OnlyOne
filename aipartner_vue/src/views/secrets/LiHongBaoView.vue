@@ -1,6 +1,6 @@
 <template>
   <SecretLayout
-    bg-image="https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E6%9D%8E%E7%BA%A2%E5%AE%9D%E8%83%8C%E6%99%AF%E5%9B%BE.png"
+    :bg-image="bg"
     title="📱 你发现了李红宝的失联空间"
     title-color="#60a5fa"
     code="260315"
@@ -9,7 +9,7 @@
   >
     <div class="story-box">
       <p>有次给他发消息，半天不回，然后说是苹果手机问题没信息提醒，说下次要@他。结果后面@他了，到第二天才回，还说是苹果手机问题，收不到消息，真的不是他的问题。</p>
-      <img src="https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E6%9D%8E%E7%BA%A2%E5%AE%9D%E6%8F%92%E5%9B%BE1.png" alt="李红宝插图" class="content-img" />
+      <img :src="img1" alt="李红宝插图" class="content-img" />
       <p>(上面的内容只是开个玩笑）</p>
       <p>我基本都是在群聊里面说话，很少和别人私聊。就算在现实里面关系很好的朋友，我也几乎不在网上聊天，
         因为我有点轻度焦虑，只要别人不回我消息，我就会越来越急，在群里面发消息，就算一个人有事，其他人也会回我。</p>
@@ -25,11 +25,14 @@
 <script setup>
 import { Picture } from '@element-plus/icons-vue'
 import SecretLayout from '../../components/SecretLayout.vue'
+import { SECRET_ASSETS } from '../../config/constants.js'
 
+const { bg, img1 } = SECRET_ASSETS.lihongbao
 defineEmits(['back'])
 </script>
 
 <style scoped>
+/* 样式保持不变 */
 .story-box {
   background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(96, 165, 250, 0.2);
   padding: 30px; border-radius: 16px; margin-bottom: 30px; width: 100%; text-align: left;

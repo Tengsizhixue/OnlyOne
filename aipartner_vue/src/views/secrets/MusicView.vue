@@ -1,6 +1,6 @@
 <template>
   <SecretLayout
-    bg-image="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=2000&q=80"
+    :bg-image="bg"
     title="🎶 你找到了音乐的力量"
     title-color="#f472b6"
     code="240802"
@@ -18,10 +18,10 @@
 
         <div class="extra-links">
           <span class="links-label">附加内容：</span>
-          <span @click="openImage('https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E5%8E%BB%E5%B9%B4%E5%90%AC%E7%9A%84%E6%AD%8C%E5%8D%95.png')" class="img-link">
+          <span @click="openImage(attach1)" class="img-link">
             <el-icon><Picture /></el-icon> 去年听的歌单
           </span>
-           <span @click="openImage('https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E5%89%8D%E5%B9%B4%E5%90%AC%E7%9A%84%E6%AD%8C%E5%8D%95.png')" class="img-link">
+           <span @click="openImage(attach2)" class="img-link">
             <el-icon><Picture /></el-icon> 前年听的歌单
           </span>
         </div>
@@ -62,11 +62,10 @@
 import { ref, onUnmounted } from 'vue'
 import { Picture, VideoPlay, VideoPause } from '@element-plus/icons-vue'
 import SecretLayout from '../../components/SecretLayout.vue'
+import { SECRET_ASSETS } from '../../config/constants.js'
 
-const againAudio = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/again.aac'
-const xuniAudio = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/%E8%99%9A%E6%8B%9F.aac'
-const huxiAudio = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/%E4%BC%9A%E5%91%BC%E5%90%B8%E7%9A%84%E7%97%9B.mp3'
-
+// 💡 统一资源引用
+const { bg, againAudio, xuniAudio, huxiAudio, cover1, cover2, cover3, attach1, attach2 } = SECRET_ASSETS.music
 const emit = defineEmits(['back'])
 
 const audioRef = ref(null)
@@ -75,9 +74,9 @@ const currentSong = ref(null)
 const isPlaying = ref(false)
 
 const playlist = ref([
-  { id: 1, title: 'again', artist: '《四月是你的谎言》插曲', src: againAudio, cover: 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/againAvatar.png' },
-  { id: 2, title: '虚拟', artist: '陈粒', src: xuniAudio, cover: 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/xuniAvatar.png' },
-  { id: 3, title: '会呼吸的痛', artist: '梁静茹', src: huxiAudio, cover: 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/hhxdtAvatar.png' }
+  { id: 1, title: 'again', artist: '《四月是你的谎言》插曲', src: againAudio, cover: cover1 },
+  { id: 2, title: '虚拟', artist: '陈粒', src: xuniAudio, cover: cover2 },
+  { id: 3, title: '会呼吸的痛', artist: '梁静茹', src: huxiAudio, cover: cover3 }
 ])
 
 const togglePlay = (song) => {
@@ -126,60 +125,28 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* 💡 核心修改：让 music-room 整体变成可滚动的容器 */
-.music-room {
-  width: 100%; flex: 1; display: flex; flex-direction: column;
-  overflow-y: auto; overflow-x: hidden;
-  padding-right: 4px; /* 为滚动条留出空间 */
-  box-sizing: border-box; /* 💡 新增：强制内边距不撑开容器宽度 */
-}
-
-/* 移动滚动条样式到整个容器上 */
+/* 样式保持不变 */
+.music-room { width: 100%; flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; padding-right: 4px; box-sizing: border-box; }
 .music-room::-webkit-scrollbar { width: 6px; }
 .music-room::-webkit-scrollbar-track { background: transparent; }
 .music-room::-webkit-scrollbar-thumb { background: rgba(244, 114, 182, 0.3); border-radius: 4px; }
 .music-room::-webkit-scrollbar-thumb:hover { background: rgba(244, 114, 182, 0.6); }
-
-.story-box {
-  background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(244, 114, 182, 0.2);
-  padding: 30px; border-radius: 16px; margin-bottom: 24px; width: 100%; text-align: left;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  flex: none; /* 💡 核心修改：不再限制高度，让文字自由撑开 */
-  overflow: visible;
-  box-sizing: border-box; /* 💡 新增：核心修复，防止 padding 导致宽度超过 100% 从而文字溢出 */
-  word-wrap: break-word; /* 💡 新增：确保过长的英文或数字也能自动换行 */
-}
-
+.story-box { background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(244, 114, 182, 0.2); padding: 30px; border-radius: 16px; margin-bottom: 24px; width: 100%; text-align: left; box-shadow: 0 10px 30px rgba(0,0,0,0.1); flex: none; overflow: visible; box-sizing: border-box; word-wrap: break-word; }
 .story-box p { font-size: 16px; line-height: 2; margin-bottom: 16px; color: #fdf2f8; text-indent: 2em; }
 .story-box p:last-child { margin-bottom: 0; }
 .story-box strong { color: #f472b6; font-weight: 600; padding: 0 4px; }
-
-.extra-links {
-  margin-top: 24px; padding-top: 16px; border-top: 1px dashed rgba(244, 114, 182, 0.3);
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-}
+.extra-links { margin-top: 24px; padding-top: 16px; border-top: 1px dashed rgba(244, 114, 182, 0.3); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .links-label { font-size: 14px; color: #fbcfe8; font-weight: 600; }
-.img-link {
-  display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
-  background: rgba(244, 114, 182, 0.1); border: 1px solid rgba(244, 114, 182, 0.3);
-  color: #fdf2f8; text-decoration: none; border-radius: 20px; font-size: 13px;
-  transition: all 0.3s ease; cursor: pointer;
-}
-.img-link:hover {
-  background: rgba(244, 114, 182, 0.25); border-color: rgba(244, 114, 182, 0.6);
-  color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(244, 114, 182, 0.2);
-}
-
+.img-link { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: rgba(244, 114, 182, 0.1); border: 1px solid rgba(244, 114, 182, 0.3); color: #fdf2f8; text-decoration: none; border-radius: 20px; font-size: 13px; transition: all 0.3s ease; cursor: pointer; }
+.img-link:hover { background: rgba(244, 114, 182, 0.25); border-color: rgba(244, 114, 182, 0.6); color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(244, 114, 182, 0.2); }
 .music-player { width: 100%; display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; flex-shrink: 0; }
 .music-item { display: flex; align-items: center; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); padding: 14px 20px; border-radius: 16px; cursor: pointer; transition: all 0.3s ease; }
 .music-item:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-2px); border-color: rgba(244, 114, 182, 0.3); }
 .music-item.is-playing { background: rgba(244, 114, 182, 0.15); border-color: rgba(244, 114, 182, 0.5); box-shadow: 0 4px 15px rgba(244, 114, 182, 0.1); }
-
 .song-cover { width: 45px; height: 45px; border-radius: 50%; background: rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: center; margin-right: 16px; font-size: 24px; color: #94a3b8; position: relative; overflow: hidden; flex-shrink: 0; transition: transform 0.3s ease; }
 .song-cover.rotating { animation: rotate-disc 3s linear infinite; }
 @keyframes rotate-disc { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .cover-img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-
 .song-info { flex: 1; text-align: left; display: flex; flex-direction: column; gap: 4px; }
 .song-title { font-size: 16px; font-weight: 600; color: #f8fafc; transition: color 0.3s; }
 .is-playing .song-title { color: #f472b6; }
@@ -193,23 +160,11 @@ onUnmounted(() => {
 @keyframes bounce { 0% { height: 3px; } 100% { height: 12px; } }
 
 @media (max-width: 768px) {
-  /* 💡 移动端全面优化：去掉极端压缩的 padding，恢复优雅阅读体验 */
-  .story-box {
-    padding: 16px 20px;
-    font-size: 15px;
-    margin-bottom: 20px;
-    border-radius: 12px;
-  }
-  .story-box p {
-    line-height: 1.7; /* 恢复阅读行高 */
-    margin-bottom: 12px;
-  }
+  .story-box { padding: 16px 20px; font-size: 15px; margin-bottom: 20px; border-radius: 12px; }
+  .story-box p { line-height: 1.7; margin-bottom: 12px; }
   .extra-links { margin-top: 16px; padding-top: 12px; }
   .img-link { padding: 5px 12px; font-size: 12px; }
-  .music-player {
-    gap: 8px; /* 减小歌曲列表的间距 */
-    margin-bottom: 16px;
-  }
+  .music-player { gap: 8px; margin-bottom: 16px; }
   .music-item { padding: 12px 16px; border-radius: 12px; }
   .song-cover { width: 40px; height: 40px; margin-right: 12px; }
 }

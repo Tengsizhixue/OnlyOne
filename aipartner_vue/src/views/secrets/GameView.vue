@@ -10,7 +10,6 @@
     <div class="gamer-room">
       <div class="story-box cyberpunk-theme">
 
-        <!-- 💡 玩家宣言区块 -->
         <div class="manifesto">
           <div class="manifesto-title">我这辈子都不会干这么几件事：</div>
           <span class="highlight-item">1. 玩 EA 的任何游戏</span><br>
@@ -29,7 +28,6 @@
           每次对话都搞几十分钟，然后故意恶心你一句，我花钱买的游戏还要证明我为什么是我，其他的厂商完全就没有这个问题，把购买账单发过去就帮你换绑了。
         </p>
 
-        <!-- 电竞感分割线 -->
         <div class="glitch-divider">
           <span class="glitch-line long"></span>
           <span class="glitch-line short"></span>
@@ -52,15 +50,13 @@
           这也是我最近不怎么在网上聊天的一个原因，因为我朋友很多都是玩 PVP 的，毕竟玩游戏有时候就是聊聊天，但我真的是玩不下去了。
         </p>
 
-        <!-- 💡 另一段回忆的分界线 -->
         <div class="glitch-divider">
           <span class="glitch-line short"></span>
           <span class="glitch-line long"></span>
           <span class="glitch-line short"></span>
         </div>
 
-        <!-- 预留的图片插槽，点击也可以放大预览 -->
-        <img src="https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E9%AA%91%E9%A9%AC%E4%B8%8E%E7%A0%8D%E6%9D%80%E5%8A%A0%E8%BD%BD.jpg" alt="骑马与砍杀" class="content-img"/>
+        <img :src="img1" alt="骑马与砍杀" class="content-img"/>
 
         <p>
           现在应该说说我最喜欢的了，<strong>《骑马与砍杀》</strong>。
@@ -78,13 +74,12 @@
           这个游戏本体内容倒是没多少，主要是无私的 mod 作者，制作了很多好玩的 mod。虽然以现在的目光来看游戏画质很差，操作很僵硬，但我有空余时间依然愿意打开它，它也给我带来了很多美好的记忆。
         </p>
 
-        <!-- 💡 附加内容模块 -->
         <div class="extra-links">
           <span class="links-label">🔗 附加内容：</span>
-          <span @click="openImage('https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E6%B8%B8%E6%88%8F%E6%97%B6%E9%95%BF.jpg')" class="img-link">
+          <span @click="openImage(attach1)" class="img-link">
             <el-icon><Picture /></el-icon> 游戏时长
           </span>
-          <span @click="openImage('https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E4%BB%A5%E5%89%8D%E5%A4%A9%E7%9C%9F%E7%9A%84%E8%A8%80%E8%AE%BA.jpg')" class="img-link">
+          <span @click="openImage(attach2)" class="img-link">
             <el-icon><Picture /></el-icon> 以前相关评论
           </span>
         </div>
@@ -97,104 +92,35 @@
 <script setup>
 import { Picture } from '@element-plus/icons-vue'
 import SecretLayout from '../../components/SecretLayout.vue'
+import { SECRET_ASSETS } from '../../config/constants.js'
 
-
+const { img1, attach1, attach2 } = SECRET_ASSETS.game
 defineEmits(['back'])
 </script>
 
 <style scoped>
-/* 滚动容器：完全解决移动端溢出挤压问题 */
-.gamer-room {
-  width: 100%; flex: 1; display: flex; flex-direction: column;
-  overflow-y: auto; overflow-x: hidden;
-  padding-right: 4px; box-sizing: border-box;
-}
-
-/* 霓虹红主题滚动条 */
+/* 样式保持不变 */
+.gamer-room { width: 100%; flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; padding-right: 4px; box-sizing: border-box; }
 .gamer-room::-webkit-scrollbar { width: 6px; }
 .gamer-room::-webkit-scrollbar-track { background: transparent; }
 .gamer-room::-webkit-scrollbar-thumb { background: rgba(239, 68, 68, 0.4); border-radius: 4px; }
 .gamer-room::-webkit-scrollbar-thumb:hover { background: rgba(239, 68, 68, 0.8); }
-
-/* 暗黑电竞风格的文字卡片 */
-.cyberpunk-theme {
-  background: rgba(9, 9, 11, 0.85); /* 极暗的深灰底板 */
-  border: 1px solid rgba(239, 68, 68, 0.3); /* 红色警示边框 */
-  border-left: 4px solid #ef4444; /* 左侧粗条，体现赛博朋克 UI 感 */
-  box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(239, 68, 68, 0.08);
-  padding: 40px; border-radius: 8px; /* 较小的圆角更硬朗 */
-  margin-bottom: 24px; width: 100%; text-align: left;
-  flex: none; overflow: visible; box-sizing: border-box; word-wrap: break-word;
-}
-
-/* 玩家宣言高亮框 */
-.manifesto {
-  background: linear-gradient(90deg, rgba(239, 68, 68, 0.15), transparent);
-  border-left: 3px solid #f87171;
-  padding: 16px 20px;
-  border-radius: 0 8px 8px 0;
-  margin-bottom: 30px;
-}
+.cyberpunk-theme { background: rgba(9, 9, 11, 0.85); border: 1px solid rgba(239, 68, 68, 0.3); border-left: 4px solid #ef4444; box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 0 20px rgba(239, 68, 68, 0.08); padding: 40px; border-radius: 8px; margin-bottom: 24px; width: 100%; text-align: left; flex: none; overflow: visible; box-sizing: border-box; word-wrap: break-word; }
+.manifesto { background: linear-gradient(90deg, rgba(239, 68, 68, 0.15), transparent); border-left: 3px solid #f87171; padding: 16px 20px; border-radius: 0 8px 8px 0; margin-bottom: 30px; }
 .manifesto-title { font-size: 16px; font-weight: bold; color: #fca5a5; margin-bottom: 8px; }
 .highlight-item { display: inline-block; margin-top: 6px; font-weight: 600; color: #fee2e2; letter-spacing: 0.5px; }
-
-.cyberpunk-theme p {
-  font-size: 15px; line-height: 2.1; margin-bottom: 20px;
-  color: #e2e8f0; /* 冷峻的灰白色，不易视觉疲劳 */
-  text-indent: 2em; text-shadow: 0 1px 2px rgba(0,0,0,0.9);
-  letter-spacing: 0.5px;
-}
-
-.cyberpunk-theme strong {
-  color: #f87171;
-  padding: 0 2px;
-}
-
-.angry-text {
-  color: #f87171;
-  font-weight: 600;
-  padding: 0 4px;
-  text-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
-}
-
-/* 电竞风虚线分割 */
-.glitch-divider {
-  display: flex; align-items: center; justify-content: center; gap: 6px;
-  margin: 36px 0; opacity: 0.7;
-}
+.cyberpunk-theme p { font-size: 15px; line-height: 2.1; margin-bottom: 20px; color: #e2e8f0; text-indent: 2em; text-shadow: 0 1px 2px rgba(0,0,0,0.9); letter-spacing: 0.5px; }
+.cyberpunk-theme strong { color: #f87171; padding: 0 2px; }
+.glitch-divider { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 36px 0; opacity: 0.7; }
 .glitch-line { height: 2px; background: #ef4444; box-shadow: 0 0 8px #ef4444; }
 .glitch-line.long { width: 60px; }
 .glitch-line.short { width: 12px; }
-
-/* 插入的图片样式 */
-.content-img {
-  width: 100%; max-width: 600px; border-radius: 8px;
-  border: 1px solid rgba(239, 68, 68, 0.4); /* 红色警示风边框 */
-  margin: 10px auto 24px auto; display: block;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(239, 68, 68, 0.1);
-  cursor: pointer; transition: transform 0.3s ease;
-}
-.content-img:hover {
-  transform: scale(1.02);
-  border-color: rgba(239, 68, 68, 0.8);
-}
-
-/* 💡 底部链接适配 (赛博朋克红色) */
-.extra-links {
-  margin-top: 32px; padding-top: 20px; border-top: 1px dashed rgba(239, 68, 68, 0.4);
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-}
+.content-img { width: 100%; max-width: 600px; border-radius: 8px; border: 1px solid rgba(239, 68, 68, 0.4); margin: 10px auto 24px auto; display: block; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 15px rgba(239, 68, 68, 0.1); cursor: pointer; transition: transform 0.3s ease; }
+.content-img:hover { transform: scale(1.02); border-color: rgba(239, 68, 68, 0.8); }
+.extra-links { margin-top: 32px; padding-top: 20px; border-top: 1px dashed rgba(239, 68, 68, 0.4); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .links-label { font-size: 14px; color: #fca5a5; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
-.img-link {
-  display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
-  background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4);
-  color: #fee2e2; text-decoration: none; border-radius: 20px; font-size: 13px;
-  transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(4px);
-}
-.img-link:hover {
-  background: rgba(239, 68, 68, 0.3); border-color: #ef4444;
-  color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-}
+.img-link { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fee2e2; text-decoration: none; border-radius: 20px; font-size: 13px; transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(4px); }
+.img-link:hover { background: rgba(239, 68, 68, 0.3); border-color: #ef4444; color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
 
 @media (max-width: 768px) {
   .cyberpunk-theme { padding: 20px 16px; margin-bottom: 20px; }
