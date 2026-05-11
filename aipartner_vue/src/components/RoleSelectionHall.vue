@@ -6,10 +6,7 @@
         v-for="(role, index) in availableRoles"
         :key="'bg-'+role.role_type"
         class="hall-bg-image"
-        :style="{
-          backgroundImage: `url(${getCurrentRoleConfig(role.role_type).hallBgUrl || getCurrentRoleConfig(role.role_type).bgUrl})`,
-          backgroundPosition: getCurrentRoleConfig(role.role_type).hallBgPosition || 'center center'
-        }"
+        :style="getBgStyle(role.role_type)"
         :class="{ 'show-bg': index === activeCarouselIndex }"
       ></div>
     </div>
@@ -170,6 +167,24 @@ const handleTouchEnd = (e) => {
   }
 }
 
+// 🌟 新增：动态获取背景样式（自动识别并切换电脑端与手机端的壁纸）
+const getBgStyle = (roleType) => {
+  const config = getCurrentRoleConfig(roleType)
+  if (isMobile.value) {
+    // 如果是手机端，优先读取手机端专属链接和位置，没有则回退到电脑端链接
+    return {
+      backgroundImage: `url(${config.hallBgUrlMobile || config.hallBgUrl || config.bgUrl})`,
+      backgroundPosition: config.hallBgPositionMobile || config.hallBgPosition || 'center center'
+    }
+  } else {
+    // 电脑端读取原电脑端链接
+    return {
+      backgroundImage: `url(${config.hallBgUrl || config.bgUrl})`,
+      backgroundPosition: config.hallBgPosition || 'center center'
+    }
+  }
+}
+
 // 🌟 修改1：3D矩阵算法重构 —— 真正恢复为向内翻折的 Concave (凹面环抱) 效果
 const getCardStyle = (index) => {
   const offset = index - activeCarouselIndex.value
@@ -240,8 +255,8 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
 </script>
 
 <style scoped>
-/* 🌟 字体修复：引入云端思源宋体，作为安卓系统没有楷体时的优雅备选 */
-@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700&display=swap');
+/* 🌟 修改2：顶部动态引入在线免费优雅艺术字体库 (站酷小薇体、思源宋体、毛笔行楷) */
+@import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700&family=ZCOOL+XiaoWei&display=swap');
 
 .selection-hall {
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -333,19 +348,12 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
   transform: translateZ(0);
 }
 
-/* 🌟 字体修复：角色名称优先使用各平台原生楷体，安卓回退到思源宋体 */
+/* 🌟 修改2：角色名称优先采用唯美飘逸的站酷小薇体/毛笔风 */
 .card-name {
-  font-size: 34px;
-  /* 🌟 字体修复：新增 Kaiti SC（iOS原生楷体），以及 Noto Serif SC（安卓回退优雅宋体） */
-  font-family: "Kaiti SC", "STKaiti", "KaiTi", "华文楷体", "楷体", "Noto Serif SC", serif;
-  font-weight: bold;
-  margin: 0 0 16px 0;
-  letter-spacing: 4px;
-  /* 🌟 性能优化：去除了 text-shadow 的重度过渡动画 */
-  transition: color 0.4s ease;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
+  font-size: 30px;
+  font-family: "STKaiti", "KaiTi", serif;
+  font-weight: bold; margin: 0 0 12px 0;
+  letter-spacing: 2px;
   text-shadow: 0 2px 10px rgba(0,0,0,0.8);
 }
 
