@@ -158,6 +158,10 @@ html, body, #app {
 .theme-snow .empty-subtext { color: #334155; text-shadow: 0 1px 2px rgba(255,255,255,0.9); }
 .theme-snow .history-item:hover { background-color: rgba(255, 255, 255, 0.4); }
 .theme-snow .history-item.active { background-color: rgba(255, 255, 255, 0.7); border-color: rgba(255, 255, 255, 0.9); box-shadow: 0 2px 10px rgba(0,0,0,0.02);}
+/* 🌟 为“誊思致雪”的亮色侧边栏修复神秘指引的可读性 🌟 */
+.theme-snow .quest-card { background: rgba(2, 132, 199, 0.1) !important; border-color: rgba(2, 132, 199, 0.3) !important; }
+.theme-snow .quest-text { color: #0f172a !important; text-shadow: none !important; font-weight: 600 !important; }
+.theme-snow .quest-text.success { color: #059669 !important; }
 .theme-snow .uid-box { background: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.8); }
 .theme-snow .uid-label { background: rgba(56, 189, 248, 0.7); color: #fff; }
 .theme-snow .uid-value { color: #0f172a; }
