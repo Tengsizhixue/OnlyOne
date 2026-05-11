@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import LandingView from '../views/LandingView.vue'
 import ChatView from '../views/ChatView.vue'
 import SecretView from '../views/SecretView.vue'
-import FinalView from '../views/secrets/FinalView.vue' // 💡 引入终局页面
+import FinalView from '../views/secrets/FinalView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -13,6 +13,7 @@ const router = createRouter({
       component: LandingView
     },
     {
+      // 🌟 核心修复：还原成单层路由，彻底消除缺失 component 的黄色警告
       path: '/chat',
       name: 'chat',
       component: ChatView
@@ -24,7 +25,6 @@ const router = createRouter({
       props: true
     },
     {
-      // 💡 注册终局路由
       path: '/final',
       name: 'final',
       component: FinalView
