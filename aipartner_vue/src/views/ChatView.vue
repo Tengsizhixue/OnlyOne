@@ -1,7 +1,11 @@
 <template>
   <div class="chat-view-root">
 
-    <transition name="fade-hall">
+    <!-- 🌟 核心修复：恢复场景切换动画，且必须使用 v-if 和 v-else！ -->
+    <!-- 若用 v-show，聊天室内部的 Element 容器会在不可见时初始化，导致宽高计算为 0，UI 直接崩塌错位 -->
+    <transition name="scene-transition" mode="out-in">
+
+      <!-- 场景 A：角色选择大厅 -->
       <RoleSelectionHall
         v-if="isSelectingRole"
         :available-roles="availableRoles"
@@ -9,10 +13,9 @@
         @update-role="handleRoleUpdate"
         @enter-chat="enterChat"
       />
-    </transition>
 
-    <transition name="fade-transform">
-      <el-container v-show="!isSelectingRole" class="main-layout glass-panel">
+      <!-- 场景 B：聊天室主界面 (使用 v-else 确保可见时才渲染高度尺寸) -->
+      <el-container v-else class="main-layout glass-panel">
 
         <ChatSidebar
           :is-mobile-menu-open="isMobileMenuOpen"
@@ -41,7 +44,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, reactive, onMounted, computed, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { USER_AVATAR, getCurrentRoleConfig } from '../config/constants.js'
@@ -55,8 +58,6 @@ const emit = defineEmits(['update:roleType'])
 const router = useRouter()
 const route = useRoute()
 
-// 🌟 核心修复：使用 Query 参数（?view=room）来判断页面状态 🌟
-// 这样就不会触发 Vue Router 的组件缺失警告，且同样完美支持浏览器返回键！
 const isSelectingRole = computed(() => route.query.view !== 'room')
 
 const isMobileMenuOpen = ref(false)
@@ -72,6 +73,9 @@ const roleConfig = reactive({
   name: '',
   nature: ''
 })
+
+// 🌟 优化1：把 controller 提出来，保存对当前请求的引用
+let activeStreamController = null
 
 function generateUid() {
   const newUid = Math.random().toString(36).substring(2, 10)
@@ -119,7 +123,6 @@ const handleRoleUpdate = (newType) => {
 }
 
 const enterChat = () => {
-  // 🌟 点击进入聊天，追加 query 参数 ?view=room
   router.push({ name: 'chat', query: { view: 'room' } })
 }
 
@@ -152,7 +155,6 @@ const loadSession = async (id) => {
       isThinking: false
     }))
 
-    // 🌟 加载记忆后，如果是从大厅进来的，追加 query 进入房间
     if (route.query.view !== 'room') {
       router.push({ name: 'chat', query: { view: 'room' } })
     }
@@ -162,10 +164,15 @@ const loadSession = async (id) => {
 }
 
 const createNewSession = () => {
+  // 🌟 优化2：在新建对话（清空消息前），如果有正在生成的请求，立即掐断它！
+  if (activeStreamController) {
+    activeStreamController.abort()
+    activeStreamController = null
+  }
+
   currentSessionId.value = ''
   messages.value = []
   isMobileMenuOpen.value = false
-  // 🌟 返回大厅，去掉 URL 里的 ?view=room
   if (route.query.view === 'room') {
     router.push({ name: 'chat' })
   }
@@ -234,8 +241,9 @@ const handleSendMessage = async (userText) => {
   messages.value.push({ role: 'assistant', content: '', avatar: aiAvatar, isThinking: true })
   isGenerating.value = true
 
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => { controller.abort() }, 10000)
+  // 🌟 优化3：赋值给全局控制器
+  activeStreamController = new AbortController()
+  const timeoutId = setTimeout(() => { activeStreamController.abort() }, 10000)
 
   try {
     const response = await fetch(`/api/chat/completions`, {
@@ -246,7 +254,7 @@ const handleSendMessage = async (userText) => {
         role_config: roleConfig, content: userText,
         user_avatar: USER_AVATAR, ai_avatar: aiAvatar
       }),
-      signal: controller.signal
+      signal: activeStreamController.signal // 使用全局的 signal
     })
 
     if (!response.ok) throw new Error("服务端异常")
@@ -264,22 +272,39 @@ const handleSendMessage = async (userText) => {
         isFirstChunk = false
       }
 
+      // 安全检查：如果消息数组被清空了，说明被阻断了，直接跳出循环
+      if (messages.value.length === 0) break;
+
       messages.value[messages.value.length - 1].content += decoder.decode(value, { stream: true })
     }
   } catch (error) {
-    messages.value[messages.value.length - 1].isThinking = false
-    if (error.name === 'AbortError') {
-      messages.value[messages.value.length - 1].content = "（大脑烧坏了...等得太久没有回应，连线已断开，请稍后重试）"
-    } else {
-      messages.value[messages.value.length - 1].content = "（伙伴似乎走神了，没听到你说的话。请检查网络或后端服务）"
+    // 安全检查：防止因阻断后操作 undefined 报错
+    if (messages.value.length > 0) {
+      messages.value[messages.value.length - 1].isThinking = false
+      if (error.name === 'AbortError') {
+        // 如果是主动掐断的，可以不显示报错，或者提示被打断
+        messages.value[messages.value.length - 1].content += "\n[对话已中断]"
+      } else {
+        messages.value[messages.value.length - 1].content = "（伙伴似乎走神了，没听到你说的话。请检查网络或后端服务）"
+      }
     }
   } finally {
-    messages.value[messages.value.length - 1].isThinking = false
+    if (messages.value.length > 0) {
+      messages.value[messages.value.length - 1].isThinking = false
+    }
     isGenerating.value = false
     clearTimeout(timeoutId)
+    activeStreamController = null // 🌟 重置控制器
     fetchSessions()
   }
 }
+
+// 🌟 优化4：组件卸载时也要记得掐断，防止进入彩蛋页面后还在请求
+onUnmounted(() => {
+  if (activeStreamController) {
+    activeStreamController.abort()
+  }
+})
 
 onMounted(() => {
   fetchRoles()
@@ -291,8 +316,25 @@ onMounted(() => {
 .chat-view-root { width: 100vw; height: 100dvh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
 .main-layout { width: 95vw; max-width: 1400px; height: 92dvh; border-radius: 24px; overflow: hidden; z-index: 10; position: relative; }
 
-.fade-transform-enter-active, .fade-transform-leave-active { transition: opacity 0.6s ease, transform 0.6s ease; transition-delay: 0.1s;}
-.fade-transform-enter-from, .fade-transform-leave-to { opacity: 0; transform: translateY(20px); }
+/* 🌟 全新的场景切换过渡动画 (结合缩放与景深模糊) 🌟 */
+.scene-transition-enter-active,
+.scene-transition-leave-active {
+  transition: opacity 0.5s cubic-bezier(0.25, 0.8, 0.25, 1),
+              transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1),
+              filter 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.scene-transition-enter-from {
+  opacity: 0;
+  transform: scale(0.95) translateY(30px);
+  filter: blur(10px);
+}
+
+.scene-transition-leave-to {
+  opacity: 0;
+  transform: scale(1.05) translateY(-30px);
+  filter: blur(10px);
+}
 
 @media (max-width: 768px) {
   .main-layout { width: 100%; height: 100%; border-radius: 0; border: none; }
