@@ -101,7 +101,8 @@ const toggleAudio = (num) => {
       targetAudio?.pause()
       isPlaying.value = false
     } else {
-      targetAudio?.play()
+      // 🌟 优化：加上 catch 捕获浏览器拦截错误
+      targetAudio?.play().catch(e => console.warn('音频播放被拦截:', e))
       isPlaying.value = true
     }
   }
@@ -111,7 +112,8 @@ const toggleAudio = (num) => {
     }
     if (targetAudio) {
       targetAudio.currentTime = 0
-      targetAudio.play()
+      // 🌟 优化：加上 catch 捕获浏览器拦截错误
+      targetAudio.play().catch(e => console.warn('音频播放被拦截:', e))
     }
     currentAudio.value = num
     isPlaying.value = true

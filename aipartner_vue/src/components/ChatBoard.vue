@@ -121,7 +121,8 @@ const handleSend = () => {
 .exit-btn { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; border: 1px solid transparent;}
 .exit-btn:hover { transform: scale(1.05); }
 
-.chat-main { flex: 1; overflow-y: auto; scroll-behavior: smooth; padding: 0; }
+/* 🌟 优化1：去掉了 scroll-behavior: smooth; 让流式接收文字时不要抽搐 */
+.chat-main { flex: 1; overflow-y: auto; padding: 0; }
 .chat-inner { max-width: 840px; margin: 0 auto; padding: 40px 24px; position: relative; }
 
 .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; margin-top: 10vh; text-align: center; animation: fade-in-up 0.8s ease-out forwards; }
