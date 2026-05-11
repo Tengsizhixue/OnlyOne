@@ -1,5 +1,4 @@
 <template>
-  <!-- 🌟 核心修复 3：添加 .passive 修饰符，消除 touchstart 性能警告 🌟 -->
   <div class="selection-hall" @touchstart.passive="handleTouchStart" @touchend.passive="handleTouchEnd">
 
     <!-- 总的背景图层 -->
@@ -19,45 +18,43 @@
         :style="getCardStyle(index)"
         @click="handleCardClick(index)"
       >
-        <!-- 卡片内部专属背景 -->
+        <!-- 🌟 核心清理：直接使用常量获取背景信息 -->
         <div class="card-inner-bg" :style="{
-          backgroundImage: `url(${getCardTheme(role.role_type).url})`,
-          backgroundPosition: getCardTheme(role.role_type).pos
+          backgroundImage: `url(${getCurrentRoleConfig(role.role_type).bgUrl})`,
+          backgroundPosition: getCurrentRoleConfig(role.role_type).bgPosition
         }"></div>
 
         <div class="card-mask"></div>
 
-        <!-- 动态边缘泛光：使用角色专属的发光色 -->
+        <!-- 🌟 动态边缘泛光：直接使用常量获取颜色 -->
         <div class="card-glow-border" :style="{
           borderColor: index === activeCarouselIndex ? 'rgba(255,255,255,0.9)' : 'rgba(255, 255, 255, 0.15)',
           boxShadow: index === activeCarouselIndex
-            ? `0 0 25px 2px ${getCardTheme(role.role_type).glow}, 0 0 40px 8px rgba(255,255,255,0.1), inset 0 0 20px ${getCardTheme(role.role_type).glow}`
+            ? `0 0 25px 2px ${getCurrentRoleConfig(role.role_type).glowColor}, 0 0 40px 8px rgba(255,255,255,0.1), inset 0 0 20px ${getCurrentRoleConfig(role.role_type).glowColor}`
             : 'none'
         }"></div>
 
         <!-- 卡片内容 -->
         <div class="card-content">
-          <!-- 🌟 核心修复 2：为头像边缘加上专属主题色的发光与边框 🌟 -->
           <img
-            :src="getRoleAvatar(role.role_type)"
+            :src="getCurrentRoleConfig(role.role_type).avatar"
             class="card-avatar"
             :style="{
-              borderColor: index === activeCarouselIndex ? getCardTheme(role.role_type).color : 'rgba(255,255,255,0.8)',
+              borderColor: index === activeCarouselIndex ? getCurrentRoleConfig(role.role_type).themeColor : 'rgba(255,255,255,0.8)',
               boxShadow: index === activeCarouselIndex
-                ? `0 0 25px ${getCardTheme(role.role_type).glow}, 0 10px 20px rgba(0,0,0,0.5)`
+                ? `0 0 25px ${getCurrentRoleConfig(role.role_type).glowColor}, 0 10px 20px rgba(0,0,0,0.5)`
                 : '0 10px 20px rgba(0,0,0,0.5)'
             }"
           />
 
           <h3 class="card-name" :style="{
-            color: index === activeCarouselIndex ? getCardTheme(role.role_type).color : '#f1f5f9',
+            color: index === activeCarouselIndex ? getCurrentRoleConfig(role.role_type).themeColor : '#f1f5f9',
             textShadow: index === activeCarouselIndex
-              ? `0 0 15px ${getCardTheme(role.role_type).glow}, 0 3px 6px rgba(0,0,0,0.9)`
+              ? `0 0 15px ${getCurrentRoleConfig(role.role_type).glowColor}, 0 3px 6px rgba(0,0,0,0.9)`
               : `0 2px 4px rgba(0,0,0,0.9)`
           }">{{ role.name }}</h3>
 
-          <!-- 🌟 这里的文字之前太挤了，现在在 CSS 里面增加了 padding 🌟 -->
-          <p class="card-desc">{{ getRoleDescription(role.role_type) }}</p>
+          <p class="card-desc">{{ getCurrentRoleConfig(role.role_type).welcomeText }}</p>
 
           <div class="click-hint" :class="{ visible: index === activeCarouselIndex }">
             <span class="shimmer-text">点击进入对话</span>
@@ -91,7 +88,7 @@ import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { House, ArrowLeftBold, ArrowRightBold } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { DEFAULT_AI_AVATAR, getCurrentRoleConfig } from '../config/constants.js'
+import { getCurrentRoleConfig } from '../config/constants.js'
 
 const props = defineProps({
   availableRoles: { type: Array, required: true },
@@ -105,55 +102,13 @@ const activeCarouselIndex = ref(0)
 const isMobile = ref(false)
 let touchStartX = 0
 
-const getRoleAvatar = (type) => getCurrentRoleConfig(type)?.avatar || DEFAULT_AI_AVATAR
-const getRoleDescription = (type) => getCurrentRoleConfig(type)?.welcomeText || '你好，我是你的伙伴'
-
-const roleThemeMap = {
-  '薇尔莉特': {
-    url: 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E8%96%87%E5%B0%94%E8%8E%89%E7%89%B9%E8%83%8C%E6%99%AF.jpg',
-    pos: '85% 50%',
-    color: '#e9d5ff',
-    glow: 'rgba(168, 85, 247, 0.7)'
-  },
-  '誊思致雪': {
-    url: 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E8%AA%8A%E6%80%9D%E8%87%B4%E9%9B%AA%E8%83%8C%E6%99%AF%E5%9B%BE.png',
-    pos: 'center top',
-    color: '#bae6fd',
-    glow: 'rgba(56, 189, 248, 0.7)'
-  },
-  '音乐推荐助手': {
-    url: 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E9%9F%B3%E4%B9%90%E5%8A%A9%E6%89%8B%E5%9B%BE%E7%89%87.jpg',
-    pos: 'center center',
-    color: '#fbcfe8',
-    glow: 'rgba(236, 72, 153, 0.7)'
-  },
-  '游戏聊天助手': {
-    url: 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/gamebackground.jpg',
-    pos: '65% 50%',
-    color: '#fef08a',
-    glow: 'rgba(234, 179, 8, 0.7)'
-  },
-  '李蓝宝': {
-    url: 'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=800&q=80',
-    pos: 'center center',
-    color: '#a7f3d0',
-    glow: 'rgba(16, 185, 129, 0.7)'
-  },
-  '自定义': {
-    url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80',
-    pos: 'center center',
-    color: '#f8fafc',
-    glow: 'rgba(255, 255, 255, 0.5)'
-  }
-}
-const getCardTheme = (type) => roleThemeMap[type] || roleThemeMap['李蓝宝']
+// 💡 此处已经完全移除了臃肿的 roleThemeMap 等本地字典
 
 const nextRole = () => { if (activeCarouselIndex.value < props.availableRoles.length - 1) activeCarouselIndex.value++ }
 const prevRole = () => { if (activeCarouselIndex.value > 0) activeCarouselIndex.value-- }
 
 const handleCardClick = (index) => {
   if (activeCarouselIndex.value === index) {
-    // 🌟 安全防护：加入 !props.roleConfig.name 检查，防止因后端数据没跟上导致 .trim() 报错阻断逻辑
     if (props.roleConfig.role_type === '自定义' && (!props.roleConfig.name || !props.roleConfig.name.trim())) {
       ElMessage.warning('请先为自定义伙伴设定称呼！')
       return
@@ -217,6 +172,7 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
 </script>
 
 <style scoped>
+/* (样式代码保持不变，完全保留之前优化好的呼吸感 padding 和过渡效果) */
 .selection-hall {
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;

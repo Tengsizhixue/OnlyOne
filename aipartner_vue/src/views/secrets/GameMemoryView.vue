@@ -6,7 +6,6 @@
     @back="handleBack"
     v-slot="{ openImage }"
   >
-    <!-- 隐藏的音频标签 -->
     <audio ref="audio1" :src="audioZhanHuo" preload="metadata" @ended="onEnded(1)"></audio>
     <audio ref="audio2" :src="audioJieJu" preload="metadata" @ended="onEnded(2)"></audio>
     <audio ref="audio3" :src="audioMoon" preload="metadata" @ended="onEnded(3)"></audio>
@@ -24,7 +23,6 @@
 
         <img :src="img7Years" alt="我在七年后等着你" class="content-img" />
 
-        <!-- 战火 音乐播放器 -->
         <div
           class="custom-audio-player"
           :class="{ 'is-playing': currentAudio === 1 && isPlaying }"
@@ -46,7 +44,6 @@
           明线是主角寻找记忆、完成约定的旅程；暗线则指向一桩牵涉人体器官交易的医院阴谋。当你玩到最后便会发现游戏里的角色都是被困在爱与执念中的普通人，他们所做的一切都是为了一个美好的结局。
           这种从告别到团圆的叙事弧光，恰好满足了我们对“努力必有回报”的渴望。</p>
 
-        <!-- 结局 音乐播放器 -->
         <div
           class="custom-audio-player"
           :class="{ 'is-playing': currentAudio === 2 && isPlaying }"
@@ -84,7 +81,6 @@
 
         <img :src="imgMoon" alt="去月球" class="content-img" />
 
-        <!-- 去月球 音乐播放器 -->
         <div
           class="custom-audio-player"
           :class="{ 'is-playing': currentAudio === 3 && isPlaying }"
@@ -133,31 +129,16 @@
 import { ref, onUnmounted } from 'vue'
 import { Picture, VideoPlay, VideoPause } from '@element-plus/icons-vue'
 import SecretLayout from '../../components/SecretLayout.vue'
+import { SECRET_ASSETS } from '../../config/constants.js'
 
-// ==========================================
-// 💡 OSS 资源链接
-// ==========================================
-
-const img7Years = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E6%88%91%E5%9C%A8%E4%B8%83%E5%B9%B4%E5%90%8E%E7%AD%89%E7%9D%80%E4%BD%A0.png'
-const audioZhanHuo = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E6%88%98%E7%81%AB.mp3'
-const audioJieJu = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E7%BB%93%E5%B1%80.mp3'
-const imgHappiness = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E8%AF%B7%E4%BD%A0%E8%8E%B7%E5%BE%97%E5%B9%B8%E7%A6%8F.jpg'
-
-const imgSpiritfarer = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E7%81%B5%E9%AD%82%E6%91%86%E6%B8%A1%E8%80%85%E5%B0%81%E9%9D%A2.png'
-const imgHeart = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E7%88%B1%E5%BF%83.jpg'
-
-const imgMoon = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E5%8E%BB%E6%9C%88%E7%90%83.png'
-const audioMoon = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E5%8E%BB%E6%9C%88%E7%90%83%E9%9F%B3%E4%B9%90.aac'
-
-const attach1 = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E5%8E%9F%E6%96%87.jpg'
-const attach2 = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E5%8E%9F%E6%96%87ai%E5%8C%96.png'
-const attach3 = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E5%8E%9F%E6%96%87ai%E5%8C%96%E5%86%8D%E7%BC%A9%E5%86%99.png'
-const attach4 = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/19%E5%B9%B4%E7%9A%84%E6%B8%B8%E6%88%8F%E8%B4%AD%E4%B9%B0%E8%AE%B0%E5%BD%95.jpg'
-// ==========================================
+const {
+  img7Years, audioZhanHuo, audioJieJu, imgHappiness,
+  imgSpiritfarer, imgHeart, imgMoon, audioMoon,
+  attach1, attach2, attach3, attach4
+} = SECRET_ASSETS.memory
 
 const emit = defineEmits(['back'])
 
-// 音乐播放器逻辑：扩展支持3个音频
 const audio1 = ref(null)
 const audio2 = ref(null)
 const audio3 = ref(null)
@@ -177,7 +158,6 @@ const toggleAudio = (num) => {
       isPlaying.value = true
     }
   } else {
-    // 暂停其他所有正在播放的音乐
     Object.values(audios).forEach(audio => {
       if (audio && audio !== targetAudio) {
         audio.pause()
@@ -212,107 +192,36 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* 💡 滚动容器：完全解决移动端溢出挤压问题 */
-.ethereal-room {
-  width: 100%; flex: 1; display: flex; flex-direction: column;
-  overflow-y: auto; overflow-x: hidden;
-  padding-right: 4px; box-sizing: border-box;
-}
-
-/* 月光青色滚动条 */
+/* 样式保持不变 */
+.ethereal-room { width: 100%; flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; padding-right: 4px; box-sizing: border-box; }
 .ethereal-room::-webkit-scrollbar { width: 6px; }
 .ethereal-room::-webkit-scrollbar-track { background: transparent; }
 .ethereal-room::-webkit-scrollbar-thumb { background: rgba(125, 211, 252, 0.4); border-radius: 4px; }
 .ethereal-room::-webkit-scrollbar-thumb:hover { background: rgba(125, 211, 252, 0.8); }
-
-/* 💡 迷雾月光主题的文字卡片 */
-.memory-box {
-  background: rgba(15, 23, 42, 0.75); /* 深夜静谧蓝底板 */
-  border: 1px solid rgba(186, 230, 253, 0.3); /* 柔和青色描边 */
-  box-shadow: 0 10px 40px rgba(0,0,0,0.7), inset 0 0 30px rgba(186, 230, 253, 0.05);
-  padding: 40px; border-radius: 16px; margin-bottom: 24px; width: 100%; text-align: left;
-  flex: none; overflow: visible; box-sizing: border-box; word-wrap: break-word;
-}
-
-.memory-box p {
-  font-size: 16px; line-height: 2.2; margin-bottom: 20px;
-  color: #e0f2fe; /* 冰蓝色字体，更显清冷温柔 */
-  text-indent: 2em; text-shadow: 0 1px 3px rgba(0,0,0,0.9);
-}
-
-.prologue {
-  font-size: 17px !important; color: #bae6fd !important;
-  font-style: italic; letter-spacing: 1px;
-}
-.epilogue {
-  margin-top: 30px; border-top: 1px solid rgba(186, 230, 253, 0.2);
-  padding-top: 20px; font-weight: 500;
-}
-
-/* 分割线：三颗钻石 */
-.divider {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  margin: 30px 0; opacity: 0.6;
-}
+.memory-box { background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(186, 230, 253, 0.3); box-shadow: 0 10px 40px rgba(0,0,0,0.7), inset 0 0 30px rgba(186, 230, 253, 0.05); padding: 40px; border-radius: 16px; margin-bottom: 24px; width: 100%; text-align: left; flex: none; overflow: visible; box-sizing: border-box; word-wrap: break-word; }
+.memory-box p { font-size: 16px; line-height: 2.2; margin-bottom: 20px; color: #e0f2fe; text-indent: 2em; text-shadow: 0 1px 3px rgba(0,0,0,0.9); }
+.prologue { font-size: 17px !important; color: #bae6fd !important; font-style: italic; letter-spacing: 1px; }
+.epilogue { margin-top: 30px; border-top: 1px solid rgba(186, 230, 253, 0.2); padding-top: 20px; font-weight: 500; }
+.divider { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 30px 0; opacity: 0.6; }
 .diamond { width: 6px; height: 6px; background: #38bdf8; transform: rotate(45deg); box-shadow: 0 0 8px #38bdf8;}
 .line { width: 120px; height: 1px; background: linear-gradient(90deg, transparent, #7dd3fc, transparent); }
-
-/* 图片排版 */
-.content-img {
-  width: 100%; max-width: 650px; border-radius: 8px;
-  border: 1px solid rgba(186, 230, 253, 0.4); /* 月光边框 */
-  margin: 24px auto; display: block;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7), 0 0 15px rgba(125, 211, 252, 0.1);
-}
+.content-img { width: 100%; max-width: 650px; border-radius: 8px; border: 1px solid rgba(186, 230, 253, 0.4); margin: 24px auto; display: block; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7), 0 0 15px rgba(125, 211, 252, 0.1); }
 .filter-soft { filter: brightness(0.9) contrast(1.05); }
-
-/* 💡 青色律动音乐播放器 */
-.custom-audio-player {
-  display: flex; justify-content: space-between; align-items: center;
-  background: linear-gradient(90deg, rgba(56, 189, 248, 0.15), rgba(56, 189, 248, 0.05));
-  border: 1px solid rgba(125, 211, 252, 0.3);
-  padding: 14px 24px; border-radius: 12px;
-  cursor: pointer; transition: all 0.3s ease;
-  margin: 10px 0 24px 0;
-}
-.custom-audio-player:hover {
-  background: linear-gradient(90deg, rgba(56, 189, 248, 0.25), rgba(56, 189, 248, 0.1));
-  border-color: rgba(125, 211, 252, 0.6);
-  transform: translateY(-2px); box-shadow: 0 6px 20px rgba(56, 189, 248, 0.15);
-}
-.custom-audio-player.is-playing {
-  background: linear-gradient(90deg, rgba(56, 189, 248, 0.35), rgba(56, 189, 248, 0.15));
-  border-color: rgba(125, 211, 252, 0.8);
-  box-shadow: 0 0 20px rgba(56, 189, 248, 0.25);
-}
-
+.custom-audio-player { display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, rgba(56, 189, 248, 0.15), rgba(56, 189, 248, 0.05)); border: 1px solid rgba(125, 211, 252, 0.3); padding: 14px 24px; border-radius: 12px; cursor: pointer; transition: all 0.3s ease; margin: 10px 0 24px 0; }
+.custom-audio-player:hover { background: linear-gradient(90deg, rgba(56, 189, 248, 0.25), rgba(56, 189, 248, 0.1)); border-color: rgba(125, 211, 252, 0.6); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(56, 189, 248, 0.15); }
+.custom-audio-player.is-playing { background: linear-gradient(90deg, rgba(56, 189, 248, 0.35), rgba(56, 189, 248, 0.15)); border-color: rgba(125, 211, 252, 0.8); box-shadow: 0 0 20px rgba(56, 189, 248, 0.25); }
 .player-left { display: flex; align-items: center; gap: 14px; }
 .play-icon { font-size: 26px; color: #7dd3fc; filter: drop-shadow(0 0 5px rgba(125,211,252,0.5)); }
 .track-name { font-size: 15px; font-weight: bold; color: #f0f9ff; letter-spacing: 1px;}
-
-/* 青色音轨特效 */
 .playing-bars { display: flex; gap: 3px; height: 16px; align-items: flex-end; }
 .playing-bars span { display: inline-block; width: 4px; background-color: #7dd3fc; border-radius: 2px; animation: bounce 1s ease infinite alternate; box-shadow: 0 0 5px #7dd3fc; }
 .playing-bars span:nth-child(2) { animation-delay: 0.3s; }
 .playing-bars span:nth-child(3) { animation-delay: 0.6s; }
 @keyframes bounce { 0% { height: 4px; } 100% { height: 18px; } }
-
-/* 底部链接适配 */
-.extra-links {
-  margin-top: 32px; padding-top: 20px; border-top: 1px dashed rgba(125, 211, 252, 0.3);
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-}
+.extra-links { margin-top: 32px; padding-top: 20px; border-top: 1px dashed rgba(125, 211, 252, 0.3); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .links-label { font-size: 14px; color: #bae6fd; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
-.img-link {
-  display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
-  background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4);
-  color: #f0f9ff; text-decoration: none; border-radius: 20px; font-size: 13px;
-  transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(4px);
-}
-.img-link:hover {
-  background: rgba(56, 189, 248, 0.3); border-color: #7dd3fc;
-  color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
-}
+.img-link { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #f0f9ff; text-decoration: none; border-radius: 20px; font-size: 13px; transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(4px); }
+.img-link:hover { background: rgba(56, 189, 248, 0.3); border-color: #7dd3fc; color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3); }
 
 @media (max-width: 768px) {
   .memory-box { padding: 20px 16px; margin-bottom: 20px; border-radius: 12px; }

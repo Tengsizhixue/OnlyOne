@@ -1,6 +1,6 @@
 <template>
   <SecretLayout
-    :bg-image="bgImg"
+    :bg-image="bg"
     title="✉️ 无名信件总有寄件人"
     title-color="#d8b4fe"
     code="191001"
@@ -10,7 +10,6 @@
     <div class="violet-room">
       <div class="letter-box violet-theme">
 
-        <!-- 💡 文本前的图片插槽 -->
         <div class="image-wrapper">
           <img
             :src="topImg"
@@ -27,7 +26,6 @@
           当时最喜欢的并不是紫罗兰而是四月是你的谎言，其中的一首插曲我还听了很长时间。
         </p>
 
-        <!-- 优雅的信笺分割线 (火漆印章元素) -->
         <div class="letter-divider">
           <span class="letter-line"></span>
           <span class="wax-seal"></span>
@@ -64,7 +62,7 @@
 
         <div class="extra-links">
           <span class="links-label">🔗 附加内容：</span>
-          <span @click="openImage('https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E5%90%B5%E6%9E%B6%E5%9B%BE.jpg')" class="img-link">
+          <span @click="openImage(attach1)" class="img-link">
             <el-icon><Picture /></el-icon> 以前的吵架图
           </span>
         </div>
@@ -77,92 +75,33 @@
 <script setup>
 import { Picture } from '@element-plus/icons-vue'
 import SecretLayout from '../../components/SecretLayout.vue'
+import { SECRET_ASSETS } from '../../config/constants.js'
 
-
-const bgImg = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E8%96%87%E5%B0%94%E8%8E%89%E7%89%B9%E8%83%8C%E6%99%AF.jpg' // 紫罗兰背景
-const topImg = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E8%96%87%E5%B0%94%E8%8E%89%E7%89%B9%E6%96%87%E6%9C%AC%E5%9B%BE.png'
+// 💡 从配置表解构资源
+const { bg, topImg, attach1 } = SECRET_ASSETS.violet
 
 defineEmits(['back'])
 </script>
 
 <style scoped>
-/* 滚动容器：解决移动端溢出问题 */
-.violet-room {
-  width: 100%; flex: 1; display: flex; flex-direction: column;
-  overflow-y: auto; overflow-x: hidden;
-  padding-right: 4px; box-sizing: border-box;
-}
-
-/* 幽紫主题滚动条 */
+/* 样式保持不变 */
+.violet-room { width: 100%; flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; padding-right: 4px; box-sizing: border-box; }
 .violet-room::-webkit-scrollbar { width: 6px; }
 .violet-room::-webkit-scrollbar-track { background: transparent; }
 .violet-room::-webkit-scrollbar-thumb { background: rgba(192, 132, 252, 0.4); border-radius: 4px; }
 .violet-room::-webkit-scrollbar-thumb:hover { background: rgba(192, 132, 252, 0.8); }
-
-/* 💡 紫罗兰信笺主题的文字卡片 */
-.violet-theme {
-  background: rgba(30, 20, 45, 0.85); /* 深邃的暗紫黑色底板，更显忧郁优雅 */
-  border: 1px solid rgba(192, 132, 252, 0.3); /* 浅紫色边框 */
-  box-shadow: 0 10px 40px rgba(0,0,0,0.7), inset 0 0 30px rgba(192, 132, 252, 0.05);
-  padding: 40px; border-radius: 12px;
-  margin-bottom: 24px; width: 100%; text-align: left;
-  flex: none; overflow: visible; box-sizing: border-box; word-wrap: break-word;
-}
-
-.violet-theme p {
-  font-size: 15px; line-height: 2.2; margin-bottom: 20px;
-  color: #f3e8ff; /* 极淡的雪青色，阅读柔和 */
-  text-indent: 2em; text-shadow: 0 1px 3px rgba(0,0,0,0.9);
-  letter-spacing: 0.5px;
-}
-
-
-/* 插入的图片样式 */
-.image-wrapper {
-  display: flex; justify-content: center;
-  margin-bottom: 30px;
-}
-.content-img {
-  width: 100%; max-width: 650px; border-radius: 8px;
-  border: 1px solid rgba(192, 132, 252, 0.4); /* 紫色相框描边 */
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(192, 132, 252, 0.15);
-  cursor: pointer; transition: transform 0.4s ease, border-color 0.4s ease;
-}
-.content-img:hover {
-  transform: scale(1.02);
-  border-color: rgba(216, 180, 254, 0.8);
-}
-
-/* 💡 优雅的火漆印章分割线 */
-.letter-divider {
-  display: flex; align-items: center; justify-content: center; gap: 12px;
-  margin: 36px 0; opacity: 0.7;
-}
-.wax-seal {
-  width: 10px; height: 10px; background: #c084fc;
-  border-radius: 50%; box-shadow: 0 0 10px #c084fc, inset 0 0 4px rgba(0,0,0,0.5);
-}
-.letter-line {
-  height: 1px; width: 120px;
-  background: linear-gradient(90deg, transparent, #c084fc, transparent);
-}
-
-/* 底部链接适配 (柔和紫) */
-.extra-links {
-  margin-top: 40px; padding-top: 20px; border-top: 1px dashed rgba(192, 132, 252, 0.3);
-  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-}
+.violet-theme { background: rgba(30, 20, 45, 0.85); border: 1px solid rgba(192, 132, 252, 0.3); box-shadow: 0 10px 40px rgba(0,0,0,0.7), inset 0 0 30px rgba(192, 132, 252, 0.05); padding: 40px; border-radius: 12px; margin-bottom: 24px; width: 100%; text-align: left; flex: none; overflow: visible; box-sizing: border-box; word-wrap: break-word; }
+.violet-theme p { font-size: 15px; line-height: 2.2; margin-bottom: 20px; color: #f3e8ff; text-indent: 2em; text-shadow: 0 1px 3px rgba(0,0,0,0.9); letter-spacing: 0.5px; }
+.image-wrapper { display: flex; justify-content: center; margin-bottom: 30px; }
+.content-img { width: 100%; max-width: 650px; border-radius: 8px; border: 1px solid rgba(192, 132, 252, 0.4); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(192, 132, 252, 0.15); cursor: pointer; transition: transform 0.4s ease, border-color 0.4s ease; }
+.content-img:hover { transform: scale(1.02); border-color: rgba(216, 180, 254, 0.8); }
+.letter-divider { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 36px 0; opacity: 0.7; }
+.wax-seal { width: 10px; height: 10px; background: #c084fc; border-radius: 50%; box-shadow: 0 0 10px #c084fc, inset 0 0 4px rgba(0,0,0,0.5); }
+.letter-line { height: 1px; width: 120px; background: linear-gradient(90deg, transparent, #c084fc, transparent); }
+.extra-links { margin-top: 40px; padding-top: 20px; border-top: 1px dashed rgba(192, 132, 252, 0.3); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .links-label { font-size: 14px; color: #d8b4fe; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
-.img-link {
-  display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px;
-  background: rgba(192, 132, 252, 0.15); border: 1px solid rgba(192, 132, 252, 0.3);
-  color: #f3e8ff; text-decoration: none; border-radius: 20px; font-size: 13px;
-  transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(4px);
-}
-.img-link:hover {
-  background: rgba(192, 132, 252, 0.3); border-color: #d8b4fe;
-  color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(192, 132, 252, 0.3);
-}
+.img-link { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: rgba(192, 132, 252, 0.15); border: 1px solid rgba(192, 132, 252, 0.3); color: #f3e8ff; text-decoration: none; border-radius: 20px; font-size: 13px; transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(4px); }
+.img-link:hover { background: rgba(192, 132, 252, 0.3); border-color: #d8b4fe; color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(192, 132, 252, 0.3); }
 
 @media (max-width: 768px) {
   .violet-theme { padding: 24px 16px; margin-bottom: 20px; }
