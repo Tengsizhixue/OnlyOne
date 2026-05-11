@@ -5,7 +5,7 @@
     title-color="#d8b4fe"
     code="191001"
     @back="$emit('back')"
-    v-slot="{ openImage }"
+    v-slot="{ openImage, isAllUnlocked, back }"
   >
     <div class="violet-room">
       <div class="letter-box violet-theme">
@@ -67,6 +67,13 @@
           </span>
         </div>
 
+        <!-- 🌟 将退出和通关按钮置于文章末尾 -->
+        <div class="bottom-action">
+          <button class="shimmer-btn" @click="back">
+            {{ isAllUnlocked ? '开启终局之门 ✨' : '返回聊天' }}
+          </button>
+        </div>
+
       </div>
     </div>
   </SecretLayout>
@@ -102,6 +109,8 @@ defineEmits(['back'])
 .links-label { font-size: 14px; color: #d8b4fe; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
 .img-link { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: rgba(192, 132, 252, 0.15); border: 1px solid rgba(192, 132, 252, 0.3); color: #f3e8ff; text-decoration: none; border-radius: 20px; font-size: 13px; transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(4px); }
 .img-link:hover { background: rgba(192, 132, 252, 0.3); border-color: #d8b4fe; color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(192, 132, 252, 0.3); }
+
+.bottom-action { margin-top: 40px; display: flex; justify-content: center; }
 
 @media (max-width: 768px) {
   .violet-theme { padding: 24px 16px; margin-bottom: 20px; }

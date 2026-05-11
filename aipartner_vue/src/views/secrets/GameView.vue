@@ -5,7 +5,7 @@
     title-color="#f87171"
     code="180818"
     @back="$emit('back')"
-    v-slot="{ openImage }"
+    v-slot="{ openImage, isAllUnlocked, back }"
   >
     <div class="gamer-room">
       <div class="story-box cyberpunk-theme">
@@ -84,6 +84,12 @@
           </span>
         </div>
 
+        <div class="bottom-action">
+          <button class="shimmer-btn" @click="back">
+            {{ isAllUnlocked ? '开启终局之门 ✨' : '返回聊天' }}
+          </button>
+        </div>
+
       </div>
     </div>
   </SecretLayout>
@@ -121,6 +127,8 @@ defineEmits(['back'])
 .links-label { font-size: 14px; color: #fca5a5; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
 .img-link { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fee2e2; text-decoration: none; border-radius: 20px; font-size: 13px; transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(4px); }
 .img-link:hover { background: rgba(239, 68, 68, 0.3); border-color: #ef4444; color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3); }
+
+.bottom-action { margin-top: 40px; display: flex; justify-content: center; }
 
 @media (max-width: 768px) {
   .cyberpunk-theme { padding: 20px 16px; margin-bottom: 20px; }

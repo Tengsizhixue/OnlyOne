@@ -4,7 +4,7 @@
     title-color="#7dd3fc"
     code="251027"
     @back="handleBack"
-    v-slot="{ openImage }"
+    v-slot="{ openImage, isAllUnlocked, back }"
   >
     <audio ref="audio1" :src="audioZhanHuo" preload="metadata" @ended="onEnded(1)"></audio>
     <audio ref="audio2" :src="audioJieJu" preload="metadata" @ended="onEnded(2)"></audio>
@@ -120,6 +120,12 @@
             <el-icon><Picture /></el-icon> 19年的游戏购买记录
           </span>
         </div>
+
+        <div class="bottom-action">
+          <button class="shimmer-btn" @click="back">
+            {{ isAllUnlocked ? '开启终局之门 ✨' : '返回聊天' }}
+          </button>
+        </div>
       </div>
     </div>
   </SecretLayout>
@@ -224,6 +230,8 @@ onUnmounted(() => {
 .links-label { font-size: 14px; color: #bae6fd; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
 .img-link { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #f0f9ff; text-decoration: none; border-radius: 20px; font-size: 13px; transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(4px); }
 .img-link:hover { background: rgba(56, 189, 248, 0.3); border-color: #7dd3fc; color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3); }
+
+.bottom-action { margin-top: 40px; display: flex; justify-content: center; }
 
 @media (max-width: 768px) {
   .memory-box { padding: 20px 16px; margin-bottom: 20px; border-radius: 12px; }
