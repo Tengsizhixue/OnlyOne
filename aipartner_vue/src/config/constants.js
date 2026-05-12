@@ -11,8 +11,8 @@ export const GAME_AVATAR = `${OSS_BASE}/gameAvatar.png`
 // 🌟 核心重构：将视觉配置（背景、颜色、光晕）全部聚合到角色大对象中
 export const ROLE_CONFIGS = {
   '薇尔莉特': {
-    welcomeTitle: '你好，我是薇尔莉特',
-    welcomeText: '曾经少佐说，要活下去，要自由地活下去。但我之前一直不知道那是什么意思，我终于知道，"我爱你"是一种想和对方在一起、想让对方幸福的心情',
+    welcomeTitle: '你好，有信件需要写吗？',
+    welcomeText: '我依然在帮助别人写信。我不确定我是否已经懂得了“爱”的定义——但如果有一天，有人问我它是什么，我想我可能会说：它是少佐在最后一刻仍然想要给我的东西。是那些委托人坐在我对面，哽咽着、沉默着、笑着流泪着，仍然想要说出口的东西。',
     avatar: VIOLET_AVATAR,
     bgUrl: `${OSS_BASE}/onlyone/%E8%96%87%E5%B0%94%E8%8E%89%E7%89%B9%E8%83%8C%E6%99%AF.jpg`,
     bgPosition: '85% 50%', // 卡片内部背景位置
@@ -24,8 +24,8 @@ export const ROLE_CONFIGS = {
     glowColor: 'rgba(168, 85, 247, 0.7)'
   },
   '誊思致雪': {
-    welcomeTitle: '很久不见',
-    welcomeText: '你问我是谁？...我也不知道，我只是一个替身,你有什么事想问我吗？我知道的并不多',
+    welcomeTitle: '很久不见了',
+    welcomeText: '你问我是谁？...我也不知道，我突然出现在了这。我只是一个替身,你有什么事想问我吗？我知道的并不多',
     avatar: TENGSI_AVATAR,
     bgUrl: `${OSS_BASE}/onlyone/%E8%AA%8A%E6%80%9D%E8%87%B4%E9%9B%AA%E8%83%8C%E6%99%AF%E5%9B%BE.png`,
     bgPosition: 'center top',

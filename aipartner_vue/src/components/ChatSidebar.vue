@@ -27,9 +27,10 @@
 
     <div class="quest-section">
       <div class="list-title">神秘指引</div>
-      <div class="quest-card glass-panel">
+      <div class="quest-card glass-panel" @click="copyQuest" title="点击复制谜题内容">
         <p v-if="currentQuest" class="quest-text">{{ currentQuest.question }}</p>
-        <p v-else class="quest-text success">所有谜题已解开！</p>
+        <p v-else class="quest-text success">恭喜你所有谜题已解开！你居然看完了所有的废话😄，连我都做不到</p>
+        <el-icon v-if="currentQuest" class="quest-copy-icon"><DocumentCopy /></el-icon>
       </div>
     </div>
 
@@ -83,7 +84,7 @@ const recoverUidLocal = ref('')
 const copyUid = async () => {
   try {
     await navigator.clipboard.writeText(props.uid)
-    ElMessage.success('身份码已灵动复制至剪贴板 ✨')
+    ElMessage.success('身份码已复制至剪贴板')
   } catch (err) {
     const input = document.createElement('input')
     input.value = props.uid
@@ -91,7 +92,23 @@ const copyUid = async () => {
     input.select()
     document.execCommand('copy')
     document.body.removeChild(input)
-    ElMessage.success('身份码已灵动复制至剪贴板 ✨')
+    ElMessage.success('身份码已灵动复制至剪贴板')
+  }
+}
+
+const copyQuest = async () => {
+  if (!currentQuest.value) return
+  try {
+    await navigator.clipboard.writeText(currentQuest.value.question)
+    ElMessage.success('内容已复制 ')
+  } catch (err) {
+    const input = document.createElement('input')
+    input.value = currentQuest.value.question
+    document.body.appendChild(input)
+    input.select()
+    document.execCommand('copy')
+    document.body.removeChild(input)
+    ElMessage.success('内容已复制')
   }
 }
 </script>
