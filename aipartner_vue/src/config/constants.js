@@ -57,7 +57,7 @@ export const ROLE_CONFIGS = {
     bgPosition: '65% 50%',
     hallBgUrl: `${OSS_BASE}/onlyone/%E9%AA%91%E9%A9%AC%E4%B8%8E%E7%A0%8D%E6%9D%80%E5%8A%A0%E8%BD%BD.jpg`,
     hallBgPosition: 'center center',
-    hallBgUrlMobile: `${OSS_BASE}/onlyone/%E6%B8%B8%E6%88%8F%E8%A7%92%E8%89%B2%E6%89%8B%E6%9C%BA%E7%AB%AF%E8%83%8C%E6%99%AF.png`, // 📱手机端专属竖屏大背景 (在此替换链接)
+    hallBgUrlMobile: `${OSS_BASE}/onlyone/%E6%B8%B8%E6%88%8F%E6%89%8B%E6%9C%BA%E7%AB%AF%E8%83%8C%E6%99%AF.png`, // 📱手机端专属竖屏大背景 (在此替换链接)
     hallBgPositionMobile: 'center center', // 📱手机端背景位置
     themeColor: '#fef08a',
     glowColor: 'rgba(234, 179, 8, 0.7)'

@@ -19,6 +19,10 @@
               <button class="shimmer-btn" @click="handleBack">
                 {{ isAllUnlocked ? '开启终局之门 ✨' : '返回聊天' }}
               </button>
+              <!-- 🐛 临时调试按钮：重置所有进度 -->
+              <button class="debug-reset-btn" @click="handleReset" title="重置所有谜题进度">
+                🔄 重置进度
+              </button>
             </div>
           </div>
         </div>
