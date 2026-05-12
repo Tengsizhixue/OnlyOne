@@ -256,7 +256,8 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
 </script>
 
 <style scoped>
-@import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700&family=ZCOOL+XiaoWei&display=swap');
+/* 🌟 字体修复：引入云端思源宋体，作为安卓系统没有楷体时的优雅备选 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700&display=swap');
 
 .selection-hall {
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -418,11 +419,17 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
 }
 
 .card-name {
-  font-size: 30px;
-  font-family: "STKaiti", "KaiTi", serif;
-  font-weight: bold; margin: 0 0 12px 0;
-  letter-spacing: 2px;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+  font-size: 34px;
+  /* 🌟 字体修复：新增 Kaiti SC（iOS原生楷体），以及 Noto Serif SC（安卓回退优雅宋体） */
+  font-family: "Kaiti SC", "STKaiti", "KaiTi", "华文楷体", "楷体", "Noto Serif SC", serif;
+  font-weight: bold;
+  margin: 0 0 16px 0;
+  letter-spacing: 4px;
+  /* 🌟 性能优化：去除了 text-shadow 的重度过渡动画 */
+  transition: color 0.4s ease;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 .card-desc {
