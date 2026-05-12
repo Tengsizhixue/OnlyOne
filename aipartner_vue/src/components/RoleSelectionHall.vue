@@ -33,10 +33,24 @@
 
         <div class="card-mask"></div>
 
+        <!-- 🌟 优化1：边缘柔化渐变，通过内阴影使卡片图像边缘与外界大背景完美交融，消除生硬割裂感 -->
+        <div class="card-edge-vignette"></div>
+
+        <!-- 🌟 优化2：卡片闪光效果（表面扫光），增加物理质感 -->
+        <div class="card-shine" :class="{ 'is-shining': index === activeCarouselIndex }"></div>
+
+        <!-- 🌟 优化3：边缘动态流光特效，跟随角色的主题色流动 -->
+        <div class="streamer-wrapper" v-if="index === activeCarouselIndex">
+          <div class="streamer-bg" :style="{
+            '--theme-color': getCurrentRoleConfig(role.role_type).themeColor
+          }"></div>
+        </div>
+
+        <!-- 原静态边框：选中时将硬描边设为透明让位给流光，但保留环境外发光 -->
         <div class="card-glow-border" :style="{
-          borderColor: index === activeCarouselIndex ? 'rgba(255,255,255,0.9)' : 'rgba(255, 255, 255, 0.15)',
+          borderColor: index === activeCarouselIndex ? 'transparent' : 'rgba(255, 255, 255, 0.15)',
           boxShadow: index === activeCarouselIndex
-            ? `0 0 25px 2px ${getCurrentRoleConfig(role.role_type).glowColor}, 0 0 40px 8px rgba(255,255,255,0.1), inset 0 0 20px ${getCurrentRoleConfig(role.role_type).glowColor}`
+            ? `0 0 35px 5px ${getCurrentRoleConfig(role.role_type).glowColor}, 0 0 50px 10px rgba(255,255,255,0.1), inset 0 0 30px ${getCurrentRoleConfig(role.role_type).glowColor}`
             : 'none'
         }"></div>
 
@@ -97,8 +111,6 @@ const router = useRouter()
 
 const activeCarouselIndex = ref(0)
 const isMobile = ref(false)
-
-// 沉浸式动画状态变量
 const isEnteringChat = ref(false)
 
 let touchStartX = 0
@@ -125,9 +137,7 @@ const handleCardClick = (index) => {
       return
     }
 
-    // 触发冲向屏幕的景深动画
     isEnteringChat.value = true
-
     setTimeout(() => {
       emit('enter-chat')
       setTimeout(() => { isEnteringChat.value = false }, 100)
@@ -167,17 +177,14 @@ const handleTouchEnd = (e) => {
   }
 }
 
-// 🌟 新增：动态获取背景样式（自动识别并切换电脑端与手机端的壁纸）
 const getBgStyle = (roleType) => {
   const config = getCurrentRoleConfig(roleType)
   if (isMobile.value) {
-    // 如果是手机端，优先读取手机端专属链接和位置，没有则回退到电脑端链接
     return {
       backgroundImage: `url(${config.hallBgUrlMobile || config.hallBgUrl || config.bgUrl})`,
       backgroundPosition: config.hallBgPositionMobile || config.hallBgPosition || 'center center'
     }
   } else {
-    // 电脑端读取原电脑端链接
     return {
       backgroundImage: `url(${config.hallBgUrl || config.bgUrl})`,
       backgroundPosition: config.hallBgPosition || 'center center'
@@ -185,13 +192,11 @@ const getBgStyle = (roleType) => {
   }
 }
 
-// 🌟 修改1：3D矩阵算法重构 —— 真正恢复为向内翻折的 Concave (凹面环抱) 效果
 const getCardStyle = (index) => {
   const offset = index - activeCarouselIndex.value
   const absOffset = Math.abs(offset)
   const sign = Math.sign(offset)
 
-  // 设置推开的间距和旋转幅度
   const xTranslate = isMobile.value ? 140 : 320
   const zTranslate = isMobile.value ? 160 : 250
   const rotate = isMobile.value ? 45 : 55
@@ -202,7 +207,6 @@ const getCardStyle = (index) => {
   let zIndex = 100 - absOffset
 
   if (isEnteringChat.value) {
-    // 电影级过场状态
     if (offset === 0) {
       transform = `translate3d(0px, 0px, 400px) scale(1.15)`
       opacity = 0
@@ -211,13 +215,10 @@ const getCardStyle = (index) => {
       opacity = 0
     }
   } else {
-    // 常规轮播状态
     if (offset === 0) {
       transform = `translate3d(0px, 0px, 50px) rotateY(0deg) scale(1)`
       opacity = 1
     } else {
-      // 💡 核心修正：改回正确的负关联角度 rotateY(${-sign * rotate}deg)
-      // 让右侧卡片(sign=+1)顺时针向左倾斜，左侧卡片(sign=-1)逆时针向右倾斜，从而完美呈现两侧向中心靠拢的“凹面环幕感”
       transform = `translate3d(${sign * xTranslate * absOffset}px, 0, ${-zTranslate * absOffset}px) rotateY(${-sign * rotate}deg) scale(${scale})`
       opacity = absOffset === 1 ? 0.35 : 0
     }
@@ -255,7 +256,6 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
 </script>
 
 <style scoped>
-/* 🌟 修改2：顶部动态引入在线免费优雅艺术字体库 (站酷小薇体、思源宋体、毛笔行楷) */
 @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;600;700&family=ZCOOL+XiaoWei&display=swap');
 
 .selection-hall {
@@ -286,7 +286,6 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
   pointer-events: none;
 }
 
-/* 轮播主体 */
 .carousel-3d {
   position: relative; width: 280px; height: 460px;
   transform-style: preserve-3d;
@@ -301,16 +300,16 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
   will-change: transform, opacity;
   backface-visibility: hidden;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.6);
 }
 
 .carousel-card.active {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  /* 移除了白色硬边框，全权交给流光和阴影 */
+  border: none;
 }
 
-/* 🌟 修改3：为卡片内部图层设置一致的模糊过渡，缩放 1.08 倍避免 CSS 模糊产生的四周边缘白边 */
 .card-inner-bg {
   position: absolute; inset: 0;
   background-size: cover;
@@ -322,20 +321,90 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
 
 .card-mask {
   position: absolute; inset: 0;
-  background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.8) 100%);
+  background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.85) 100%);
   z-index: 2;
+}
+
+/* 🌟 新增特效层：边缘柔化渐变，彻底解决贴图生硬违和感 */
+.card-edge-vignette {
+  position: absolute; inset: 0;
+  border-radius: 16px;
+  /* 使用强烈的向内阴影模糊边缘，让背景向黑色过渡 */
+  box-shadow: inset 0 0 60px rgba(0,0,0,0.9), inset 0 0 25px rgba(0,0,0,0.6);
+  z-index: 3;
+  pointer-events: none;
+}
+
+/* 🌟 新增特效层：卡片表面的高光扫光 */
+.card-shine {
+  position: absolute; inset: 0;
+  border-radius: 16px;
+  z-index: 6; /* 在所有内层之上 */
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(255, 255, 255, 0.4) 28%,
+    rgba(255, 255, 255, 0.05) 31%,
+    transparent 36%
+  );
+  background-size: 200% 200%;
+  opacity: 0;
+}
+.card-shine.is-shining {
+  animation: shine-sweep 4s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+@keyframes shine-sweep {
+  0% { background-position: 200% 200%; opacity: 0; }
+  10% { opacity: 1; }
+  40% { background-position: -100% -100%; opacity: 0; }
+  100% { background-position: -100% -100%; opacity: 0; }
+}
+
+/* 🌟 新增特效层：边缘动态流光，利用 mask 切割出流光的边框 */
+.streamer-wrapper {
+  position: absolute; inset: 0;
+  border-radius: 16px;
+  overflow: hidden;
+  z-index: 5;
+  pointer-events: none;
+  padding: 2px; /* 这里决定了流光边框的粗细 */
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+.streamer-bg {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 250%; height: 250%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    transparent 70%,
+    var(--theme-color) 90%,
+    #ffffff 100%
+  );
+  transform: translate(-50%, -50%);
+  animation: rotate-streamer 3s linear infinite;
+}
+@keyframes rotate-streamer {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 .card-glow-border {
   position: absolute; inset: 0;
   border-radius: 16px;
   pointer-events: none;
-  z-index: 5;
+  z-index: 4;
   transition: all 0.4s ease;
+  border: 1px solid transparent;
 }
 
 .card-content {
-  position: relative; z-index: 3;
+  position: relative; z-index: 7; /* 置于所有特效之上 */
   padding: 30px 0;
   width: 100%; height: 100%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -348,7 +417,6 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
   transform: translateZ(0);
 }
 
-/* 🌟 修改2：角色名称优先采用唯美飘逸的站酷小薇体/毛笔风 */
 .card-name {
   font-size: 30px;
   font-family: "STKaiti", "KaiTi", serif;
@@ -357,7 +425,6 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
   text-shadow: 0 2px 10px rgba(0,0,0,0.8);
 }
 
-/* 🌟 修改2：欢迎语描述采用极佳阅读体验且优雅高贵的思源宋体 */
 .card-desc {
   font-size: 14px; line-height: 1.6; color: #e2e8f0;
   font-family: 'Noto Serif SC', 'ZCOOL XiaoWei', "STKaiti", "KaiTi", serif;
@@ -408,7 +475,6 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
 .fade-hall-enter-from { opacity: 0; transform: scale(1.05); }
 .fade-hall-leave-to { opacity: 0; transform: scale(0.95); }
 
-/* 移动端适配 */
 @media (max-width: 768px) {
   .carousel-3d { width: 210px; height: 400px; }
   .card-avatar { width: 70px; height: 70px; margin-bottom: 12px; }
