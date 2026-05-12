@@ -33,7 +33,7 @@
 
 <script setup>
 import { computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { unlockCode, isAllUnlocked, resetQuestProgress } from '../store/questState.js'
 
 import LiHongBaoView from './secrets/LiHongBaoView.vue'
@@ -51,6 +51,7 @@ const props = defineProps({
 })
 
 const router = useRouter()
+const route = useRoute()
 
 onMounted(() => {
   if (props.secretCode) unlockCode(props.secretCode)
@@ -63,7 +64,14 @@ const handleBack = () => {
   if (isAllUnlocked.value) {
     router.push('/final')
   } else {
-    router.push('/chat')
+    router.push({
+      name: 'chat',
+      query: {
+        view: 'room',
+        role: route.query.role,
+        session: route.query.session
+      }
+    })
   }
 }
 

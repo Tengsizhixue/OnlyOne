@@ -288,7 +288,6 @@ def chat_completions(request: ChatRequest):
                 messages=api_messages,
                 stream=True,
                 temperature=0.8,
-                max_tokens=1024
             )
             for chunk in response:
                 if chunk.choices and len(chunk.choices) > 0:
