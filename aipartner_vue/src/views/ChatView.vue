@@ -203,7 +203,7 @@ const recoverHistory = async (targetUid) => {
 }
 
 const deleteSession = (id) => {
-  ElMessageBox.confirm('确定要抹除这段对话记忆吗？此操作将无法挽回。', '抹除确认', {
+  ElMessageBox.confirm('确定要删除吗？此操作将无法挽回。', '抹除确认', {
     type: 'warning', confirmButtonText: '确定抹除', cancelButtonText: '再想一下'
   }).then(async () => {
     try {
@@ -218,15 +218,7 @@ const deleteSession = (id) => {
 }
 
 const backToSelection = () => {
-  if (messages.value.length > 0) {
-    ElMessageBox.confirm('返回选择大厅将暂时离开当前对话，你可以在左侧边栏找到它。确定返回吗？', '提示', {
-      confirmButtonText: '确定', cancelButtonText: '取消', type: 'info'
-    }).then(() => {
-      createNewSession() // createNewSession 内部会切换路由并触发退回动画
-    }).catch(() => {})
-  } else {
-    createNewSession()
-  }
+  createNewSession()
 }
 
 const handleSendMessage = async (userText) => {
@@ -310,6 +302,20 @@ onUnmounted(() => {
 onMounted(() => {
   fetchRoles()
   fetchSessions()
+})
+
+onMounted(async () => {
+  await fetchRoles()
+  await fetchSessions()
+
+  // 🌟 返回聊天室时：根据 URL 参数自动恢复刚才的对话现场
+  if (route.query.view === 'room') {
+    if (route.query.session) {
+      await loadSession(route.query.session)
+    } else if (route.query.role) {
+      handleRoleUpdate(route.query.role)
+    }
+  }
 })
 </script>
 

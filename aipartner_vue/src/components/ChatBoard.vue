@@ -121,7 +121,6 @@ const handleSend = () => {
 .exit-btn { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; border: 1px solid transparent;}
 .exit-btn:hover { transform: scale(1.05); }
 
-/* 🌟 优化1：去掉了 scroll-behavior: smooth; 让流式接收文字时不要抽搐 */
 .chat-main { flex: 1; overflow-y: auto; padding: 0; }
 .chat-inner { max-width: 840px; margin: 0 auto; padding: 40px 24px; position: relative; }
 
@@ -132,16 +131,133 @@ const handleSend = () => {
 .empty-title { font-size: 24px; font-weight: 600; margin: 0 0 12px 0; }
 .empty-subtext { font-size: 15px; margin: 0; max-width: 400px; line-height: 1.6; }
 
+/* ================= 🌟 气泡 UI 重新设计 ================= */
 .message-wrapper { display: flex; margin-bottom: 36px; align-items: flex-start; }
 .message-wrapper.user { flex-direction: row-reverse; }
-.avatar-container { border-radius: 14px; padding: 2px; flex-shrink: 0; }
-.avatar { width: 42px; height: 42px; border-radius: 12px; display: block; }
-.message-wrapper.user .avatar-container { margin-left: 18px; }
-.message-wrapper.assistant .avatar-container { margin-right: 18px; }
+.avatar-container { flex-shrink: 0; }
+.avatar { width: 42px; height: 42px; border-radius: 12px; display: block; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+.message-wrapper.user .avatar-container { margin-left: 16px; }
+.message-wrapper.assistant .avatar-container { margin-right: 16px; }
 
-.bubble { max-width: 75%; padding: 16px 22px; font-size: 15px; line-height: 1.7; word-wrap: break-word; backdrop-filter: blur(10px); transition: background-color 0.5s ease; border: 1px solid transparent;}
+/* 基础形状与毛玻璃特效 */
+.bubble {
+  max-width: 75%; padding: 14px 20px; font-size: 15px; line-height: 1.8; word-wrap: break-word;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+}
 .message-wrapper.user .bubble { border-radius: 20px 4px 20px 20px; }
 .message-wrapper.assistant .bubble { border-radius: 4px 20px 20px 20px; }
+
+/* ================= 🌈 多主题毛玻璃气泡自适应适配 ================= */
+
+/* 默认科技蓝主题 (李蓝宝/自定义) */
+:global(.theme-default) .message-wrapper.user .bubble {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(79, 70, 229, 0.05)) !important;
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+  color: #f8fafc !important;
+}
+:global(.theme-default) .message-wrapper.assistant .bubble {
+  background: rgba(15, 23, 42, 0.5) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+  color: #e2e8f0 !important;
+}
+
+/* ❄️ 誊思致雪主题 (修复亮色系白底白字看不清的问题) */
+:global(.theme-snow) .message-wrapper.user .bubble {
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.15), rgba(125, 211, 252, 0.05)) !important;
+  border: 1px solid rgba(56, 189, 248, 0.4) !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+  color: #0f172a !important; /* 深色字体 */
+  font-weight: 500;
+}
+:global(.theme-snow) .message-wrapper.assistant .bubble {
+  background: rgba(255, 255, 255, 0.8) !important; /* 白色半透明底 */
+  border: 1px solid rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 4px 20px rgba(56, 189, 248, 0.1) !important;
+  color: #0f172a !important; /* 强制深色黑体文字！ */
+  font-weight: 500;
+}
+
+/* 🌸 薇尔莉特主题 (紫色系) */
+:global(.theme-violet) .message-wrapper.user .bubble {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(109, 40, 217, 0.05)) !important;
+  border: 1px solid rgba(139, 92, 246, 0.3) !important;
+  color: #f8fafc !important;
+}
+:global(.theme-violet) .message-wrapper.assistant .bubble {
+  background: rgba(23, 11, 43, 0.5) !important;
+  border: 1px solid rgba(167, 139, 250, 0.2) !important;
+  color: #e2e8f0 !important;
+}
+
+/* 🎵 音乐助手主题 (粉色系) */
+:global(.theme-music) .message-wrapper.user .bubble {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.15), rgba(190, 24, 93, 0.05)) !important;
+  border: 1px solid rgba(244, 114, 182, 0.3) !important;
+  color: #fdf2f8 !important;
+}
+:global(.theme-music) .message-wrapper.assistant .bubble {
+  background: rgba(33, 10, 18, 0.5) !important;
+  border: 1px solid rgba(244, 114, 182, 0.2) !important;
+  color: #fbcfe8 !important;
+}
+
+/* ⚔️ 游戏助手主题 (黑金系) */
+:global(.theme-game) .message-wrapper.user .bubble {
+  background: linear-gradient(135deg, rgba(184, 142, 81, 0.15), rgba(145, 110, 60, 0.05)) !important;
+  border: 1px solid rgba(184, 142, 81, 0.3) !important;
+  color: #f5eedc !important;
+}
+:global(.theme-game) .message-wrapper.assistant .bubble {
+  background: rgba(20, 12, 8, 0.6) !important;
+  border: 1px solid rgba(184, 142, 81, 0.2) !important;
+  color: #e8d7ba !important;
+}
+
+/* 🧠 深度思考指示器 */
+:deep(.deep-thinking-badge) {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.05));
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 20px;
+  color: #c4b5fd;
+  font-size: 13px;
+  margin-bottom: 12px;
+  animation: pulse-glow 2.5s infinite alternate ease-in-out;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.1);
+}
+
+/* 适配亮色主题下深度思考的颜色 */
+:global(.theme-snow) .deep-thinking-badge {
+  background: linear-gradient(90deg, rgba(139, 92, 246, 0.15), rgba(139, 92, 246, 0.02)) !important;
+  border-color: rgba(139, 92, 246, 0.3) !important;
+  color: #6d28d9 !important;
+  font-weight: 600;
+}
+
+:deep(.think-icon) {
+  animation: float-spin 3s linear infinite;
+  display: inline-block;
+}
+:deep(.think-text) {
+  letter-spacing: 0.5px;
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 5px rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.3); }
+  100% { box-shadow: 0 0 20px rgba(139, 92, 246, 0.4); border-color: rgba(139, 92, 246, 0.6); }
+}
+@keyframes float-spin {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-2px) rotate(180deg); }
+  100% { transform: translateY(0) rotate(360deg); }
+}
+/* ======================================================= */
 
 .thinking-state { display: flex; align-items: center; gap: 8px; font-size: 14px; font-style: italic; opacity: 0.7;}
 .is-loading { animation: rotating 2s linear infinite; }

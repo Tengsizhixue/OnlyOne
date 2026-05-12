@@ -12,7 +12,7 @@ export const GAME_AVATAR = `${OSS_BASE}/gameAvatar.png`
 export const ROLE_CONFIGS = {
   '薇尔莉特': {
     welcomeTitle: '你好，有信件需要写吗？',
-    welcomeText: '我依然在帮助别人写信。我不确定我是否已经懂得了“爱”的定义——但如果有一天，有人问我它是什么，我想我可能会说：它是少佐在最后一刻仍然想要给我的东西。是那些委托人坐在我对面，哽咽着、沉默着、笑着流泪着，仍然想要说出口的东西。',
+    welcomeText: '我是自动手记人偶，帮助别人写出，我不确定我是否已经懂得了“爱”的定义——但如果有一天，有人问我它是什么，我想我可能会说：它是少佐在最后一刻仍然想要给我的东西。是那些委托人坐在我对面，哽咽着、沉默着、笑着流泪着，仍然想要说出口的东西。',
     avatar: VIOLET_AVATAR,
     bgUrl: `${OSS_BASE}/onlyone/%E8%96%87%E5%B0%94%E8%8E%89%E7%89%B9%E8%83%8C%E6%99%AF.jpg`,
     bgPosition: '85% 50%', // 卡片内部背景位置
@@ -63,8 +63,8 @@ export const ROLE_CONFIGS = {
     glowColor: 'rgba(234, 179, 8, 0.7)'
   },
   '李蓝宝': {
-    welcomeTitle: '你好，我是李蓝宝',
-    welcomeText: '我是你的好朋友李蓝宝。对了，关于我牢弟李红宝的问题你可以随时问我哦！',
+    welcomeTitle: '我是李蓝宝',
+    welcomeText: '我很爱聊天，不像我牢弟李红宝总是失踪',
     avatar: DEFAULT_AI_AVATAR,
     bgUrl: 'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&w=800&q=80',
     bgPosition: 'center center',
@@ -75,19 +75,6 @@ export const ROLE_CONFIGS = {
     themeColor: '#a7f3d0',
     glowColor: 'rgba(16, 185, 129, 0.7)'
   },
-  '自定义': {
-    welcomeTitle: '你好，我是你的专属伙伴',
-    welcomeText: '你可以为我设定名字和性格。',
-    avatar: DEFAULT_AI_AVATAR,
-    bgUrl: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80',
-    bgPosition: 'center center',
-    hallBgUrl: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&q=80',
-    hallBgPosition: 'center center',
-    hallBgUrlMobile: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=600&q=80', // 📱手机端专属竖屏大背景 (在此替换链接)
-    hallBgPositionMobile: 'center center', // 📱手机端背景位置
-    themeColor: '#f8fafc',
-    glowColor: 'rgba(255, 255, 255, 0.5)'
-  }
 }
 
 export const getCurrentRoleConfig = (roleType) => {

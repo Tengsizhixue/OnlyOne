@@ -12,7 +12,7 @@
 
     <div class="epic-room">
       <div class="story-box golden-theme">
-        <p class="author-note">(以下内容主体由 AI 编写)</p>
+        <p class="author-note">(这个游戏的内容几乎都是AI写的)</p>
 
         <div
           class="custom-audio-player"
