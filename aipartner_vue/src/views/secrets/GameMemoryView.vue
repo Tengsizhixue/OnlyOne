@@ -6,9 +6,8 @@
     @back="handleBack"
     v-slot="{ openImage, isAllUnlocked, back }"
   >
-    <audio ref="audio1" :src="audioZhanHuo" preload="metadata" @ended="onEnded(1)"></audio>
-    <audio ref="audio2" :src="audioJieJu" preload="metadata" @ended="onEnded(2)"></audio>
-    <audio ref="audio3" :src="audioMoon" preload="metadata" @ended="onEnded(3)"></audio>
+    <!-- 🌟 核心修复：只保留一个全局的 audio 实例，通过动态切换 src 解决手机端多音频实例被强行静音的问题 -->
+    <audio ref="globalAudio" :src="currentAudioSrc" preload="metadata" @ended="onEnded"></audio>
 
     <div class="ethereal-room">
       <div class="memory-box moonlight-theme">
@@ -145,51 +144,56 @@ const {
 
 const emit = defineEmits(['back'])
 
-const audio1 = ref(null)
-const audio2 = ref(null)
-const audio3 = ref(null)
+// 🌟 核心修复：改用单音频实例机制
+const globalAudio = ref(null)
+const currentAudioSrc = ref('')
 const currentAudio = ref(null)
 const isPlaying = ref(false)
 
+// 将音频源映射到一个对象中
+const audioSources = {
+  1: audioZhanHuo,
+  2: audioJieJu,
+  3: audioMoon
+}
+
 const toggleAudio = (num) => {
-  const audios = { 1: audio1.value, 2: audio2.value, 3: audio3.value }
-  const targetAudio = audios[num]
+  if (!globalAudio.value) return
+  const audio = globalAudio.value
 
   if (currentAudio.value === num) {
     if (isPlaying.value) {
-      targetAudio?.pause()
+      audio.pause()
       isPlaying.value = false
     } else {
-      // 🌟 优化：加上 catch 捕获浏览器拦截错误
-      targetAudio?.play().catch(e => console.warn('音频播放被拦截:', e))
+      audio.play().catch(e => console.warn('音频播放被拦截:', e))
       isPlaying.value = true
     }
   } else {
-    Object.values(audios).forEach(audio => {
-      if (audio && audio !== targetAudio) {
-        audio.pause()
-      }
-    })
-    if (targetAudio) {
-      targetAudio.currentTime = 0
-      // 🌟 优化：加上 catch 捕获浏览器拦截错误
-      targetAudio.play().catch(e => console.warn('音频播放被拦截:', e))
-    }
+    // 切换歌曲：改变 src 并标记状态
     currentAudio.value = num
+    currentAudioSrc.value = audioSources[num]
     isPlaying.value = true
+
+    // 留出 50ms 给 Vue 更新 DOM 的 src 属性，然后再播放
+    setTimeout(() => {
+      if (globalAudio.value) {
+        globalAudio.value.currentTime = 0
+        globalAudio.value.play().catch(e => console.warn('音频播放被拦截:', e))
+      }
+    }, 50)
   }
 }
 
-const onEnded = (num) => {
-  if (currentAudio.value === num) {
-    isPlaying.value = false
-  }
+const onEnded = () => {
+  isPlaying.value = false
 }
 
 const handleBack = () => {
-  if (audio1.value) { audio1.value.pause(); audio1.value.currentTime = 0; }
-  if (audio2.value) { audio2.value.pause(); audio2.value.currentTime = 0; }
-  if (audio3.value) { audio3.value.pause(); audio3.value.currentTime = 0; }
+  if (globalAudio.value) {
+    globalAudio.value.pause()
+    globalAudio.value.currentTime = 0
+  }
   isPlaying.value = false
   emit('back')
 }

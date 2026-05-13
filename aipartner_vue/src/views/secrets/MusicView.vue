@@ -7,7 +7,8 @@
     @back="handleBack"
     v-slot="{ openImage, isAllUnlocked, back }"
   >
-    <audio ref="audioRef" :src="currentAudioSrc" preload="metadata" @ended="onAudioEnded"></audio>
+    <!-- 🌟 核心修复：只保留一个全局的 audio 实例，通过动态切换 src 解决手机端多音频实例被强行静音的问题 -->
+    <audio ref="globalAudio" :src="currentAudioSrc" preload="metadata" @ended="onAudioEnded"></audio>
 
     <div class="music-room">
       <div class="story-box">
@@ -75,7 +76,8 @@ import { SECRET_ASSETS } from '../../config/constants.js'
 const { bg, againAudio, xuniAudio, huxiAudio, cover1, cover2, cover3, attach1, attach2 } = SECRET_ASSETS.music
 const emit = defineEmits(['back'])
 
-const audioRef = ref(null)
+// 🌟 核心修复：改用单音频实例机制
+const globalAudio = ref(null)
 const currentAudioSrc = ref('')
 const currentSong = ref(null)
 const isPlaying = ref(false)
@@ -87,8 +89,8 @@ const playlist = ref([
 ])
 
 const togglePlay = (song) => {
-  if (!audioRef.value) return
-  const audio = audioRef.value
+  if (!globalAudio.value) return
+  const audio = globalAudio.value
 
   if (currentSong.value?.id === song.id) {
     if (isPlaying.value) {
@@ -101,13 +103,16 @@ const togglePlay = (song) => {
     return
   }
 
+  // 切换歌曲：改变 src 并标记状态
   currentSong.value = song
   currentAudioSrc.value = song.src
   isPlaying.value = true
 
+  // 留出 50ms 给 Vue 更新 DOM 的 src 属性，然后再播放
   setTimeout(() => {
-    if (audioRef.value) {
-      audioRef.value.play().catch(err => { if (err.name !== 'AbortError') console.error('播放失败:', err) })
+    if (globalAudio.value) {
+      globalAudio.value.currentTime = 0
+      globalAudio.value.play().catch(err => { if (err.name !== 'AbortError') console.error('播放失败:', err) })
     }
   }, 50)
 }
@@ -115,18 +120,18 @@ const togglePlay = (song) => {
 const onAudioEnded = () => { isPlaying.value = false }
 
 const handleBack = () => {
-  if (audioRef.value) {
-    audioRef.value.pause()
-    audioRef.value.currentTime = 0
+  if (globalAudio.value) {
+    globalAudio.value.pause()
+    globalAudio.value.currentTime = 0
     isPlaying.value = false
   }
   emit('back')
 }
 
 onUnmounted(() => {
-  if (audioRef.value) {
-    audioRef.value.pause()
-    audioRef.value.currentTime = 0
+  if (globalAudio.value) {
+    globalAudio.value.pause()
+    globalAudio.value.currentTime = 0
   }
 })
 </script>
