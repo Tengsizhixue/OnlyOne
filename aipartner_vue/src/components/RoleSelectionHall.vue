@@ -33,20 +33,20 @@
 
         <div class="card-mask"></div>
 
-        <!-- 🌟 优化1：边缘柔化渐变，通过内阴影使卡片图像边缘与外界大背景完美交融，消除生硬割裂感 -->
+        <!-- 边缘柔化渐变 -->
         <div class="card-edge-vignette"></div>
 
-        <!-- 🌟 优化2：卡片闪光效果（表面扫光），增加物理质感 -->
+        <!-- 卡片闪光效果 -->
         <div class="card-shine" :class="{ 'is-shining': index === activeCarouselIndex }"></div>
 
-        <!-- 🌟 优化3：边缘动态流光特效，跟随角色的主题色流动 -->
+        <!-- 边缘动态流光特效 -->
         <div class="streamer-wrapper" v-if="index === activeCarouselIndex">
           <div class="streamer-bg" :style="{
             '--theme-color': getCurrentRoleConfig(role.role_type).themeColor
           }"></div>
         </div>
 
-        <!-- 原静态边框：选中时将硬描边设为透明让位给流光，但保留环境外发光 -->
+        <!-- 静态边框 -->
         <div class="card-glow-border" :style="{
           borderColor: index === activeCarouselIndex ? 'transparent' : 'rgba(255, 255, 255, 0.15)',
           boxShadow: index === activeCarouselIndex
@@ -232,6 +232,26 @@ const getCardStyle = (index) => {
   }
 }
 
+// 🌟 核心优化：后台静默预加载所有角色的背景和头像
+const preloadAssets = () => {
+  // 延迟 1 秒执行，绝对不抢占首屏 Vue 渲染和第一张图的加载带宽
+  setTimeout(() => {
+    props.availableRoles.forEach(role => {
+      const config = getCurrentRoleConfig(role.role_type)
+      if (config) {
+        const bgImg = new Image()
+        bgImg.src = isMobile.value ? (config.hallBgUrlMobile || config.hallBgUrl || config.bgUrl) : (config.hallBgUrl || config.bgUrl)
+
+        const cardImg = new Image()
+        cardImg.src = config.bgUrl
+
+        const avatarImg = new Image()
+        avatarImg.src = config.avatar
+      }
+    })
+  }, 1000)
+}
+
 watch(activeCarouselIndex, (newIdx) => {
   if (props.availableRoles[newIdx]) {
     emit('update-role', props.availableRoles[newIdx].role_type)
@@ -250,6 +270,7 @@ const checkMobile = () => { isMobile.value = window.innerWidth <= 768 }
 onMounted(() => {
   checkMobile()
   window.addEventListener('resize', checkMobile)
+  preloadAssets() // 启动预加载引擎
 })
 
 onUnmounted(() => window.removeEventListener('resize', checkMobile))
@@ -264,7 +285,6 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
   perspective: 1200px;
   -webkit-perspective: 1200px;
   z-index: 50; user-select: none; overflow: hidden;
-  /* 🌟 核心修复1：设为实体背景色！阻断与底层 App.vue 动态背景的重复混合渲染，极大幅度降低 GPU 开销 */
   background: #050505;
   touch-action: none;
 }
@@ -279,7 +299,6 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
   opacity: 0; transition: opacity 0.8s ease-in-out;
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
-  /* 🌟 核心修复2：移除 will-change 属性，防止浏览器一次性强占太多显存导致内存崩溃闪屏 */
 }
 .hall-bg-image.show-bg {
   opacity: 1;
@@ -307,9 +326,6 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
   -webkit-backface-visibility: hidden;
   overflow: hidden;
   box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-  /* 🌟 核心修复3：彻底移除这里的 backdrop-filter: blur() ！
-     因为内部的 .card-inner-bg 已经是一张模糊过的图片并且遮挡了全卡片，
-     这里的 filter 除了触发 iOS/Android 的底层渲染 Bug 导致严重闪屏外，毫无用处！ */
 }
 
 .carousel-card.active {

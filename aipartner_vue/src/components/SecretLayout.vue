@@ -4,11 +4,11 @@
 
     <div class="quest-floating-widget glass-panel shadow-lg">
       <div class="quest-header">
-        <el-icon><Compass /></el-icon> 命运的指引
+        <el-icon><Compass /></el-icon> 指引小精灵
       </div>
       <div class="quest-body">
         <p v-if="currentQuest" class="quest-text">{{ currentQuest.question }}</p>
-        <p v-else class="quest-text success">✨ 所有的拼图已集齐...</p>
+        <p v-else class="quest-text success">我的任务完成了，下一次再见就是很多年后了😊</p>
       </div>
     </div>
 
@@ -88,16 +88,22 @@ const closeImage = () => { previewImage.value = '' }
 
 @media (max-width: 768px) {
   .secret-page {
-    width: 100%; height: 100dvh; /* 💡 使用 dvh 以适配手机浏览器下方工具栏 */
+    width: 100%; height: 100dvh;
     border-radius: 0;
-    padding: 70px 20px 20px; /* 💡 调整 Padding，不要留太大以免内容越界 */
+    /* 💡 核心修复1：将顶部的 padding 从 70px 加大到 120px，给多行文本的悬浮窗留足物理空间 */
+    padding: 70px 20px 20px;
     border: none; background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   }
-  .highlight-text { font-size: 24px; margin-bottom: 6px; }
+
+  /* 💡 稍微缩小一点主标题字号，防止手机上文字太挤折行 */
+  .highlight-text { font-size: 22px; margin-bottom: 6px; }
   .subtitle { font-size: 12px; margin-bottom: 16px; }
 
   .quest-floating-widget {
-    top: 10px; left: 10px; right: 10px; width: auto; padding: 12px 16px;
+    /* 💡 核心修复2：让手机上的悬浮窗排版更紧凑，避免其高度无限制扩张 */
+    top: 10px; left: 10px; right: 10px; width: auto; padding: 10px 14px;
   }
+  .quest-header { font-size: 13px; margin-bottom: 4px; }
+  .quest-text { font-size: 13px; line-height: 1.4; }
 }
 </style>

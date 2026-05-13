@@ -1,8 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import LandingView from '../views/LandingView.vue'
-import ChatView from '../views/ChatView.vue'
-import SecretView from '../views/SecretView.vue'
-import FinalView from '../views/secrets/FinalView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -10,24 +6,24 @@ const router = createRouter({
     {
       path: '/',
       name: 'landing',
-      component: LandingView
+      // 🌟 优化：使用动态 import() 实现路由懒加载，极大缩小首屏 JS 体积
+      component: () => import('../views/LandingView.vue')
     },
     {
-      // 🌟 核心修复：还原成单层路由，彻底消除缺失 component 的黄色警告
       path: '/chat',
       name: 'chat',
-      component: ChatView
+      component: () => import('../views/ChatView.vue')
     },
     {
       path: '/secret/:secretCode',
       name: 'secret',
-      component: SecretView,
+      component: () => import('../views/SecretView.vue'),
       props: true
     },
     {
       path: '/final',
       name: 'final',
-      component: FinalView
+      component: () => import('../views/secrets/FinalView.vue')
     }
   ]
 })

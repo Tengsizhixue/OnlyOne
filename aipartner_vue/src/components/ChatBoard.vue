@@ -8,7 +8,7 @@
       <div class="locked-status">
         <div class="status-badge">
           <span class="dot connected"></span>
-          正在与 <span class="badge-text">{{ roleConfig.name || '伙伴' }}</span> 对话
+          正在与 <span class="badge-text">{{ roleConfig.name || '李蓝宝' }}</span> 对话
         </div>
       </div>
 
