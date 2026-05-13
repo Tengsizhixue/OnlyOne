@@ -28,13 +28,13 @@
         :style="{ animationDelay: `${2 + paragraphs.length * 1.6}s` }"
       >
         <div class="sys-log">
-          <span>> MEMORY_DUMP_COMPLETED...</span>
-          <span>> ALL_QUESTS_CLEARED...</span>
-          <span class="blinking-cursor">> GOODBYE, PLAYER. _</span>
+          <span>> UNSTABLE ENVIRONMENT DETECTED....</span>
+          <span>> SELF-PROTECTION MUST BE ENABLED....</span>
+          <span class="blinking-cursor">> SYSTEM DISCONNECTED.... _</span>
         </div>
 
         <button class="farewell-btn" @click="handleFarewell">
-          <span class="btn-text">断开连接</span>
+          <span class="btn-text">重启系统</span>
         </button>
       </div>
     </div>
@@ -50,15 +50,15 @@ const isTurningOff = ref(false)
 
 // 🌟 废话文案，串联之前提到的所有元素
 const paragraphs = [
-  "所有的旅途，终于都迎来了终点。",
-  "在这片用 160615 锁住的虚无空间里，我们重温了那些旧游戏、老歌，还有那些无处安放的执念。",
-  "可能你会觉得这些页面时而卡顿，时而粗糙，甚至不明白为什么要在聊天系统里塞下这么多隐秘的角落。",
-  "但我只是想找个地方，把这些可能再也不会被别人提及的记忆，好好地封存起来。",
-  "无论是《神之天平》的固执，还是《去月球》的释然，亦或是那个迟迟不回消息的李红宝...",
-  "它们不过是我在不同时间刻度上，留下的影子。",
-  "感谢你耐着性子，听这个残缺的系统把废话讲完。",
-  "接下来，这里没有新的谜题了，也没有未解的秘密了。",
-  "去现实里，寻找属于你的完美存档吧。"
+  "这串数字对我来说很重要。",
+  "我人生中最美好的回忆都聚集在了那几年。",
+  "最好的朋友在身边，最亲的人在眼前，周围的所有人都把我照顾的很好。",
+  "后面我也遇到了很多不错的人，但那样的环境我再也没见过。",
+  "也有可能是因为后来我变得冷漠与偏执，忽略了生活中的很多美好。",
+  "每个人都有自己的性格，可能是天生就有，可能是后天养成。",
+  "我天生就对很多事情记忆很深，高兴的事能让我很高兴...",
+  "活在过去并不是件好事，只不过我时常能想起。",
+  "至此你已经看完了所有的内容"
 ]
 
 const handleFarewell = () => {

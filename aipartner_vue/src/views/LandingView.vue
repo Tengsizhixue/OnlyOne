@@ -26,10 +26,10 @@
               <div class="icon-ring outer-ring"></div>
               <img src="https://api.dicebear.com/9.x/bottts-neutral/svg?seed=AI" alt="AI Logo" class="landing-img" />
             </div>
-            <h1 class="landing-title glitch-text" data-text="正在开发，未完成">正在开发，未完成</h1>
+            <h1 class="landing-title glitch-text" data-text="呆呆的非智能伙伴">呆呆的非智能伙伴</h1>
             <div class="sys-status">
               <span class="status-dot"></span>
-              <span>SYSTEM STATUS: ONLINE_</span>
+              <span>SYSTEM STATUS: ONLINE</span>
             </div>
           </div>
 
