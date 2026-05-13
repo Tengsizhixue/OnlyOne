@@ -69,16 +69,24 @@ const transitionName = ref('fade-zoom-in')
 const isMobileMenuOpen = ref(false)
 const uid = ref(localStorage.getItem('chat_uid') || generateUid())
 const sessions = ref([])
-const currentSessionId = ref('')
+
+// 🌟 修复 1：初始化时立刻从 URL 读取历史会话ID，防止侧边栏出现选中状态闪跳
+const currentSessionId = ref(route.query.session || '')
 const messages = ref([])
 const isGenerating = ref(false)
 const availableRoles = ref([])
 
+// 🌟 修复 2：初始化时立刻从 URL 读取角色设定，而不是留空等待后端。避免显示“李蓝宝”的闪屏
 const roleConfig = reactive({
-  role_type: '',
+  role_type: route.query.role || '',
   name: '',
   nature: ''
 })
+
+// 🌟 修复 3：组件一创建就立刻通知外层 App.vue 切换背景，实现无缝衔接
+if (route.query.role) {
+  emit('update:roleType', route.query.role)
+}
 
 let activeStreamController = null
 
@@ -148,6 +156,11 @@ const loadSession = async (id) => {
     let detectedRoleType = '自定义'
     const matchedRole = availableRoles.value.find(r => r.name === savedName)
     if (matchedRole && matchedRole.role_type !== '自定义') detectedRoleType = matchedRole.role_type
+
+    // 如果从路由携带了角色且当前未能探测到特定角色，维持原有逻辑
+    if (route.query.role && detectedRoleType === '自定义') {
+       detectedRoleType = route.query.role
+    }
 
     roleConfig.role_type = detectedRoleType
     roleConfig.name = savedName
@@ -224,7 +237,6 @@ const backToSelection = () => {
 const handleSendMessage = async (userText) => {
   const validCodes = [...SECRET_QUESTS.map(q => q.code), '160615']
   if (validCodes.includes(userText)) {
-    // 💡 修复：将当前的会话ID和角色配置通过 query 参数传递给彩蛋页面
     router.push({
       name: 'secret',
       params: { secretCode: userText },
@@ -307,14 +319,13 @@ onUnmounted(() => {
   }
 })
 
-onMounted(() => {
-  fetchRoles()
-  fetchSessions()
-})
-
+// 🌟 修复 4：删掉了原始代码中重复写了两遍的冗余 onMounted。
+// 并改为 Promise.all 并行请求，将 1-2秒 的延迟大幅压缩。
 onMounted(async () => {
-  await fetchRoles()
-  await fetchSessions()
+  await Promise.all([
+    fetchRoles(),
+    fetchSessions()
+  ])
 
   // 🌟 返回聊天室时：根据 URL 参数自动恢复刚才的对话现场
   if (route.query.view === 'room') {
