@@ -51,6 +51,7 @@ import { ref, reactive, onMounted, computed, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { USER_AVATAR, getCurrentRoleConfig } from '../config/constants.js'
+
 import { SECRET_QUESTS } from '../store/questState.js'
 
 import RoleSelectionHall from '../components/RoleSelectionHall.vue'

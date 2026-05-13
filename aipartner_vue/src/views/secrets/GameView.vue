@@ -120,7 +120,6 @@ defineEmits(['back'])
 .manifesto-title { font-size: 16px; font-weight: bold; color: #fca5a5; margin-bottom: 8px; }
 .highlight-item { display: inline-block; margin-top: 6px; font-weight: 600; color: #fee2e2; letter-spacing: 0.5px; }
 .cyberpunk-theme p { font-size: 15px; line-height: 2.1; margin-bottom: 20px; color: #e2e8f0; text-indent: 2em; text-shadow: 0 1px 2px rgba(0,0,0,0.9); letter-spacing: 0.5px; }
-.cyberpunk-theme strong { color: #f87171; padding: 0 2px; }
 .glitch-divider { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 36px 0; opacity: 0.7; }
 .glitch-line { height: 2px; background: #ef4444; box-shadow: 0 0 8px #ef4444; }
 .glitch-line.long { width: 60px; }

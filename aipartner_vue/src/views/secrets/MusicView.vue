@@ -13,9 +13,9 @@
     <div class="music-room">
       <div class="story-box">
         <p>我听歌有个习惯，一个时间段里面肯定有一首歌我会逮着死听，18年以前没这个习惯，就什么歌火就听什么。</p>
-        <p>19年我非常歧视中文歌，因为那个时间段很多热歌都是抄袭的，一打开评论区全是吵架撕逼，而我听歌都是喜欢看评论区的，所以当年基本都是用网易云，只听纯音乐和日式的ACG，听的最多的是《四月是你的谎言》中的一个插曲，叫 <strong>again</strong>，我当时非常喜欢一个作者的纯音乐，我记得名字叫羽肿，我现在倒是不怎么听，纯音乐最大的缺点就是记不住名字。</p>
-        <p>后面反着来了，基本全是中文歌，早就把网易云注销换QQ音乐，网易云版权太少，中间几年听的最多的是 <strong>虚拟</strong>，这歌是我听过次数最多的，这歌无论是旋律还是歌词，我当时都很喜欢，现在我在抖音里面刷到还是愿意听一听的。</p>
-        <p>最近几年听的最多的是梁静茹的 <strong>会呼吸的痛</strong>，这歌是作者写给母亲的，感染力还是很强的，现在我已经听了快900遍，再听个两年应该就超过虚拟了。</p>
+        <p>19年我非常歧视中文歌，因为那个时间段很多热歌都是抄袭的，一打开评论区全是吵架撕逼，而我听歌都是喜欢看评论区的，所以当年基本都是用网易云，只听纯音乐和日式的ACG，听的最多的是《四月是你的谎言》中的一个插曲，叫again，我当时非常喜欢一个作者的纯音乐，我记得名字叫羽肿，我现在倒是不怎么听，纯音乐最大的缺点就是记不住名字。</p>
+        <p>后面反着来了，基本全是中文歌，早就把网易云注销换QQ音乐，网易云版权太少，中间几年听的最多的是虚拟，这歌是我听过次数最多的，这歌无论是旋律还是歌词，我当时都很喜欢，现在我在抖音里面刷到还是愿意听一听的。</p>
+        <p>最近几年听的最多的是梁静茹的会呼吸的痛，这歌是作者写给母亲的，感染力还是很强的，现在我已经听了快900遍，再听个两年应该就超过虚拟了。</p>
 
         <div class="extra-links">
           <span class="links-label">附加内容：</span>
@@ -146,7 +146,6 @@ onUnmounted(() => {
 .story-box { background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(244, 114, 182, 0.2); padding: 30px; border-radius: 16px; margin-bottom: 24px; width: 100%; text-align: left; box-shadow: 0 10px 30px rgba(0,0,0,0.1); flex: none; overflow: visible; box-sizing: border-box; word-wrap: break-word; }
 .story-box p { font-size: 16px; line-height: 2; margin-bottom: 16px; color: #fdf2f8; text-indent: 2em; }
 .story-box p:last-child { margin-bottom: 0; }
-.story-box strong { color: #f472b6; font-weight: 600; padding: 0 4px; }
 .extra-links { margin-top: 24px; padding-top: 16px; border-top: 1px dashed rgba(244, 114, 182, 0.3); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .links-label { font-size: 14px; color: #fbcfe8; font-weight: 600; }
 .img-link { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: rgba(244, 114, 182, 0.1); border: 1px solid rgba(244, 114, 182, 0.3); color: #fdf2f8; text-decoration: none; border-radius: 20px; font-size: 13px; transition: all 0.3s ease; cursor: pointer; }
