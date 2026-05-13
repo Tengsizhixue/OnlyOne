@@ -34,9 +34,3 @@ export const currentQuest = computed(() => {
 export const isAllUnlocked = computed(() => {
   return SECRET_QUESTS.every(q => unlockedCodes.value.includes(q.code))
 })
-
-// 6. 重置所有进度的函数
-export const resetQuestProgress = () => {
-  unlockedCodes.value = []
-  localStorage.removeItem('unlocked_secrets')
-}

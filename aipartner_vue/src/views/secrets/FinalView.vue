@@ -1,7 +1,12 @@
 <template>
-  <div class="final-terminal" :class="{ 'tv-off': isTurningOff, 'hacked-mode': isHacked }">
+  <div class="final-terminal" :class="{ 'tv-off': isTurningOff }">
     <!-- 📺 复古 CRT 扫描线遮罩 -->
     <div class="scanlines"></div>
+
+    <!-- ✨ 创意1：记忆光尘 -->
+    <div class="dust-particles">
+      <div v-for="n in 15" :key="n" class="dust" :style="getDustStyle(n)"></div>
+    </div>
 
     <!-- 深空微光背景 -->
     <div class="abyss-bg">
@@ -20,7 +25,7 @@
           v-for="(text, index) in paragraphs"
           :key="index"
           class="fade-line"
-          :style="{ animationDelay: `${1.8 + index * 2.0}s` }"
+          :style="{ animationDelay: `${1.8 + index * 2.2}s` }"
           @animationend="handleLineShow(index)"
         >
           {{ text }}
@@ -30,7 +35,7 @@
       <!-- 最终动作区：计算所有文字显示完毕后才出现 -->
       <div
         class="action-footer"
-        :class="{ 'show-footer': isHacked }"
+        :class="{ 'show-footer': showFooter }"
       >
         <div class="sys-log">
           <span class="typewriter">> 检测到李蓝宝的攻击....</span>
@@ -40,7 +45,6 @@
 
         <button
           class="farewell-btn"
-          :class="{ 'glitch-btn': isHacked }"
           :disabled="isTurningOff"
           @click="handleFarewell"
         >
@@ -57,7 +61,7 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const isTurningOff = ref(false)
-const isHacked = ref(false) // 控制画风突变的开关
+const showFooter = ref(false) // 控制底部控制台的显示
 const contentRef = ref(null)
 
 // 🌟 160615 解码特效
@@ -74,8 +78,23 @@ const decodeText = () => {
     }).join("");
 
     if (iterations >= targetCode.length) clearInterval(interval);
-    iterations += 1 / 5; // 控制解码速度
+    iterations += 1 / 5;
   }, 30);
+}
+
+// 随机生成记忆光尘的样式
+const getDustStyle = (n) => {
+  const size = Math.random() * 3 + 1;
+  const left = Math.random() * 100;
+  const duration = Math.random() * 20 + 10;
+  const delay = Math.random() * 10;
+  return {
+    width: `${size}px`,
+    height: `${size}px`,
+    left: `${left}%`,
+    animationDuration: `${duration}s`,
+    animationDelay: `-${delay}s`
+  };
 }
 
 // 🌟 废话文案
@@ -100,11 +119,10 @@ const handleLineShow = (index) => {
     });
   }
 
-  // 当最后一行文字播放完毕，触发“被黑”状态
+  // 当最后一行文字播放完毕，触发底部控制台显示
   if (index === paragraphs.length - 1) {
     setTimeout(() => {
-      isHacked.value = true;
-      // 再次滚动到底部确保按钮可见
+      showFooter.value = true;
       setTimeout(() => {
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
       }, 100);
@@ -113,14 +131,13 @@ const handleLineShow = (index) => {
 }
 
 onMounted(() => {
-  setTimeout(decodeText, 500); // 延迟半秒开始解码数字
+  setTimeout(decodeText, 500);
 })
 
 const handleFarewell = () => {
-  if (isTurningOff.value) return; // 防抖，防止重复点击
+  if (isTurningOff.value) return;
   isTurningOff.value = true
 
-  // ================= 🌟 跨页面音乐引擎 🌟 =================
   const audioUrl = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E6%9C%80%E7%BB%88%E7%9A%84%E6%90%9E%E7%AC%91%E9%9F%B3%E4%B9%90.mp3'
   const bgAudio = new Audio(audioUrl)
   bgAudio.loop = true
@@ -146,7 +163,6 @@ const handleFarewell = () => {
 </script>
 
 <style scoped>
-/* 保持原有基础样式 */
 .final-terminal {
   width: 100vw;
   height: 100dvh;
@@ -160,10 +176,9 @@ const handleFarewell = () => {
   overflow-x: hidden;
   overflow-y: auto;
   font-family: 'Noto Serif SC', "STKaiti", "KaiTi", serif;
-  transition: background-color 0.5s ease;
 }
 
-/* 📺 增加复古扫描线 */
+/* 📺 复古扫描线 */
 .scanlines {
   position: fixed;
   inset: 0;
@@ -180,13 +195,28 @@ const handleFarewell = () => {
   opacity: 0.3;
 }
 
-/* 🚨 黑客入侵模式（画风突变） */
-.final-terminal.hacked-mode {
-  background-color: #1a0505; /* 变成暗红色调 */
+/* ✨ 记忆光尘特效 */
+.dust-particles {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
 }
-.hacked-mode .orb-top { background: #ef4444; filter: blur(150px); }
-.hacked-mode .orb-bottom { background: #b91c1c; }
-.hacked-mode .fade-line { opacity: 0.5; } /* 让前面的文字变暗 */
+.dust {
+  position: absolute;
+  bottom: -10px;
+  background-color: rgba(203, 213, 225, 0.4);
+  border-radius: 50%;
+  filter: blur(1px);
+  animation: floatUp linear infinite;
+}
+@keyframes floatUp {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  10% { opacity: 0.5; }
+  90% { opacity: 0.5; }
+  100% { transform: translateY(-100vh) translateX(20px); opacity: 0; }
+}
 
 /* 原有光晕动画 */
 .abyss-bg {
@@ -194,14 +224,12 @@ const handleFarewell = () => {
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  overflow: hidden;
 }
 .glow-orb {
   position: absolute;
   border-radius: 50%;
   filter: blur(120px);
   opacity: 0.15;
-  transition: all 1.5s ease;
   animation: breathe 15s infinite alternate ease-in-out;
 }
 .orb-top { width: 60vw; height: 60vw; background: #cbd5e1; top: -20%; left: -10%; }
@@ -258,15 +286,14 @@ const handleFarewell = () => {
   letter-spacing: 2px;
   opacity: 0;
   animation: fadeInLine 2s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
-  transition: opacity 1s ease;
 }
 
-/* 🌟 控制台打字机效果 */
+/* 🌟 控制台区域 */
 .action-footer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  display: none; /* 初始隐藏 */
+  display: none;
 }
 .action-footer.show-footer {
   display: flex;
@@ -275,7 +302,7 @@ const handleFarewell = () => {
 .sys-log {
   font-family: monospace;
   font-size: 12px;
-  color: #ef4444; /* 警告红 */
+  color: #94a3b8; /* 恢复冷色调 */
   text-align: left;
   display: flex;
   flex-direction: column;
@@ -311,7 +338,7 @@ const handleFarewell = () => {
   border-radius: 4px;
   opacity: 0;
   animation: fadeInLine 1s ease forwards;
-  animation-delay: 2.5s; /* 等打字机打完再出现 */
+  animation-delay: 2.5s;
 }
 .farewell-btn::before {
   content: '';
@@ -331,14 +358,6 @@ const handleFarewell = () => {
 .farewell-btn:hover:not(:disabled)::before {
   transform: scaleX(1);
   transform-origin: left;
-}
-/* 被黑客入侵后的按钮样式 */
-.glitch-btn {
-  border-color: #ef4444;
-  color: #ef4444;
-}
-.glitch-btn::before {
-  background: #ef4444;
 }
 
 /* ================= 动画关键帧 ================= */

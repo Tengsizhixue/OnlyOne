@@ -20,10 +20,6 @@
               <button class="shimmer-btn" @click="handleBack">
                 {{ isAllUnlocked ? '点击查看最后的废话' : '返回聊天' }}
               </button>
-              <!-- 🐛 临时调试按钮：重置所有进度 -->
-              <button class="debug-reset-btn" @click="handleReset" title="重置所有谜题进度">
-                🔄 重置进度
-              </button>
             </div>
           </div>
         </div>
@@ -35,7 +31,7 @@
 <script setup>
 import { computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { unlockCode, isAllUnlocked, resetQuestProgress } from '../store/questState.js'
+import { unlockCode, isAllUnlocked } from '../store/questState.js'
 
 import LiHongBaoView from './secrets/LiHongBaoView.vue'
 import GameMemoryView from './secrets/GameMemoryView.vue'
@@ -73,14 +69,6 @@ const handleBack = () => {
         session: route.query.session
       }
     })
-  }
-}
-
-const handleReset = () => {
-  if (confirm('确定要重置所有谜题进度吗？')) {
-    resetQuestProgress()
-    alert('✅ 已重置！页面将刷新...')
-    window.location.reload()
   }
 }
 
