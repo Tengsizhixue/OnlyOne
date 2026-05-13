@@ -1,89 +1,91 @@
 <template>
   <div class="landing-page tech-theme">
-    <!-- 科技风背景层 -->
-    <div class="tech-bg-layer">
-      <div class="cyber-grid"></div>
-      <div class="glowing-orb orb-1"></div>
-      <div class="glowing-orb orb-2"></div>
-      <div class="scanlines"></div>
-      <div class="vignette"></div>
-    </div>
-
-    <el-scrollbar class="landing-scrollbar">
-      <div class="landing-content hud-panel sys-boot-seq">
-
-        <!-- 四角瞄准星装饰 (HUD风格) -->
-        <div class="hud-corner top-left"></div>
-        <div class="hud-corner top-right"></div>
-        <div class="hud-corner bottom-left"></div>
-        <div class="hud-corner bottom-right"></div>
-
-        <div class="landing-header stagger-1">
-          <div class="landing-icon holo-icon">
-            <div class="icon-ring inner-ring"></div>
-            <div class="icon-ring outer-ring"></div>
-            <img src="https://api.dicebear.com/9.x/bottts-neutral/svg?seed=AI" alt="AI Logo" class="landing-img" />
-          </div>
-          <h1 class="landing-title glitch-text" data-text="正在开发，未完成">正在开发，未完成</h1>
-          <div class="sys-status">
-            <span class="status-dot"></span>
-            <span>SYSTEM STATUS: ONLINE_</span>
-          </div>
-        </div>
-
-        <div class="features-grid stagger-2">
-          <!-- 修改点：将内容用 card-text 包装，方便在移动端应用横排 Flex 布局 -->
-          <div class="feature-card cyber-card">
-            <div class="card-border-trace desktop-only"></div>
-            <el-icon class="feature-icon neon-glow"><User /></el-icon>
-            <div class="card-text">
-              <h3>角色优化</h3>
-              <p>这次的每个人物我都进行了特殊的设计</p>
-            </div>
-          </div>
-          <div class="feature-card cyber-card">
-            <div class="card-border-trace desktop-only"></div>
-            <el-icon class="feature-icon neon-glow"><ColdDrink /></el-icon>
-            <div class="card-text">
-              <h3>额外内容</h3>
-              <p>加的内容已经完全脱离了我最开始的初衷</p>
-            </div>
-          </div>
-          <div class="feature-card cyber-card">
-            <div class="card-border-trace desktop-only"></div>
-            <el-icon class="feature-icon neon-glow"><Sugar /></el-icon>
-            <div class="card-text">
-              <h3>ui优化</h3>
-              <p>ui设计会比上次好看，但是我不确定会有什么bug，我一个人测试是不会卡的</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="scenario-section stagger-3">
-          <h3 class="scenario-title">[ 我想说的 ]</h3>
-          <div class="scenario-tags">
-            <span class="scenario-tag holo-tag">全都是AI做的，但很耗时间</span>
-            <span class="scenario-tag holo-tag">想不到还能加什么</span>
-            <span class="scenario-tag holo-tag">有的浏览器可能会很卡</span>
-            <span class="scenario-tag holo-tag">没什么能分享的了</span>
-            <span class="scenario-tag holo-tag">电脑和手机页面我都做了优化</span>
-            <span class="scenario-tag holo-tag">如果你会看源码，就能直接看到我加了什么</span>
-            <span class="scenario-tag holo-tag alert-tag">不推荐直接看源码</span>
-            <span class="scenario-tag holo-tag alert-tag">后面没时间，不会再改了</span>
-          </div>
-        </div>
-
-        <!-- 科技感启动按钮 -->
-        <div class="action-wrapper stagger-4">
-          <button class="enter-btn cyber-btn" @click="goToChat">
-            <span class="btn-text">WELCOME</span>
-            <el-icon class="enter-icon"><ArrowRight /></el-icon>
-            <div class="btn-glitch-layer"></div>
-          </button>
-        </div>
-
+    <!-- 🌟 核心修复：抽出单独的一层 wrapper 运行开机动画，避免与 Vue Router 的切换事件产生冲突锁死 -->
+    <div class="tv-crt-wrapper">
+      <!-- 科技风背景层 -->
+      <div class="tech-bg-layer">
+        <div class="cyber-grid"></div>
+        <div class="glowing-orb orb-1"></div>
+        <div class="glowing-orb orb-2"></div>
+        <div class="scanlines"></div>
+        <div class="vignette"></div>
       </div>
-    </el-scrollbar>
+
+      <el-scrollbar class="landing-scrollbar">
+        <div class="landing-content hud-panel sys-boot-seq">
+
+          <!-- 四角瞄准星装饰 (HUD风格) -->
+          <div class="hud-corner top-left"></div>
+          <div class="hud-corner top-right"></div>
+          <div class="hud-corner bottom-left"></div>
+          <div class="hud-corner bottom-right"></div>
+
+          <div class="landing-header stagger-1">
+            <div class="landing-icon holo-icon">
+              <div class="icon-ring inner-ring"></div>
+              <div class="icon-ring outer-ring"></div>
+              <img src="https://api.dicebear.com/9.x/bottts-neutral/svg?seed=AI" alt="AI Logo" class="landing-img" />
+            </div>
+            <h1 class="landing-title glitch-text" data-text="正在开发，未完成">正在开发，未完成</h1>
+            <div class="sys-status">
+              <span class="status-dot"></span>
+              <span>SYSTEM STATUS: ONLINE_</span>
+            </div>
+          </div>
+
+          <div class="features-grid stagger-2">
+            <div class="feature-card cyber-card">
+              <div class="card-border-trace desktop-only"></div>
+              <el-icon class="feature-icon neon-glow"><User /></el-icon>
+              <div class="card-text">
+                <h3>角色优化</h3>
+                <p>这次的每个人物我都进行了特殊的设计</p>
+              </div>
+            </div>
+            <div class="feature-card cyber-card">
+              <div class="card-border-trace desktop-only"></div>
+              <el-icon class="feature-icon neon-glow"><ColdDrink /></el-icon>
+              <div class="card-text">
+                <h3>额外内容</h3>
+                <p>加的内容已经完全脱离了我最开始的初衷</p>
+              </div>
+            </div>
+            <div class="feature-card cyber-card">
+              <div class="card-border-trace desktop-only"></div>
+              <el-icon class="feature-icon neon-glow"><Sugar /></el-icon>
+              <div class="card-text">
+                <h3>ui优化</h3>
+                <p>ui设计会比上次好看，但是我不确定会有什么bug，我一个人测试是不会卡的</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="scenario-section stagger-3">
+            <h3 class="scenario-title">[ 我想说的 ]</h3>
+            <div class="scenario-tags">
+              <span class="scenario-tag holo-tag">全都是AI做的，但很耗时间</span>
+              <span class="scenario-tag holo-tag">想不到还能加什么</span>
+              <span class="scenario-tag holo-tag">有的浏览器可能会很卡</span>
+              <span class="scenario-tag holo-tag">没什么能分享的了</span>
+              <span class="scenario-tag holo-tag">电脑和手机页面我都做了优化</span>
+              <span class="scenario-tag holo-tag">如果你会看源码，就能直接看到我加了什么</span>
+              <span class="scenario-tag holo-tag alert-tag">不推荐直接看源码</span>
+              <span class="scenario-tag holo-tag alert-tag">后面没时间，不会再改了</span>
+            </div>
+          </div>
+
+          <!-- 科技感启动按钮 -->
+          <div class="action-wrapper stagger-4">
+            <button class="enter-btn cyber-btn" @click="goToChat">
+              <span class="btn-text">WELCOME</span>
+              <el-icon class="enter-icon"><ArrowRight /></el-icon>
+              <div class="btn-glitch-layer"></div>
+            </button>
+          </div>
+
+        </div>
+      </el-scrollbar>
+    </div>
   </div>
 </template>
 
@@ -94,7 +96,6 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 const goToChat = () => {
-  // 可以在这里加一个音效或者离开动画的延迟
   router.push('/chat')
 }
 </script>
@@ -117,6 +118,35 @@ const goToChat = () => {
   color: var(--text-main);
   overflow: hidden;
   font-family: 'SF Pro Display', -apple-system, Roboto, Helvetica, sans-serif;
+}
+
+/* ================= 📺 老式 CRT 电视开机特效 (移至内层) ================= */
+.tv-crt-wrapper {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+  animation: turn-on 0.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  transform-origin: center center;
+}
+
+@keyframes turn-on {
+  0% {
+    transform: scale(0, 0) translate3d(0, 0, 0);
+    filter: brightness(0);
+  }
+  30% {
+    transform: scale(0.1, 0.002) translate3d(0, 0, 0);
+    filter: brightness(10); /* 收缩成高亮的一条线 */
+  }
+  60% {
+    transform: scale(1, 0.002) translate3d(0, 0, 0);
+    filter: brightness(10); /* 横向撑开的高亮线 */
+  }
+  100% {
+    transform: scale(1, 1) translate3d(0, 0, 0);
+    filter: brightness(1); /* 垂直撑开，恢复正常亮度 */
+  }
 }
 
 /* ================= 背景系统 ================= */
@@ -160,7 +190,6 @@ const goToChat = () => {
 
 /* ================= 布局 & 滚动 ================= */
 .landing-scrollbar { height: 100%; width: 100%; z-index: 10; position: relative; }
-/* 修复点：改用 el-scrollbar__view 并加上 padding 以防止高度不足时被切断 */
 :deep(.el-scrollbar__view) {
   min-height: 100%;
   display: flex;
@@ -178,7 +207,6 @@ const goToChat = () => {
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(0, 243, 255, 0.15);
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0, 243, 255, 0.05);
-  /* 科技感切角 */
   clip-path: polygon(
     30px 0, 100% 0, 100% calc(100% - 30px), calc(100% - 30px) 100%, 0 100%, 0 30px
   );
@@ -220,14 +248,14 @@ const goToChat = () => {
 .status-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981; animation: blink 1.5s infinite; }
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-/* ================= 功能卡片 (默认PC桌面布局) ================= */
+/* ================= 功能卡片 ================= */
 .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 50px; }
 .cyber-card {
   background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);
   padding: 30px 20px; text-align: center; position: relative;
   transition: all 0.4s ease; overflow: hidden; cursor: crosshair;
 }
-.cyber-card::before { /* 卡片悬浮扫光底色 */
+.cyber-card::before {
   content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent, rgba(0, 243, 255, 0.1) 100%);
   transform: translateY(100%); transition: transform 0.4s ease;
 }
@@ -267,6 +295,7 @@ const goToChat = () => {
   display: flex;
   justify-content: center;
   width: 100%;
+  z-index: 20;
 }
 .cyber-btn {
   background: transparent; border: 1px solid var(--primary-cyan);
@@ -286,19 +315,18 @@ const goToChat = () => {
 .cyber-btn:hover .enter-icon { transform: translateX(5px); }
 
 /* ================= 入场启动动画序列 ================= */
-.sys-boot-seq .stagger-1 { opacity: 0; animation: bootUp 0.8s ease forwards 0.2s; }
-.sys-boot-seq .stagger-2 { opacity: 0; animation: bootUp 0.8s ease forwards 0.4s; }
-.sys-boot-seq .stagger-3 { opacity: 0; animation: bootUp 0.8s ease forwards 0.6s; }
-.sys-boot-seq .stagger-4 { opacity: 0; animation: bootUp 0.8s ease forwards 0.8s; }
+.sys-boot-seq .stagger-1 { opacity: 0; animation: bootUp 0.8s ease forwards 0.7s; }
+.sys-boot-seq .stagger-2 { opacity: 0; animation: bootUp 0.8s ease forwards 0.9s; }
+.sys-boot-seq .stagger-3 { opacity: 0; animation: bootUp 0.8s ease forwards 1.1s; }
+.sys-boot-seq .stagger-4 { opacity: 0; animation: bootUp 0.8s ease forwards 1.3s; }
 
 @keyframes bootUp {
   0% { opacity: 0; transform: translateY(30px) scale(0.98); filter: blur(5px); }
   100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
 
-/* ================= 移动端适配 (重点重构) ================= */
+/* ================= 移动端适配 ================= */
 @media (max-width: 768px) {
-  /* 修复点1：禁用垂直居中，改为从头排列，解决顶部内容被推出版外的问题 */
   :deep(.el-scrollbar__view) {
     align-items: flex-start;
     padding: 20px 10px;
@@ -311,12 +339,10 @@ const goToChat = () => {
 
   .hud-corner { display: none; }
 
-  /* 缩小头部尺寸以节省宝贵的纵向空间 */
   .landing-header { margin-bottom: 30px; }
   .holo-icon { width: 80px; height: 80px; margin-bottom: 12px; }
   .glitch-text { font-size: 22px; }
 
-  /* 修复点2：将巨大的卡片改为“紧凑的数据列表(Data Rows)”风格 */
   .features-grid {
     display: flex;
     flex-direction: column;
@@ -333,9 +359,9 @@ const goToChat = () => {
     background: linear-gradient(90deg, rgba(0, 243, 255, 0.08) 0%, rgba(0, 0, 0, 0) 100%);
     border: none;
     border-left: 3px solid var(--primary-cyan);
-    transform: none !important; /* 禁用手机端的缩放动画 */
+    transform: none !important;
   }
-  .cyber-card::before, .desktop-only { display: none; } /* 隐藏PC端特有装饰 */
+  .cyber-card::before, .desktop-only { display: none; }
   .cyber-card:hover { box-shadow: none; }
 
   .feature-icon {
@@ -352,12 +378,10 @@ const goToChat = () => {
   .cyber-card h3 { font-size: 15px; margin-bottom: 4px; }
   .cyber-card p { font-size: 12px; }
 
-  /* 标签紧凑排布 */
   .scenario-section { margin-bottom: 40px; }
   .scenario-tags { gap: 8px; }
   .holo-tag { padding: 6px 10px; font-size: 11px; }
 
-  /* 按钮全宽 */
   .action-wrapper { display: block; width: 100%; }
   .cyber-btn { width: 100%; padding: 16px 20px; font-size: 15px; }
 }
