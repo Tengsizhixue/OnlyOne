@@ -184,5 +184,11 @@ onUnmounted(() => {
   .track-name { font-size: 14px; }
   .extra-links { margin-top: 20px; padding-top: 16px; }
   .img-link { padding: 5px 12px; font-size: 12px; }
+
+  /* 🌟 手机端背景模糊度调节：穿透 SecretLayout 修改底层背景 */
+  :deep(.secret-bg) {
+    filter: brightness(0.65) blur(6px); /* 调节这里的数值即可改变模糊度 */
+    transform: scale(1.05); /* 稍微放大，防止模糊后边缘出现白边透底 */
+  }
 }
 </style>

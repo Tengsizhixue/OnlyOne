@@ -124,10 +124,18 @@ const currentComponent = computed(() => {
 .bottom-action { margin-top: 30px; display: flex; justify-content: center; }
 
 @media (max-width: 768px) {
+  .fallback-bg {
+    filter: brightness(0.65) blur(10px);
+    transform: scale(1.1); /* 稍微放大，防止模糊后边缘出现白边透底 */
+  }
+
   .secret-page {
     width: 100%; height: 100dvh; border-radius: 0;
     padding: 70px 20px 20px; /* 💡 缩小 padding */
-    border: none; background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    border: none;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
   .content-box { padding: 18px; font-size: 14px; margin-bottom: 16px; border-radius: 12px; line-height: 1.8; }
   .highlight-text { font-size: 24px; margin-bottom: 6px; }
