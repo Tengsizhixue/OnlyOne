@@ -288,10 +288,7 @@ def chat_completions(request: ChatRequest):
             messages=api_messages,
             stream=True,
             temperature=0.8,
-            max_tokens=2048,          # 限制最大输出 token 数
-            top_p=0.95,               # 核采样参数
-            frequency_penalty=0.5,    # 频率惩罚，减少重复
-            presence_penalty=0.5,     # 存在惩罚，鼓励新话题
+            max_tokens=2048,
 )
 
             for chunk in response:
