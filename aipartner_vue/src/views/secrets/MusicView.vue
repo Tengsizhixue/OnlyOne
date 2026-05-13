@@ -58,7 +58,7 @@
       <!-- 🌟 将退出和通关按钮置于末尾 -->
       <div class="bottom-action">
         <button class="shimmer-btn" @click="back">
-          {{ isAllUnlocked ? '开启终局之门 ✨' : '返回聊天' }}
+          {{ isAllUnlocked ? '点击查看最后的废话' : '返回聊天' }}
         </button>
       </div>
     </div>

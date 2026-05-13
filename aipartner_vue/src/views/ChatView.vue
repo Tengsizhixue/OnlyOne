@@ -224,7 +224,15 @@ const backToSelection = () => {
 const handleSendMessage = async (userText) => {
   const validCodes = [...SECRET_QUESTS.map(q => q.code), '160615']
   if (validCodes.includes(userText)) {
-    router.push({ name: 'secret', params: { secretCode: userText } })
+    // 💡 修复：将当前的会话ID和角色配置通过 query 参数传递给彩蛋页面
+    router.push({
+      name: 'secret',
+      params: { secretCode: userText },
+      query: {
+        role: roleConfig.role_type,
+        session: currentSessionId.value || undefined
+      }
+    })
     return
   }
 

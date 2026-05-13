@@ -1,7 +1,7 @@
 <template>
   <div class="final-container">
     <div class="final-content glass-panel shadow-2xl">
-      <h1 class="highlight-text">🎉 终局之门</h1>
+      <h1 class="highlight-text">160615</h1>
 
       <div class="story-box">
         <p>恭喜你，沿着这些神秘的数字，找齐了所有失落的记忆拼图。</p>
@@ -9,7 +9,7 @@
       </div>
 
       <button class="enter-btn shimmer-btn" @click="goHome">
-        返回现实 (主页)
+        你已经看完了全部内容了，再见👋
       </button>
     </div>
   </div>
