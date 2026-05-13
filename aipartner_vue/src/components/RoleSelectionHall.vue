@@ -256,14 +256,16 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
 </script>
 
 <style scoped>
-/* 🌟 字体修复：引入云端思源宋体，作为安卓系统没有楷体时的优雅备选 */
 @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@700&display=swap');
 
 .selection-hall {
   position: absolute; top: 0; left: 0; width: 100%; height: 100%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  perspective: 1200px; z-index: 50; user-select: none; overflow: hidden;
-  background: transparent;
+  perspective: 1200px;
+  -webkit-perspective: 1200px;
+  z-index: 50; user-select: none; overflow: hidden;
+  /* 🌟 核心修复1：设为实体背景色！阻断与底层 App.vue 动态背景的重复混合渲染，极大幅度降低 GPU 开销 */
+  background: #050505;
   touch-action: none;
 }
 
@@ -275,6 +277,9 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
   background-size: cover;
   background-position: center center;
   opacity: 0; transition: opacity 0.8s ease-in-out;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  /* 🌟 核心修复2：移除 will-change 属性，防止浏览器一次性强占太多显存导致内存崩溃闪屏 */
 }
 .hall-bg-image.show-bg {
   opacity: 1;
@@ -298,16 +303,16 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
   border-radius: 16px;
   background: rgba(30, 41, 59, 0.8);
   transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.4s ease;
-  will-change: transform, opacity;
   backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   overflow: hidden;
   box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+  /* 🌟 核心修复3：彻底移除这里的 backdrop-filter: blur() ！
+     因为内部的 .card-inner-bg 已经是一张模糊过的图片并且遮挡了全卡片，
+     这里的 filter 除了触发 iOS/Android 的底层渲染 Bug 导致严重闪屏外，毫无用处！ */
 }
 
 .carousel-card.active {
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  /* 移除了白色硬边框，全权交给流光和阴影 */
   border: none;
 }
 
@@ -316,6 +321,7 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
   background-size: cover;
   filter: blur(3.5px);
   transform: scale(1.08) translateZ(0);
+  -webkit-transform: scale(1.08) translateZ(0);
   transition: transform 0.6s ease, filter 0.6s ease;
   z-index: 1;
 }
@@ -326,21 +332,18 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
   z-index: 2;
 }
 
-/* 🌟 新增特效层：边缘柔化渐变，彻底解决贴图生硬违和感 */
 .card-edge-vignette {
   position: absolute; inset: 0;
   border-radius: 16px;
-  /* 使用强烈的向内阴影模糊边缘，让背景向黑色过渡 */
   box-shadow: inset 0 0 60px rgba(0,0,0,0.9), inset 0 0 25px rgba(0,0,0,0.6);
   z-index: 3;
   pointer-events: none;
 }
 
-/* 🌟 新增特效层：卡片表面的高光扫光 */
 .card-shine {
   position: absolute; inset: 0;
   border-radius: 16px;
-  z-index: 6; /* 在所有内层之上 */
+  z-index: 6;
   pointer-events: none;
   background: linear-gradient(
     105deg,
@@ -363,14 +366,13 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
   100% { background-position: -100% -100%; opacity: 0; }
 }
 
-/* 🌟 新增特效层：边缘动态流光，利用 mask 切割出流光的边框 */
 .streamer-wrapper {
   position: absolute; inset: 0;
   border-radius: 16px;
   overflow: hidden;
   z-index: 5;
   pointer-events: none;
-  padding: 2px; /* 这里决定了流光边框的粗细 */
+  padding: 2px;
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -405,7 +407,7 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
 }
 
 .card-content {
-  position: relative; z-index: 7; /* 置于所有特效之上 */
+  position: relative; z-index: 7;
   padding: 30px 0;
   width: 100%; height: 100%;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -420,12 +422,10 @@ onUnmounted(() => window.removeEventListener('resize', checkMobile))
 
 .card-name {
   font-size: 34px;
-  /* 🌟 字体修复：新增 Kaiti SC（iOS原生楷体），以及 Noto Serif SC（安卓回退优雅宋体） */
   font-family: "Kaiti SC", "STKaiti", "KaiTi", "华文楷体", "楷体", "Noto Serif SC", serif;
   font-weight: bold;
   margin: 0 0 16px 0;
   letter-spacing: 4px;
-  /* 🌟 性能优化：去除了 text-shadow 的重度过渡动画 */
   transition: color 0.4s ease;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
