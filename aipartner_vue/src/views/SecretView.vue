@@ -11,13 +11,14 @@
         <div class="secret-content">
           <h1 class="highlight-text">🎉 恭喜你找到了特殊页面！</h1>
           <div class="content-box">
-            <p>这个数字是我网址的二级域名的。顶级域名.xyz单纯是因为便宜，1年就1刀乐。</p>
-            <p>回到侧边框后，你会看到其他的一些问题，你可以尝试着去问ai里面的问题，如果你觉得问的角色没错，但是ai却没给你正确的答案</p>
-            <p>要么是ai抽风了，要么就是你在瞎**问</p>
+            <p>这个数字是我网址的一级域名。顶级域名.xyz单纯是因为便宜，1年就1刀乐。</p>
+            <p>回到侧边框后，你会看到其他的一些问题，你可以尝试着去问ai里面的问题，
+              如果你觉得问的角色没错，但是ai却没给你正确的答案</p>
+            <p>要么是ai抽风了，你可以多问几遍，如果还是没反应那就是你在瞎**问</p>
 
             <div class="bottom-action">
               <button class="shimmer-btn" @click="handleBack">
-                {{ isAllUnlocked ? '开启终局之门 ✨' : '返回聊天' }}
+                {{ isAllUnlocked ? '点击查看最后的废话' : '返回聊天' }}
               </button>
               <!-- 🐛 临时调试按钮：重置所有进度 -->
               <button class="debug-reset-btn" @click="handleReset" title="重置所有谜题进度">
