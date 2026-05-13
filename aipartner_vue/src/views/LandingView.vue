@@ -1,6 +1,5 @@
 <template>
   <div class="landing-page tech-theme">
-    <!-- 🌟 核心修复：抽出单独的一层 wrapper 运行开机动画，避免与 Vue Router 的切换事件产生冲突锁死 -->
     <div class="tv-crt-wrapper">
       <!-- 科技风背景层 -->
       <div class="tech-bg-layer">
@@ -14,7 +13,7 @@
       <el-scrollbar class="landing-scrollbar">
         <div class="landing-content hud-panel sys-boot-seq">
 
-          <!-- 四角瞄准星装饰 (HUD风格) -->
+          <!-- 四角瞄准星装饰 -->
           <div class="hud-corner top-left"></div>
           <div class="hud-corner top-right"></div>
           <div class="hud-corner bottom-left"></div>
@@ -33,39 +32,75 @@
             </div>
           </div>
 
+          <!-- 🌟 核心重构：高级系统模块化的卡片设计 -->
           <div class="features-grid stagger-2">
+
             <div class="feature-card cyber-card">
               <div class="card-border-trace desktop-only"></div>
-              <el-icon class="feature-icon neon-glow"><User /></el-icon>
+              <div class="icon-wrapper">
+                <!-- 科技感图标：身份生物识别/目标锁定 -->
+                <svg class="custom-tech-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <circle cx="12" cy="10" r="3" stroke-dasharray="2 2"></circle>
+                  <path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path>
+                  <line x1="12" y1="2" x2="12" y2="4"></line>
+                  <line x1="12" y1="20" x2="12" y2="22"></line>
+                  <line x1="2" y1="12" x2="4" y2="12"></line>
+                  <line x1="20" y1="12" x2="22" y2="12"></line>
+                </svg>
+              </div>
               <div class="card-text">
+                <div class="sys-label">BETTER_CHARACTER_DESIGN </div>
                 <h3>角色优化</h3>
                 <p>这次的每个人物我都进行了特殊的设计</p>
               </div>
             </div>
+
             <div class="feature-card cyber-card">
               <div class="card-border-trace desktop-only"></div>
-              <el-icon class="feature-icon neon-glow"><ColdDrink /></el-icon>
+              <div class="icon-wrapper">
+                <!-- 科技感图标：3D等距数据魔方/资料库 -->
+                <svg class="custom-tech-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                  <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                  <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                  <polygon points="12 7 8 9.5 8 14.5 12 17 16 14.5 16 9.5 12 7" stroke-dasharray="1 2"></polygon>
+                </svg>
+              </div>
               <div class="card-text">
+                <div class="sys-label">EXTRA_CONTENT</div>
                 <h3>额外内容</h3>
                 <p>加的内容已经完全脱离了我最开始的初衷</p>
               </div>
             </div>
+
             <div class="feature-card cyber-card">
               <div class="card-border-trace desktop-only"></div>
-              <el-icon class="feature-icon neon-glow"><Sugar /></el-icon>
+              <div class="icon-wrapper">
+                <!-- 科技感图标：UI显示器蓝图 -->
+                <svg class="custom-tech-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                  <line x1="8" y1="21" x2="16" y2="21"></line>
+                  <line x1="12" y1="17" x2="12" y2="21"></line>
+                  <rect x="6" y="7" width="12" height="6" stroke-dasharray="2 2"></rect>
+                  <line x1="2" y1="10" x2="22" y2="10" stroke-width="0.5" stroke-dasharray="1 3"></line>
+                </svg>
+              </div>
               <div class="card-text">
-                <h3>ui优化</h3>
+                <div class="sys-label">BETTER_UI</div>
+                <h3>UI优化</h3>
                 <p>ui设计会比上次好看，但是我不确定会有什么bug，我一个人测试是不会卡的</p>
               </div>
             </div>
+
           </div>
 
           <div class="scenario-section stagger-3">
-            <h3 class="scenario-title">[ 我想说的 ]</h3>
+            <h3 class="scenario-title">[ 前言 ]</h3>
             <div class="scenario-tags">
               <span class="scenario-tag holo-tag">全都是AI做的，但很耗时间</span>
               <span class="scenario-tag holo-tag">想不到还能加什么</span>
-              <span class="scenario-tag holo-tag">有的浏览器可能会很卡</span>
+              <span class="scenario-tag holo-tag">有的浏览器可能会巨卡</span>
               <span class="scenario-tag holo-tag">没什么能分享的了</span>
               <span class="scenario-tag holo-tag">电脑和手机页面我都做了优化</span>
               <span class="scenario-tag holo-tag">如果你会看源码，就能直接看到我加了什么</span>
@@ -74,7 +109,6 @@
             </div>
           </div>
 
-          <!-- 科技感启动按钮 -->
           <div class="action-wrapper stagger-4">
             <button class="enter-btn cyber-btn" @click="goToChat">
               <span class="btn-text">WELCOME</span>
@@ -90,7 +124,8 @@
 </template>
 
 <script setup>
-import { User, ColdDrink, Sugar, ArrowRight } from '@element-plus/icons-vue'
+// 移除了 User, ColdDrink, Sugar 这些不协调的图标，只保留必要的箭头
+import { ArrowRight } from '@element-plus/icons-vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -131,28 +166,15 @@ const goToChat = () => {
 }
 
 @keyframes turn-on {
-  0% {
-    transform: scale(0, 0) translate3d(0, 0, 0);
-    filter: brightness(0);
-  }
-  30% {
-    transform: scale(0.1, 0.002) translate3d(0, 0, 0);
-    filter: brightness(10); /* 收缩成高亮的一条线 */
-  }
-  60% {
-    transform: scale(1, 0.002) translate3d(0, 0, 0);
-    filter: brightness(10); /* 横向撑开的高亮线 */
-  }
-  100% {
-    transform: scale(1, 1) translate3d(0, 0, 0);
-    filter: brightness(1); /* 垂直撑开，恢复正常亮度 */
-  }
+  0% { transform: scale(0, 0) translate3d(0, 0, 0); filter: brightness(0); }
+  30% { transform: scale(0.1, 0.002) translate3d(0, 0, 0); filter: brightness(10); }
+  60% { transform: scale(1, 0.002) translate3d(0, 0, 0); filter: brightness(10); }
+  100% { transform: scale(1, 1) translate3d(0, 0, 0); filter: brightness(1); }
 }
 
 /* ================= 背景系统 ================= */
 .tech-bg-layer { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
 
-/* 动态透视网格 */
 .cyber-grid {
   position: absolute; inset: -50%;
   background-image:
@@ -167,7 +189,6 @@ const goToChat = () => {
   100% { transform: perspective(1000px) rotateX(60deg) translateY(40px) translateZ(-200px); }
 }
 
-/* 背景呼吸光晕 */
 .glowing-orb {
   position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.4;
   animation: orb-float 10s ease-in-out infinite alternate;
@@ -179,7 +200,6 @@ const goToChat = () => {
   100% { transform: translate(50px, 50px) scale(1.2); }
 }
 
-/* 屏幕复古扫描线 & 暗角 */
 .scanlines {
   position: absolute; inset: 0;
   background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
@@ -214,7 +234,6 @@ const goToChat = () => {
   box-sizing: border-box;
 }
 
-/* HUD 四角瞄准星 */
 .hud-corner { position: absolute; width: 20px; height: 20px; border: 2px solid var(--primary-cyan); opacity: 0.5; }
 .top-left { top: 15px; left: 15px; border-right: none; border-bottom: none; }
 .top-right { top: 15px; right: 15px; border-left: none; border-bottom: none; }
@@ -224,7 +243,6 @@ const goToChat = () => {
 /* ================= 头部元素 ================= */
 .landing-header { margin-bottom: 50px; }
 
-/* 全息头像框 */
 .holo-icon {
   position: relative; width: 110px; height: 110px; margin: 0 auto 20px auto;
   display: flex; align-items: center; justify-content: center;
@@ -236,24 +254,23 @@ const goToChat = () => {
 @keyframes spin { 100% { transform: rotate(360deg); } }
 @keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
 
-/* 故障风标题 */
 .glitch-text {
   font-size: 32px; font-weight: 800; letter-spacing: 2px;
   color: #fff; text-shadow: var(--neon-shadow); margin-bottom: 12px;
   position: relative;
 }
 
-/* 系统状态打字机效果 */
 .sys-status { font-family: monospace; font-size: 13px; color: var(--primary-cyan); display: flex; align-items: center; justify-content: center; gap: 8px; opacity: 0.8; }
 .status-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; box-shadow: 0 0 8px #10b981; animation: blink 1.5s infinite; }
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-/* ================= 功能卡片 ================= */
+/* ================= 🌟 模块化功能卡片 ================= */
 .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 50px; }
 .cyber-card {
   background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05);
   padding: 30px 20px; text-align: center; position: relative;
   transition: all 0.4s ease; overflow: hidden; cursor: crosshair;
+  display: flex; flex-direction: column; align-items: center;
 }
 .cyber-card::before {
   content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent, rgba(0, 243, 255, 0.1) 100%);
@@ -269,9 +286,39 @@ const goToChat = () => {
 .cyber-card:hover .card-border-trace::before { width: 100%; top: 0; left: 0; box-shadow: var(--neon-shadow); }
 .cyber-card:hover .card-border-trace::after { width: 100%; bottom: 0; right: 0; box-shadow: var(--neon-shadow); }
 
-.feature-icon { font-size: 32px; color: var(--primary-cyan); margin-bottom: 16px; transition: all 0.3s; z-index: 2; position: relative; }
-.cyber-card:hover .feature-icon { transform: scale(1.1); color: #fff; filter: drop-shadow(0 0 10px var(--primary-cyan)); }
+/* 🌟 高级定制：带扫描线动画的图标盒子 */
+.icon-wrapper {
+  position: relative;
+  width: 54px; height: 54px; margin-bottom: 18px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0, 243, 255, 0.05); border: 1px solid rgba(0, 243, 255, 0.2);
+  border-radius: 12px; box-shadow: inset 0 0 15px rgba(0, 243, 255, 0.05);
+  transition: all 0.4s ease; z-index: 2; overflow: hidden;
+}
+.cyber-card:hover .icon-wrapper {
+  background: rgba(0, 243, 255, 0.15); border-color: rgba(0, 243, 255, 0.6);
+  box-shadow: 0 0 20px rgba(0, 243, 255, 0.2), inset 0 0 15px rgba(0, 243, 255, 0.2);
+  transform: scale(1.1);
+}
+/* HUD 上下扫描雷达线 */
+.icon-wrapper::after {
+  content: ''; position: absolute; top: -10%; left: 0; right: 0; height: 2px;
+  background: var(--primary-cyan); box-shadow: 0 0 10px var(--primary-cyan);
+  animation: scan-line 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite; opacity: 0.6;
+}
+@keyframes scan-line {
+  0% { top: -10%; opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { top: 110%; opacity: 0; }
+}
+
+.custom-tech-icon { width: 28px; height: 28px; color: var(--primary-cyan); filter: drop-shadow(0 0 5px var(--primary-cyan)); transition: all 0.4s ease; }
+.cyber-card:hover .custom-tech-icon { color: #fff; filter: drop-shadow(0 0 12px var(--primary-cyan)); }
+
 .card-text { z-index: 2; position: relative; }
+/* 增加系统模块号标签，强化科技专业感 */
+.sys-label { font-family: monospace; font-size: 10px; color: var(--primary-blue); letter-spacing: 1px; margin-bottom: 8px; font-weight: bold; }
 .cyber-card h3 { font-size: 17px; font-weight: 600; color: #fff; margin: 0 0 10px 0; }
 .cyber-card p { font-size: 13px; color: var(--text-muted); line-height: 1.6; margin: 0; }
 
@@ -291,11 +338,7 @@ const goToChat = () => {
 
 /* ================= 动作按钮 ================= */
 .action-wrapper {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  z-index: 20;
+  position: relative; display: flex; justify-content: center; width: 100%; z-index: 20;
 }
 .cyber-btn {
   background: transparent; border: 1px solid var(--primary-cyan);
@@ -327,54 +370,36 @@ const goToChat = () => {
 
 /* ================= 移动端适配 ================= */
 @media (max-width: 768px) {
-  :deep(.el-scrollbar__view) {
-    align-items: flex-start;
-    padding: 20px 10px;
-  }
+  :deep(.el-scrollbar__view) { align-items: flex-start; padding: 20px 10px; }
 
   .hud-panel {
     padding: 30px 15px;
     clip-path: polygon(15px 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%, 0 15px);
   }
-
   .hud-corner { display: none; }
-
   .landing-header { margin-bottom: 30px; }
   .holo-icon { width: 80px; height: 80px; margin-bottom: 12px; }
   .glitch-text { font-size: 22px; }
 
-  .features-grid {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 30px;
-  }
+  /* 🌟 移动端：将系统模块改为带有左侧粗边的列阵排版，让它看起来像数据终端的选项卡 */
+  .features-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
 
   .cyber-card {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    text-align: left;
-    padding: 14px 16px;
-    background: linear-gradient(90deg, rgba(0, 243, 255, 0.08) 0%, rgba(0, 0, 0, 0) 100%);
-    border: none;
-    border-left: 3px solid var(--primary-cyan);
-    transform: none !important;
+    flex-direction: row; align-items: stretch; text-align: left;
+    padding: 16px; background: linear-gradient(90deg, rgba(0, 243, 255, 0.08) 0%, rgba(0, 0, 0, 0) 100%);
+    border: none; border-left: 3px solid var(--primary-cyan); transform: none !important;
   }
   .cyber-card::before, .desktop-only { display: none; }
   .cyber-card:hover { box-shadow: none; }
 
-  .feature-icon {
-    margin-bottom: 0;
-    margin-right: 16px;
-    font-size: 26px;
-    flex-shrink: 0;
+  .icon-wrapper {
+    margin-bottom: 0; margin-right: 16px; flex-shrink: 0;
+    width: 48px; height: 48px; border-radius: 8px;
   }
-  .card-text {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
+  .cyber-card:hover .icon-wrapper { transform: none; }
+
+  .card-text { display: flex; flex-direction: column; justify-content: center; }
+  .sys-label { font-size: 9px; margin-bottom: 2px; }
   .cyber-card h3 { font-size: 15px; margin-bottom: 4px; }
   .cyber-card p { font-size: 12px; }
 
