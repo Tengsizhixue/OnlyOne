@@ -1,5 +1,8 @@
 <template>
-  <div class="final-terminal" :class="{ 'tv-off': isTurningOff }">
+  <div class="final-terminal" :class="{ 'tv-off': isTurningOff, 'hacked-mode': isHacked }">
+    <!-- 📺 复古 CRT 扫描线遮罩 -->
+    <div class="scanlines"></div>
+
     <!-- 深空微光背景 -->
     <div class="abyss-bg">
       <div class="glow-orb orb-top"></div>
@@ -7,8 +10,9 @@
     </div>
 
     <!-- 内容主干 -->
-    <div class="ending-content">
-      <h1 class="ending-code fade-in-up">160615</h1>
+    <div class="ending-content" ref="contentRef">
+      <!-- 动态解码的数字 -->
+      <h1 class="ending-code fade-in-up">{{ displayCode }}</h1>
       <div class="divider fade-in-up" style="animation-delay: 1s;"></div>
 
       <div class="text-container">
@@ -17,6 +21,7 @@
           :key="index"
           class="fade-line"
           :style="{ animationDelay: `${1.8 + index * 2.0}s` }"
+          @animationend="handleLineShow(index)"
         >
           {{ text }}
         </p>
@@ -24,16 +29,21 @@
 
       <!-- 最终动作区：计算所有文字显示完毕后才出现 -->
       <div
-        class="action-footer fade-in-up"
-        :style="{ animationDelay: `${2 + paragraphs.length * 1.6}s` }"
+        class="action-footer"
+        :class="{ 'show-footer': isHacked }"
       >
         <div class="sys-log">
-          <span>> 检测到李蓝宝的攻击....</span>
-          <span>> 正在启动驱魔音乐....</span>
-          <span class="blinking-cursor">> 需要最高权限....</span>
+          <span class="typewriter">> 检测到李蓝宝的攻击....</span>
+          <span class="typewriter" style="animation-delay: 0.8s;">> 正在启动驱魔音乐....</span>
+          <span class="typewriter blinking-cursor" style="animation-delay: 1.6s;">> 需要最高权限....</span>
         </div>
 
-        <button class="farewell-btn" @click="handleFarewell">
+        <button
+          class="farewell-btn"
+          :class="{ 'glitch-btn': isHacked }"
+          :disabled="isTurningOff"
+          @click="handleFarewell"
+        >
           <span class="btn-text">播放音乐并重启系统</span>
         </button>
       </div>
@@ -42,13 +52,33 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const isTurningOff = ref(false)
+const isHacked = ref(false) // 控制画风突变的开关
+const contentRef = ref(null)
 
-// 🌟 废话文案，串联之前提到的所有元素
+// 🌟 160615 解码特效
+const targetCode = "160615"
+const displayCode = ref("000000")
+const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*"
+
+const decodeText = () => {
+  let iterations = 0;
+  const interval = setInterval(() => {
+    displayCode.value = displayCode.value.split("").map((letter, index) => {
+      if (index < iterations) return targetCode[index];
+      return chars[Math.floor(Math.random() * chars.length)];
+    }).join("");
+
+    if (iterations >= targetCode.length) clearInterval(interval);
+    iterations += 1 / 5; // 控制解码速度
+  }, 30);
+}
+
+// 🌟 废话文案
 const paragraphs = [
   "这串数字对我来说很重要。",
   "我人生中最美好的回忆都聚集在了那几年。",
@@ -61,45 +91,62 @@ const paragraphs = [
   "至此你已经看完了所有的内容"
 ]
 
+// 监听每一行文字出现，实现自动向下滚动
+const handleLineShow = (index) => {
+  if (contentRef.value) {
+    window.scrollTo({
+      top: document.body.scrollHeight,
+      behavior: 'smooth'
+    });
+  }
+
+  // 当最后一行文字播放完毕，触发“被黑”状态
+  if (index === paragraphs.length - 1) {
+    setTimeout(() => {
+      isHacked.value = true;
+      // 再次滚动到底部确保按钮可见
+      setTimeout(() => {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      }, 100);
+    }, 1500);
+  }
+}
+
+onMounted(() => {
+  setTimeout(decodeText, 500); // 延迟半秒开始解码数字
+})
+
 const handleFarewell = () => {
-  // 触发 CRT 电视关机动画
+  if (isTurningOff.value) return; // 防抖，防止重复点击
   isTurningOff.value = true
 
   // ================= 🌟 跨页面音乐引擎 🌟 =================
-  // 1. 创建游离于 Vue 组件之外的全局 Audio 实例
-  const audioUrl = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E6%9C%80%E7%BB%88%E7%9A%84%E6%90%9E%E7%AC%91%E9%9F%B3%E4%B9%90.mp3' // 👈 这里换成你的音乐！
+  const audioUrl = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E6%9C%80%E7%BB%88%E7%9A%84%E6%90%9E%E7%AC%91%E9%9F%B3%E4%B9%90.mp3'
   const bgAudio = new Audio(audioUrl)
-  bgAudio.loop = true // 设置循环播放
+  bgAudio.loop = true
 
-  // 动画结束后跳转回首页
   setTimeout(() => {
-    // 2. 开始播放驱魔音乐
     bgAudio.play().catch(e => console.warn('音频播放被拦截:', e))
-
-    // 把音频对象临时存到 window 全局上
     window.__exorcism_audio = bgAudio
 
-    // 3. 动态注册一个路由监听器 (监视用户什么时候离开首页)
     const unregisterGuard = router.beforeEach((to, from) => {
-      // 当检测到：用户当前在首页('/')，且正准备去其他页面(如'/chat')时
       if (from.path === '/' && to.path !== '/') {
         if (window.__exorcism_audio) {
-          window.__exorcism_audio.pause()          // 停止音乐
-          window.__exorcism_audio.currentTime = 0  // 进度归零
-          window.__exorcism_audio = null           // 销毁内存
+          window.__exorcism_audio.pause()
+          window.__exorcism_audio.currentTime = 0
+          window.__exorcism_audio = null
         }
-        unregisterGuard() // 阅后即焚：执行一次后就销毁这个监听器，不影响后续性能
+        unregisterGuard()
       }
     })
 
-    // 4. 正式重启回到首页
     router.push('/')
   }, 700)
 }
 </script>
 
 <style scoped>
-/* 🌟 极致的深邃底色 */
+/* 保持原有基础样式 */
 .final-terminal {
   width: 100vw;
   height: 100dvh;
@@ -109,14 +156,39 @@ const handleFarewell = () => {
   background-color: #030305;
   color: #e2e8f0;
   z-index: 2000;
-  /* 💡 核心修复：移除 Flex 的 align-items:center 强制居中，改为允许原生的上下滚动 */
   display: block;
   overflow-x: hidden;
   overflow-y: auto;
   font-family: 'Noto Serif SC', "STKaiti", "KaiTi", serif;
+  transition: background-color 0.5s ease;
 }
 
-/* 🌟 缓慢呼吸的深海光晕 */
+/* 📺 增加复古扫描线 */
+.scanlines {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(255,255,255,0),
+    rgba(255,255,255,0) 50%,
+    rgba(0,0,0,0.1) 50%,
+    rgba(0,0,0,0.1)
+  );
+  background-size: 100% 4px;
+  z-index: 100;
+  pointer-events: none;
+  opacity: 0.3;
+}
+
+/* 🚨 黑客入侵模式（画风突变） */
+.final-terminal.hacked-mode {
+  background-color: #1a0505; /* 变成暗红色调 */
+}
+.hacked-mode .orb-top { background: #ef4444; filter: blur(150px); }
+.hacked-mode .orb-bottom { background: #b91c1c; }
+.hacked-mode .fade-line { opacity: 0.5; } /* 让前面的文字变暗 */
+
+/* 原有光晕动画 */
 .abyss-bg {
   position: fixed;
   inset: 0;
@@ -129,34 +201,25 @@ const handleFarewell = () => {
   border-radius: 50%;
   filter: blur(120px);
   opacity: 0.15;
+  transition: all 1.5s ease;
   animation: breathe 15s infinite alternate ease-in-out;
 }
-.orb-top {
-  width: 60vw; height: 60vw;
-  background: #cbd5e1;
-  top: -20%; left: -10%;
-}
-.orb-bottom {
-  width: 50vw; height: 50vw;
-  background: #fbbf24;
-  bottom: -20%; right: -10%;
-  animation-delay: -5s;
-}
+.orb-top { width: 60vw; height: 60vw; background: #cbd5e1; top: -20%; left: -10%; }
+.orb-bottom { width: 50vw; height: 50vw; background: #fbbf24; bottom: -20%; right: -10%; animation-delay: -5s; }
+
 @keyframes breathe {
   0% { transform: scale(0.8) translate(0, 0); opacity: 0.1; }
   100% { transform: scale(1.2) translate(5%, 5%); opacity: 0.25; }
 }
 
-/* 🌟 内容区排版 */
 .ending-content {
   position: relative;
   z-index: 10;
   width: 90vw;
   max-width: 680px;
-  /* 💡 核心修复：通过 min-height 实现短文本垂直居中，长文本自然延伸不被截断 */
   min-height: 100%;
   margin: 0 auto;
-  padding: 8vh 0 10vh 0; /* 上下留出安全边距 */
+  padding: 8vh 0 10vh 0;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -181,7 +244,6 @@ const handleFarewell = () => {
   margin: 0 auto 50px auto;
 }
 
-/* 🌟 电影字幕式排版 */
 .text-container {
   display: flex;
   flex-direction: column;
@@ -196,34 +258,45 @@ const handleFarewell = () => {
   letter-spacing: 2px;
   opacity: 0;
   animation: fadeInLine 2s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+  transition: opacity 1s ease;
 }
 
-/* 🌟 结尾控制台区域 */
+/* 🌟 控制台打字机效果 */
 .action-footer {
   display: flex;
   flex-direction: column;
   align-items: center;
-  opacity: 0;
-  animation-fill-mode: forwards;
+  display: none; /* 初始隐藏 */
+}
+.action-footer.show-footer {
+  display: flex;
 }
 
 .sys-log {
   font-family: monospace;
   font-size: 12px;
-  color: #64748b;
+  color: #ef4444; /* 警告红 */
   text-align: left;
   display: flex;
   flex-direction: column;
   gap: 6px;
   margin-bottom: 40px;
-  opacity: 0.7;
+  width: 100%;
+  max-width: 300px;
 }
-.blinking-cursor {
+
+.typewriter {
+  overflow: hidden;
+  white-space: nowrap;
+  width: 0;
+  animation: typing 1s steps(30, end) forwards;
+}
+
+.blinking-cursor::after {
+  content: '_';
   animation: blink 1s step-end infinite;
 }
 
-/* 🌟 极简反色按钮 */
 .farewell-btn {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -236,6 +309,9 @@ const handleFarewell = () => {
   overflow: hidden;
   transition: all 0.5s ease;
   border-radius: 4px;
+  opacity: 0;
+  animation: fadeInLine 1s ease forwards;
+  animation-delay: 2.5s; /* 等打字机打完再出现 */
 }
 .farewell-btn::before {
   content: '';
@@ -247,14 +323,22 @@ const handleFarewell = () => {
   transition: transform 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
   z-index: -1;
 }
-.farewell-btn:hover {
+.farewell-btn:hover:not(:disabled) {
   color: #030305;
   border-color: #f8fafc;
   box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
 }
-.farewell-btn:hover::before {
+.farewell-btn:hover:not(:disabled)::before {
   transform: scaleX(1);
   transform-origin: left;
+}
+/* 被黑客入侵后的按钮样式 */
+.glitch-btn {
+  border-color: #ef4444;
+  color: #ef4444;
+}
+.glitch-btn::before {
+  background: #ef4444;
 }
 
 /* ================= 动画关键帧 ================= */
@@ -265,6 +349,10 @@ const handleFarewell = () => {
 .fade-in-up {
   opacity: 0;
   animation: fadeInLine 2s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
+}
+@keyframes typing {
+  from { width: 0 }
+  to { width: 100% }
 }
 @keyframes blink {
   0%, 100% { opacity: 1; }
@@ -277,22 +365,10 @@ const handleFarewell = () => {
   pointer-events: none;
 }
 @keyframes turn-off {
-  0% {
-    transform: scale(1, 1) translate3d(0, 0, 0);
-    filter: brightness(1);
-  }
-  40% {
-    transform: scale(1, 0.002) translate3d(0, 0, 0);
-    filter: brightness(10);
-  }
-  70% {
-    transform: scale(0.1, 0.002) translate3d(0, 0, 0);
-    filter: brightness(10);
-  }
-  100% {
-    transform: scale(0, 0) translate3d(0, 0, 0);
-    filter: brightness(0);
-  }
+  0% { transform: scale(1, 1) translate3d(0, 0, 0); filter: brightness(1); }
+  40% { transform: scale(1, 0.002) translate3d(0, 0, 0); filter: brightness(10); }
+  70% { transform: scale(0.1, 0.002) translate3d(0, 0, 0); filter: brightness(10); }
+  100% { transform: scale(0, 0) translate3d(0, 0, 0); filter: brightness(0); }
 }
 
 /* ================= 移动端适配 ================= */
@@ -300,7 +376,7 @@ const handleFarewell = () => {
   .ending-content { padding: 8vh 0 12vh 0; }
   .text-container { gap: 20px; margin-bottom: 60px; }
   .fade-line { font-size: 14px; line-height: 1.8; padding: 0 10px; }
-  .sys-log { font-size: 10px; }
+  .sys-log { font-size: 11px; }
   .farewell-btn { padding: 14px 36px; font-size: 13px; }
   .divider { height: 40px; margin-bottom: 30px; }
 }
