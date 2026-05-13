@@ -16,7 +16,7 @@
           v-for="(text, index) in paragraphs"
           :key="index"
           class="fade-line"
-          :style="{ animationDelay: `${1.8 + index * 1.6}s` }"
+          :style="{ animationDelay: `${1.8 + index * 2.0}s` }"
         >
           {{ text }}
         </p>
@@ -28,13 +28,13 @@
         :style="{ animationDelay: `${2 + paragraphs.length * 1.6}s` }"
       >
         <div class="sys-log">
-          <span>> UNSTABLE ENVIRONMENT DETECTED....</span>
-          <span>> SELF-PROTECTION MUST BE ENABLED....</span>
-          <span class="blinking-cursor">> SYSTEM DISCONNECTED.... _</span>
+          <span>> 检测到李蓝宝的攻击....</span>
+          <span>> 正在启动驱魔音乐....</span>
+          <span class="blinking-cursor">> 需要最高权限....</span>
         </div>
 
         <button class="farewell-btn" @click="handleFarewell">
-          <span class="btn-text">重启系统</span>
+          <span class="btn-text">播放音乐并重启系统</span>
         </button>
       </div>
     </div>
@@ -65,8 +65,34 @@ const handleFarewell = () => {
   // 触发 CRT 电视关机动画
   isTurningOff.value = true
 
+  // ================= 🌟 跨页面音乐引擎 🌟 =================
+  // 1. 创建游离于 Vue 组件之外的全局 Audio 实例
+  const audioUrl = 'https://tengsizhixue.oss-cn-hangzhou.aliyuncs.com/onlyone/%E6%9C%80%E7%BB%88%E7%9A%84%E6%90%9E%E7%AC%91%E9%9F%B3%E4%B9%90.mp3' // 👈 这里换成你的音乐！
+  const bgAudio = new Audio(audioUrl)
+  bgAudio.loop = true // 设置循环播放
+
   // 动画结束后跳转回首页
   setTimeout(() => {
+    // 2. 开始播放驱魔音乐
+    bgAudio.play().catch(e => console.warn('音频播放被拦截:', e))
+
+    // 把音频对象临时存到 window 全局上
+    window.__exorcism_audio = bgAudio
+
+    // 3. 动态注册一个路由监听器 (监视用户什么时候离开首页)
+    const unregisterGuard = router.beforeEach((to, from) => {
+      // 当检测到：用户当前在首页('/')，且正准备去其他页面(如'/chat')时
+      if (from.path === '/' && to.path !== '/') {
+        if (window.__exorcism_audio) {
+          window.__exorcism_audio.pause()          // 停止音乐
+          window.__exorcism_audio.currentTime = 0  // 进度归零
+          window.__exorcism_audio = null           // 销毁内存
+        }
+        unregisterGuard() // 阅后即焚：执行一次后就销毁这个监听器，不影响后续性能
+      }
+    })
+
+    // 4. 正式重启回到首页
     router.push('/')
   }, 700)
 }
