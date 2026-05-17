@@ -9,7 +9,8 @@ export const SECRET_QUESTS = [
   { id: 4, question: "今年印象深刻的作品？", code: "260410" },
   { id: 5, question: "对待网游与ea的态度？", code: "180818" },
   { id: 6, question: "经常用什么头像？", code: "191001" },
-  { id: 7, question: "听歌的习惯是什么？", code: "240802" }
+  { id: 7, question: "听歌的习惯是什么？", code: "240802" },
+  { id: 8, question: "为什么注销QQ？", code: "240619" }
 ]
 
 // 2. 从本地缓存读取已解锁的密码记录（防止刷新后进度丢失）
