@@ -8,7 +8,7 @@
       </div>
       <div class="quest-body">
         <p v-if="currentQuest" class="quest-text">{{ currentQuest.question }}</p>
-        <p v-else class="quest-text success">我的任务完成了，下一次再见就是很多年后了😊</p>
+        <p v-else class="quest-text success">我的任务完成了，以后应该不会再见了😊</p>
       </div>
     </div>
 

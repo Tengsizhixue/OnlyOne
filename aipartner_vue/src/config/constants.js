@@ -130,5 +130,8 @@ export const SECRET_ASSETS = {
     bg: `${OSS_BASE}/onlyone/%E8%96%87%E5%B0%94%E8%8E%89%E7%89%B9%E8%83%8C%E6%99%AF.jpg`,
     topImg: `${OSS_BASE}/onlyone/%E8%96%87%E5%B0%94%E8%8E%89%E7%89%B9%E6%96%87%E6%9C%AC%E5%9B%BE.png`,
     attach1: `${OSS_BASE}/onlyone/%E5%90%B5%E6%9E%B6%E5%9B%BE.jpg`
+  },
+  qq: {
+    bg: "''"
   }
 }
