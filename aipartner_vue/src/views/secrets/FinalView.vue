@@ -39,8 +39,8 @@
       >
         <div class="sys-log">
           <span class="typewriter">> 检测到李蓝宝的攻击....</span>
-          <span class="typewriter" style="animation-delay: 0.8s;">> 正在启动驱魔音乐....</span>
-          <span class="typewriter blinking-cursor" style="animation-delay: 1.6s;">> 需要最高权限....</span>
+          <span class="typewriter" style="animation-delay: 0.8s;">> 李蓝宝想播放一首它精心挑选的音乐....</span>
+          <span class="typewriter blinking-cursor" style="animation-delay: 1.6s;">> 需要你的权限....</span>
         </div>
 
         <button
