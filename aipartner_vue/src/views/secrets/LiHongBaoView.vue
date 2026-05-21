@@ -20,7 +20,7 @@
       <p>我不怎么在网上聊天还有一个原因就是我不玩网游，这方面的我应该后面还会再提。</p>
 
       <div class="bottom-action">
-        <button class="shimmer-btn" @click="back">返回聊天</button>
+        <button class="shimmer-btn" @click="back">返回前言</button>
       </div>
     </div>
   </SecretLayout>

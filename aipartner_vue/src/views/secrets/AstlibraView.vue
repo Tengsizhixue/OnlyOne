@@ -74,7 +74,7 @@
         </div>
 
         <div class="bottom-action">
-          <button class="shimmer-btn" @click="back">返回聊天</button>
+          <button class="shimmer-btn" @click="back">返回前言</button>
         </div>
       </div>
     </div>
