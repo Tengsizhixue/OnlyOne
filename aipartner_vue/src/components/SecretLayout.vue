@@ -2,24 +2,13 @@
   <div class="secret-view-container">
     <div class="secret-bg" :style="{ backgroundImage: `url(${bgImage})` }"></div>
 
-    <!-- 🌟 新增判断：如果传入 hideQuestWidget，则隐藏指引小精灵 -->
-    <div v-if="!hideQuestWidget" class="quest-floating-widget glass-panel shadow-lg">
-      <div class="quest-header">
-        <el-icon><Compass /></el-icon> 指引小精灵
-      </div>
-      <div class="quest-body">
-        <p v-if="currentQuest" class="quest-text">{{ currentQuest.question }}</p>
-        <p v-else class="quest-text success">我的任务完成了，以后应该不会再见了😊</p>
-      </div>
-    </div>
-
     <div class="secret-page shadow-2xl">
       <div class="secret-content">
         <h1 class="highlight-text" :style="{ color: titleColor }">{{ title }}</h1>
         <p class="subtitle">恭喜你找到：{{ code }}</p>
 
         <!-- 将控制逻辑下放到插槽中，以便在每个文本的最末尾使用按钮 -->
-        <slot :openImage="openImage" :isAllUnlocked="isAllUnlocked" :back="() => $emit('back')"></slot>
+        <slot :openImage="openImage" :back="() => $emit('back')"></slot>
       </div>
     </div>
 
@@ -34,16 +23,13 @@
 
 <script setup>
 import { ref } from 'vue'
-import { Close, Compass } from '@element-plus/icons-vue'
-import { currentQuest, isAllUnlocked } from '../store/questState.js'
+import { Close } from '@element-plus/icons-vue'
 
 defineProps({
   bgImage: { type: String, required: true },
   title: { type: String, required: true },
   titleColor: { type: String, default: '#f8fafc' },
-  code: { type: String, required: true },
-  // 🌟 新增 Prop 属性，用于控制小精灵的显示与隐藏
-  hideQuestWidget: { type: Boolean, default: false }
+  code: { type: String, required: true }
 })
 
 defineEmits(['back'])
@@ -78,27 +64,12 @@ const closeImage = () => { previewImage.value = '' }
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 
-.quest-floating-widget {
-  position: absolute; top: 30px; right: 30px; width: 300px; padding: 16px 20px;
-  border-radius: 16px; z-index: 50; background: rgba(15, 23, 42, 0.6);
-  backdrop-filter: blur(12px); border: 1px solid rgba(167, 139, 250, 0.4); color: #f8fafc;
-}
-.quest-header { font-size: 14px; font-weight: bold; color: #a78bfa; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;}
-.quest-text { font-size: 15px; margin: 0; line-height: 1.5; }
-.quest-text.success { color: #34d399; font-weight: bold;}
-
 @media (max-width: 768px) {
   .secret-page {
     width: 100%; height: 100dvh; border-radius: 0;
-    padding: 70px 20px 20px; border: none; background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    padding: 1px 20px 20px; border: none; background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   }
   .highlight-text { font-size: 22px; margin-bottom: 6px; }
   .subtitle { font-size: 12px; margin-bottom: 16px; }
-
-  .quest-floating-widget {
-    top: 10px; left: 10px; right: 10px; width: auto; padding: 10px 14px;
-  }
-  .quest-header { font-size: 13px; margin-bottom: 4px; }
-  .quest-text { font-size: 13px; line-height: 1.4; }
 }
 </style>

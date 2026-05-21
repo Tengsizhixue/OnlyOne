@@ -44,7 +44,7 @@ defineEmits(['back'])
 .story-box p:last-child { margin-bottom: 0; }
 .redacted-block { position: relative; margin-bottom: 16px; }
 .redacted-block::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(20, 20, 25, 0.95) 0%, rgba(10, 10, 15, 0.98) 50%, rgba(5, 5, 10, 1) 100%); border-radius: 8px; z-index: 10; backdrop-filter: blur(8px); }
-.redacted-block::after { content: '[去除了废话，你只要知道我很少网上聊天就行了，这里BB太多了，我自己都看不下去]'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: rgba(255, 255, 255, 0.6); font-size: 14px; font-weight: 600; z-index: 11; letter-spacing: 2px; }
+.redacted-block::after { content: '[去除了废话，这里BB太多了，我自己都看不下去]'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: rgba(255, 255, 255, 0.6); font-size: 14px; font-weight: 600; z-index: 11; letter-spacing: 2px; }
 .content-img { width: 100%; max-width: 600px; border-radius: 12px; margin: 16px auto; display: block; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4); }
 .extra-links { margin-top: 24px; padding-top: 16px; border-top: 1px dashed rgba(96, 165, 250, 0.3); display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .links-label { font-size: 14px; color: #bfdbfe; font-weight: 600; }
