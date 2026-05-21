@@ -70,15 +70,15 @@ defineEmits(['back'])
   right: 0;
   bottom: 0;
   background: linear-gradient(135deg, 
-    rgba(96, 165, 250, 0.85) 0%, 
-    rgba(59, 130, 246, 0.9) 50%,
-    rgba(37, 99, 235, 0.95) 100%);
+    rgba(20, 20, 25, 0.95) 0%, 
+    rgba(10, 10, 15, 0.98) 50%,
+    rgba(5, 5, 10, 1) 100%);
   border-radius: 8px;
   z-index: 10;
-  backdrop-filter: blur(2px);
+  backdrop-filter: blur(8px);
 }
 .redacted-block::after {
-  content: '[这段内容我放在了后面，前面不讨论这些]';
+  content: '[这段内容我放在了后面，前面不讨论]';
   position: absolute;
   top: 50%;
   left: 50%;
