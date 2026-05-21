@@ -1,7 +1,6 @@
 import { ref, computed } from 'vue'
 
 // 1. 🧩 所有的谜题配置都在这里！
-// 后续你要修改顺序、或者追加新问题，只需要在这里修改或添加对应的对象即可，不需要改动任何页面代码。
 export const SECRET_QUESTS = [
   { id: 1, question: "尝试在聊天框发送160615", code: "160615" },
   { id: 2, question: "世界上只有两个人的苹果手机收不到消息，其中的一个是谁？", code: "260315" },
@@ -9,8 +8,7 @@ export const SECRET_QUESTS = [
   { id: 4, question: "今年印象深刻的作品？", code: "260410" },
   { id: 5, question: "对待网游与ea的态度？", code: "180818" },
   { id: 6, question: "经常用什么头像？", code: "191001" },
-  { id: 7, question: "听歌的习惯是什么？", code: "240802" },
-  { id: 8, question: "为什么注销QQ？", code: "240619" }
+  { id: 7, question: "听歌的习惯是什么？", code: "240802" }
 ]
 
 // 2. 从本地缓存读取已解锁的密码记录（防止刷新后进度丢失）
@@ -31,7 +29,7 @@ export const currentQuest = computed(() => {
   return SECRET_QUESTS.find(q => !unlockedCodes.value.includes(q.code))
 })
 
-// 5. 判断是否全部通关
+// 5. 判断是否全部通关 (原逻辑不再作为限制条件，但仍可留作记录判定)
 export const isAllUnlocked = computed(() => {
   return SECRET_QUESTS.every(q => unlockedCodes.value.includes(q.code))
 })

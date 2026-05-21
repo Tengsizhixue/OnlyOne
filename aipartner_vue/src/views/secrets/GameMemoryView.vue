@@ -4,9 +4,8 @@
     title-color="#7dd3fc"
     code="251027"
     @back="handleBack"
-    v-slot="{ openImage, isAllUnlocked, back }"
+    v-slot="{ openImage, back }"
   >
-    <!-- 🌟 核心修复：只保留一个全局的 audio 实例，通过动态切换 src 解决手机端多音频实例被强行静音的问题 -->
     <audio ref="globalAudio" :src="currentAudioSrc" preload="metadata" @ended="onEnded"></audio>
 
     <div class="ethereal-room">
@@ -122,9 +121,7 @@
         </div>
 
         <div class="bottom-action">
-          <button class="shimmer-btn" @click="back">
-            {{ isAllUnlocked ? '点击查看最后的废话' : '返回聊天' }}
-          </button>
+          <button class="shimmer-btn" @click="back">返回聊天</button>
         </div>
       </div>
     </div>
@@ -145,18 +142,12 @@ const {
 
 const emit = defineEmits(['back'])
 
-// 🌟 核心修复：改用单音频实例机制
 const globalAudio = ref(null)
 const currentAudioSrc = ref('')
 const currentAudio = ref(null)
 const isPlaying = ref(false)
 
-// 将音频源映射到一个对象中
-const audioSources = {
-  1: audioZhanHuo,
-  2: audioJieJu,
-  3: audioMoon
-}
+const audioSources = { 1: audioZhanHuo, 2: audioJieJu, 3: audioMoon }
 
 const toggleAudio = (num) => {
   if (!globalAudio.value) return
@@ -171,12 +162,9 @@ const toggleAudio = (num) => {
       isPlaying.value = true
     }
   } else {
-    // 切换歌曲：改变 src 并标记状态
     currentAudio.value = num
     currentAudioSrc.value = audioSources[num]
     isPlaying.value = true
-
-    // 留出 50ms 给 Vue 更新 DOM 的 src 属性，然后再播放
     setTimeout(() => {
       if (globalAudio.value) {
         globalAudio.value.currentTime = 0
@@ -186,26 +174,18 @@ const toggleAudio = (num) => {
   }
 }
 
-const onEnded = () => {
-  isPlaying.value = false
-}
+const onEnded = () => { isPlaying.value = false }
 
 const handleBack = () => {
-  if (globalAudio.value) {
-    globalAudio.value.pause()
-    globalAudio.value.currentTime = 0
-  }
+  if (globalAudio.value) { globalAudio.value.pause(); globalAudio.value.currentTime = 0; }
   isPlaying.value = false
   emit('back')
 }
 
-onUnmounted(() => {
-  handleBack()
-})
+onUnmounted(() => handleBack())
 </script>
 
 <style scoped>
-/* 样式保持不变 */
 .ethereal-room { width: 100%; flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; padding-right: 4px; box-sizing: border-box; }
 .ethereal-room::-webkit-scrollbar { width: 6px; }
 .ethereal-room::-webkit-scrollbar-track { background: transparent; }
@@ -235,7 +215,6 @@ onUnmounted(() => {
 .links-label { font-size: 14px; color: #bae6fd; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
 .img-link { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #f0f9ff; text-decoration: none; border-radius: 20px; font-size: 13px; transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(4px); }
 .img-link:hover { background: rgba(56, 189, 248, 0.3); border-color: #7dd3fc; color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3); }
-
 .bottom-action { margin-top: 40px; display: flex; justify-content: center; }
 
 @media (max-width: 768px) {

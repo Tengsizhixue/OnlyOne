@@ -2,7 +2,8 @@
   <div class="secret-view-container">
     <div class="secret-bg" :style="{ backgroundImage: `url(${bgImage})` }"></div>
 
-    <div class="quest-floating-widget glass-panel shadow-lg">
+    <!-- 🌟 新增判断：如果传入 hideQuestWidget，则隐藏指引小精灵 -->
+    <div v-if="!hideQuestWidget" class="quest-floating-widget glass-panel shadow-lg">
       <div class="quest-header">
         <el-icon><Compass /></el-icon> 指引小精灵
       </div>
@@ -40,7 +41,9 @@ defineProps({
   bgImage: { type: String, required: true },
   title: { type: String, required: true },
   titleColor: { type: String, default: '#f8fafc' },
-  code: { type: String, required: true }
+  code: { type: String, required: true },
+  // 🌟 新增 Prop 属性，用于控制小精灵的显示与隐藏
+  hideQuestWidget: { type: Boolean, default: false }
 })
 
 defineEmits(['back'])
@@ -58,13 +61,11 @@ const closeImage = () => { previewImage.value = '' }
   width: 95vw; max-width: 1200px; height: 90vh; padding: 40px 60px; text-align: center; border-radius: 24px; z-index: 1; color: #f8fafc;
   background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.15); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
-  display: flex; flex-direction: column;
-  box-sizing: border-box; /* 💡 核心修复：防止 padding 撑爆高度 */
+  display: flex; flex-direction: column; box-sizing: border-box;
 }
 
 .secret-content {
-  flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%;
-  width: 100%; overflow: hidden; /* 💡 核心修复：防止内部元素把容器撑开 */
+  flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; width: 100%; overflow: hidden;
 }
 
 .highlight-text { margin-bottom: 10px; font-size: 32px; font-weight: bold; flex-shrink: 0; }
@@ -88,19 +89,13 @@ const closeImage = () => { previewImage.value = '' }
 
 @media (max-width: 768px) {
   .secret-page {
-    width: 100%; height: 100dvh;
-    border-radius: 0;
-    /* 💡 核心修复1：将顶部的 padding 从 70px 加大到 120px，给多行文本的悬浮窗留足物理空间 */
-    padding: 70px 20px 20px;
-    border: none; background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    width: 100%; height: 100dvh; border-radius: 0;
+    padding: 70px 20px 20px; border: none; background: rgba(15, 23, 42, 0.3); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
   }
-
-  /* 💡 稍微缩小一点主标题字号，防止手机上文字太挤折行 */
   .highlight-text { font-size: 22px; margin-bottom: 6px; }
   .subtitle { font-size: 12px; margin-bottom: 16px; }
 
   .quest-floating-widget {
-    /* 💡 核心修复2：让手机上的悬浮窗排版更紧凑，避免其高度无限制扩张 */
     top: 10px; left: 10px; right: 10px; width: auto; padding: 10px 14px;
   }
   .quest-header { font-size: 13px; margin-bottom: 4px; }

@@ -5,7 +5,7 @@
     title-color="#fbbf24"
     code="260410"
     @back="handleBack"
-    v-slot="{ openImage, isAllUnlocked, back }"
+    v-slot="{ openImage, back }"
   >
     <audio ref="audio1" :src="audioStart" preload="metadata" @ended="onEnded(1)"></audio>
     <audio ref="audio2" :src="audioEnd" preload="metadata" @ended="onEnded(2)"></audio>
@@ -74,9 +74,7 @@
         </div>
 
         <div class="bottom-action">
-          <button class="shimmer-btn" @click="back">
-            {{ isAllUnlocked ? '点击查看最后的废话' : '返回聊天' }}
-          </button>
+          <button class="shimmer-btn" @click="back">返回聊天</button>
         </div>
       </div>
     </div>
@@ -90,7 +88,6 @@ import SecretLayout from '../../components/SecretLayout.vue'
 import { SECRET_ASSETS } from '../../config/constants.js'
 
 const { bg, cover, destiny, audioStart, audioEnd, imgDefect1, imgDefect2 } = SECRET_ASSETS.astlibra
-
 const emit = defineEmits(['back'])
 
 const audio1 = ref(null)
@@ -107,18 +104,14 @@ const toggleAudio = (num) => {
       targetAudio?.pause()
       isPlaying.value = false
     } else {
-      // 🌟 优化：加上 catch 捕获浏览器拦截错误
       targetAudio?.play().catch(e => console.warn('音频播放被拦截:', e))
       isPlaying.value = true
     }
   }
   else {
-    if (otherAudio) {
-      otherAudio.pause()
-    }
+    if (otherAudio) otherAudio.pause()
     if (targetAudio) {
       targetAudio.currentTime = 0
-      // 🌟 优化：加上 catch 捕获浏览器拦截错误
       targetAudio.play().catch(e => console.warn('音频播放被拦截:', e))
     }
     currentAudio.value = num
@@ -126,11 +119,7 @@ const toggleAudio = (num) => {
   }
 }
 
-const onEnded = (num) => {
-  if (currentAudio.value === num) {
-    isPlaying.value = false
-  }
-}
+const onEnded = (num) => { if (currentAudio.value === num) isPlaying.value = false }
 
 const handleBack = () => {
   if (audio1.value) { audio1.value.pause(); audio1.value.currentTime = 0; }
@@ -139,14 +128,10 @@ const handleBack = () => {
   emit('back')
 }
 
-onUnmounted(() => {
-  if (audio1.value) { audio1.value.pause(); audio1.value.currentTime = 0; }
-  if (audio2.value) { audio2.value.pause(); audio2.value.currentTime = 0; }
-})
+onUnmounted(() => handleBack())
 </script>
 
 <style scoped>
-/* 样式保持不变 */
 .epic-room { width: 100%; flex: 1; display: flex; flex-direction: column; overflow-y: auto; overflow-x: hidden; padding-right: 4px; box-sizing: border-box; }
 .epic-room::-webkit-scrollbar { width: 6px; }
 .epic-room::-webkit-scrollbar-track { background: transparent; }
@@ -173,7 +158,6 @@ onUnmounted(() => {
 .links-label { font-size: 14px; color: #fde68a; font-weight: 600; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
 .img-link { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.4); color: #fef3c7; text-decoration: none; border-radius: 20px; font-size: 13px; transition: all 0.3s ease; cursor: pointer; backdrop-filter: blur(4px); }
 .img-link:hover { background: rgba(251, 191, 36, 0.3); border-color: #fbbf24; color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3); }
-
 .bottom-action { margin-top: 40px; display: flex; justify-content: center; }
 
 @media (max-width: 768px) {
@@ -184,11 +168,6 @@ onUnmounted(() => {
   .track-name { font-size: 14px; }
   .extra-links { margin-top: 20px; padding-top: 16px; }
   .img-link { padding: 5px 12px; font-size: 12px; }
-
-  /* 🌟 手机端背景模糊度调节：穿透 SecretLayout 修改底层背景 */
-  :deep(.secret-bg) {
-    filter: brightness(0.65) blur(6px); /* 调节这里的数值即可改变模糊度 */
-    transform: scale(1.05); /* 稍微放大，防止模糊后边缘出现白边透底 */
-  }
+  :deep(.secret-bg) { filter: brightness(0.65) blur(6px); transform: scale(1.05); }
 }
 </style>
