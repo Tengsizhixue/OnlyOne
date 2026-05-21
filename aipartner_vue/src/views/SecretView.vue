@@ -142,10 +142,11 @@ onMounted(() => { if (props.secretCode) unlockCode(props.secretCode) })
 watch(() => props.secretCode, (newCode) => { if (newCode) unlockCode(newCode) })
 
 const handleBack = () => {
+  // 返回到 160615 主界面
   router.push({
-    name: 'chat',
+    name: 'secret',
+    params: { secretCode: '160615' },
     query: {
-      view: 'room',
       role: route.query.role,
       session: route.query.session
     }
@@ -154,9 +155,9 @@ const handleBack = () => {
 
 // 🌟 附加目录的数据配置
 const EXTRA_LIST = [
-  { name: '？？？？', code: '？？？？', realCode: '200326' },
-  { name: '？？？？', code: '？？？？', realCode: '210318' },
-  { name: '？？？？', code: '？？？？', realCode: '230602' },
+  { name: '附加1', code: '？？？？', realCode: '200326' },
+  { name: '附加2', code: '？？？？', realCode: '210318' },
+  { name: '附加3', code: '？？？？', realCode: '230602' },
 ]
 
 const goToFinalFromList = () => {
