@@ -1,6 +1,6 @@
 <template>
   <SecretLayout
-    title="⏳ 时空“穿越”"
+    title="时空“穿越”"
     title-color="#7dd3fc"
     code="251027"
     @back="handleBack"
@@ -70,7 +70,8 @@
 
         <p>而《灵魂摆渡者》则给出了另一种“向内的告别”。你陪伴一个个灵魂走完最后的旅程，送他们前往永恒之门。
           船越建越大，人却越来越少——当不得不送走那些倾注了情感的角色时，原本温暖的任务逐渐变成情感的负重，让人难以前行。
-          然而，当你最终完成所有使命，驾驶着空船，准备送走最后一位乘客——主角自己时，才会真正明白：我们终其一生，都是在摆渡他人，最终摆渡自己。告别并不是终点，不过是人生中的旅途罢了。</p>
+          然而，当你最终完成所有使命，驾驶着空船，准备送走最后一位乘客——主角自己时，才会真正明白：我们终其一生，都是在摆渡他人，最终摆渡自己。
+          告别并不是终点，只是人生中的旅途。</p>
 
         <img :src="imgHeart" alt="爱心" class="content-img filter-soft" />
 
@@ -105,9 +106,9 @@
           它们共同指向一个命题——真正的生活不该只有单程票，它既需要重逢的信念，也需要放手的勇气，更需要与自己和解的气概</p>
 
         <div class="extra-links">
-          <span class="links-label">🔗 记忆的附件：</span>
+          <span class="links-label">附件：</span>
           <span @click="openImage(attach1)" class="img-link">
-            <el-icon><Picture /></el-icon> 原文
+            <el-icon><Picture /></el-icon> 去年写的原文
           </span>
           <span @click="openImage(attach2)" class="img-link">
             <el-icon><Picture /></el-icon> 原文AI化
