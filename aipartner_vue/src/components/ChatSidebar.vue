@@ -29,8 +29,7 @@
       <div class="list-title">神秘指引</div>
       <div class="quest-card glass-panel" @click="copyQuest" title="点击复制谜题内容">
         <p v-if="currentQuest" class="quest-text">{{ currentQuest.question }}</p>
-        <p v-else class="quest-text success">恭喜你所有谜题已解开！你居然看完了这么多废话，连我都做不到😄。给你列出所有的代码吧，这些你都看过了
-          160610、180818、191001、240619、240802、251027、260315、260410</p>
+        <p v-else class="quest-text success">恭喜你所有常规记忆已解开！你居然看完了这么多内容😄。代码列表：160615、180818、191001、240802、251027、260315、260410</p>
         <el-icon v-if="currentQuest" class="quest-copy-icon"><DocumentCopy /></el-icon>
       </div>
     </div>

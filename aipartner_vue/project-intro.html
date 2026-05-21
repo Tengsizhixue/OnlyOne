@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>不太聪明的李蓝宝 - 项目介绍</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cyan: #00f0ff;
+    --purple: #a855f7;
+    --pink: #ec4899;
+    --gold: #f59e0b;
+    --bg: #0a0a0f;
+    --card-bg: rgba(15, 15, 30, 0.85);
+    --glass: rgba(255,255,255,0.04);
+  }
+
+  body {
+    font-family: 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: #e0e0e0;
+    overflow-x: hidden;
+    line-height: 1.7;
+  }
+
+  /* ===== 动态背景 ===== */
+  #bg-canvas {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 0; pointer-events: none;
+  }
+
+  .scanlines {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 1;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+  }
+
+  /* ===== 主容器 ===== */
+  .wrapper { position: relative; z-index: 2; }
+
+  /* ===== HERO ===== */
+  .hero {
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; padding: 40px 20px;
+  }
+  .hero-badge {
+    display: inline-block; padding: 6px 18px;
+    border: 1px solid var(--cyan); border-radius: 20px;
+    color: var(--cyan); font-size: 13px; letter-spacing: 3px;
+    animation: badgePulse 3s ease-in-out infinite;
+    margin-bottom: 24px;
+  }
+  @keyframes badgePulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(0,240,255,0.2); }
+    50% { box-shadow: 0 0 24px rgba(0,240,255,0.5); }
+  }
+  .hero h1 {
+    font-size: clamp(42px, 8vw, 80px); font-weight: 900;
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--purple) 50%, var(--pink) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 16px; letter-spacing: 4px;
+  }
+  .hero .subtitle {
+    font-size: 18px; color: #888; max-width: 600px;
+    letter-spacing: 1px; margin-bottom: 40px;
+  }
+  .hero .subtitle em { color: var(--cyan); font-style: normal; }
+
+  .scroll-hint {
+    position: absolute; bottom: 40px;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    animation: float 2s ease-in-out infinite;
+  }
+  .scroll-hint span { font-size: 12px; color: #555; letter-spacing: 2px; }
+  .scroll-hint .arrow { width: 20px; height: 20px; border-right: 1px solid #555; border-bottom: 1px solid #555; transform: rotate(45deg); }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(10px); }
+  }
+
+  /* ===== 区块通用 ===== */
+  section { padding: 100px 20px; max-width: 1100px; margin: 0 auto; }
+  .section-label {
+    font-size: 11px; letter-spacing: 4px; color: var(--cyan);
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+  .section-title {
+    font-size: clamp(28px, 5vw, 42px); font-weight: 700;
+    margin-bottom: 48px; color: #fff;
+  }
+
+  /* ===== 功能卡片网格 ===== */
+  .feature-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+  .feature-card {
+    background: var(--card-bg); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px; padding: 36px 28px;
+    transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+    position: relative; overflow: hidden;
+  }
+  .feature-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .feature-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0,240,255,0.25);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.4);
+  }
+  .feature-card:hover::before { opacity: 1; }
+  .feature-card .icon {
+    font-size: 36px; margin-bottom: 16px; display: block;
+  }
+  .feature-card h3 { font-size: 18px; color: #fff; margin-bottom: 8px; }
+  .feature-card p { font-size: 14px; color: #888; line-height: 1.7; }
+
+  /* ===== 角色展示 ===== */
+  .role-showcase {
+    display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;
+  }
+  .role-card {
+    background: var(--card-bg); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px; padding: 28px 22px;
+    width: 200px; text-align: center;
+    transition: transform 0.3s, border-color 0.3s;
+  }
+  .role-card:hover { transform: translateY(-6px); }
+  .role-card .avatar {
+    width: 80px; height: 80px; border-radius: 50%;
+    margin: 0 auto 14px;
+    background-size: cover; background-position: center;
+    border: 2px solid rgba(255,255,255,0.1);
+  }
+  .role-card h4 { font-size: 15px; color: #fff; margin-bottom: 4px; }
+  .role-card .role-desc { font-size: 12px; color: #666; }
+  .role-card .theme-dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    margin-right: 4px; vertical-align: middle;
+  }
+
+  /* ===== 记忆碎片 ===== */
+  .memory-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+  }
+  .memory-card {
+    background: var(--card-bg); border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 12px; padding: 20px;
+    cursor: default; transition: all 0.3s;
+  }
+  .memory-card:hover { border-color: rgba(168,85,247,0.4); }
+  .memory-card .code {
+    font-family: 'Courier New', monospace; font-size: 20px;
+    color: var(--purple); letter-spacing: 3px; margin-bottom: 6px;
+  }
+  .memory-card .mem-title { font-size: 14px; color: #ccc; font-weight: 500; }
+  .memory-card .mem-hint { font-size: 12px; color: #555; margin-top: 4px; }
+
+  /* ===== 技术栈标签 ===== */
+  .tech-tags { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 16px; }
+  .tech-tag {
+    padding: 8px 18px; border-radius: 20px; font-size: 13px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    color: #aaa; letter-spacing: 1px;
+  }
+
+  /* ===== 数据亮点 ===== */
+  .stats-row {
+    display: flex; flex-wrap: wrap; gap: 30px; justify-content: center;
+    margin-top: 48px;
+  }
+  .stat-item { text-align: center; }
+  .stat-item .num {
+    font-size: 48px; font-weight: 900;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .stat-item .lbl { font-size: 13px; color: #666; letter-spacing: 2px; margin-top: 4px; }
+
+  /* ===== 页脚 ===== */
+  footer {
+    text-align: center; padding: 60px 20px;
+    border-top: 1px solid rgba(255,255,255,0.04);
+    color: #444; font-size: 13px;
+  }
+  footer .code-highlight {
+    font-family: 'Courier New', monospace; color: var(--cyan);
+    font-size: 16px; letter-spacing: 4px;
+  }
+
+  /* ===== 响应式 ===== */
+  @media (max-width: 768px) {
+    section { padding: 60px 16px; }
+    .role-showcase { gap: 12px; }
+    .role-card { width: 150px; padding: 20px 14px; }
+    .role-card .avatar { width: 56px; height: 56px; }
+    .feature-grid { grid-template-columns: 1fr; }
+    .memory-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas"></canvas>
+<div class="scanlines"></div>
+
+<div class="wrapper">
+
+  <!-- ====== HERO ====== -->
+  <section class="hero">
+    <div class="hero-badge">PERSONAL PROJECT 2024</div>
+    <h1>不太聪明的李蓝宝</h1>
+    <p class="subtitle">
+      一个融合了 <em>AI 聊天</em> 与 <em>个人记忆画廊</em> 的创意项目<br>
+      表面是聊天机器人，深处是一封写给自己的信
+    </p>
+    <div class="scroll-hint">
+      <span>向下探索</span>
+      <div class="arrow"></div>
+    </div>
+  </section>
+
+  <!-- ====== 项目简介 ====== -->
+  <section>
+    <div class="section-label">// Overview</div>
+    <h2 class="section-title">项目简介</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <span class="icon">🤖</span>
+        <h3>多角色 AI 聊天</h3>
+        <p>5 位风格迥异的 AI 角色可供选择，每位角色拥有独立的视觉主题、背景和对话风格。支持流式实时对话，10 秒超时保护。</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🎠</span>
+        <h3>3D 角色选择转盘</h3>
+        <p>采用 CSS 3D 透视变换打造的旋转木马式角色选择界面，带有流光边框、光泽扫过动画和动态背景切换。</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🔐</span>
+        <h3>隐藏记忆碎片系统</h3>
+        <p>在聊天中输入密码可解锁 8 块"记忆碎片"——每块都是一篇私密的个人随笔，配有音乐、图片和游戏回忆。</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🎨</span>
+        <h3>赛博朋克视觉风格</h3>
+        <p>CRT 电视开关机动画、动态极光背景、扫描线叠加、毛玻璃 UI —— 精心打磨的复古未来主义视觉体验。</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">📱</span>
+        <h3>全设备响应式适配</h3>
+        <p>从桌面端到移动端完整适配，侧边栏滑入式布局，触控手势支持角色转盘滑动切换。</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🔗</span>
+        <h3>UID 会话共享</h3>
+        <p>每位用户拥有 8 位随机身份码，可跨设备同步聊天记录，支持"恢复历史"功能找回之前的数据。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== 数据亮点 ====== -->
+  <section style="padding-top: 0;">
+    <div class="stats-row">
+      <div class="stat-item"><div class="num">5</div><div class="lbl">AI 角色</div></div>
+      <div class="stat-item"><div class="num">8</div><div class="lbl">记忆碎片</div></div>
+      <div class="stat-item"><div class="num">5</div><div class="lbl">视觉主题</div></div>
+      <div class="stat-item"><div class="num">7+</div><div class="lbl">秘密页面</div></div>
+    </div>
+  </section>
+
+  <!-- ====== AI 角色介绍 ====== -->
+  <section>
+    <div class="section-label">// Characters</div>
+    <h2 class="section-title">AI 角色阵容</h2>
+    <div class="role-showcase">
+      <div class="role-card" style="border-color: rgba(99,102,241,0.3);">
+        <div class="avatar" style="background-color:#6366f1;"></div>
+        <h4>李蓝宝</h4>
+        <div class="role-desc">「我很爱聊天」</div>
+        <div style="margin-top:8px;"><span class="theme-dot" style="background:#6366f1;"></span>默认主题</div>
+      </div>
+      <div class="role-card" style="border-color: rgba(168,85,247,0.3);">
+        <div class="avatar" style="background-color:#a855f7;"></div>
+        <h4>薇尔莉特</h4>
+        <div class="role-desc">「你好，有信件需要写吗？」</div>
+        <div style="margin-top:8px;"><span class="theme-dot" style="background:#a855f7;"></span>紫罗兰主题</div>
+      </div>
+      <div class="role-card" style="border-color: rgba(59,130,246,0.3);">
+        <div class="avatar" style="background-color:#3b82f6;"></div>
+        <h4>誊思致雪</h4>
+        <div class="role-desc">「很久不见了」</div>
+        <div style="margin-top:8px;"><span class="theme-dot" style="background:#3b82f6;"></span>冰雪主题</div>
+      </div>
+      <div class="role-card" style="border-color: rgba(236,72,153,0.3);">
+        <div class="avatar" style="background-color:#ec4899;"></div>
+        <h4>音乐推荐助手</h4>
+        <div class="role-desc">「音乐，是灵魂的共鸣」</div>
+        <div style="margin-top:8px;"><span class="theme-dot" style="background:#ec4899;"></span>音乐主题</div>
+      </div>
+      <div class="role-card" style="border-color: rgba(245,158,11,0.3);">
+        <div class="avatar" style="background-color:#f59e0b;"></div>
+        <h4>游戏聊天助手</h4>
+        <div class="role-desc">「你是谁？我根本不认识你！」</div>
+        <div style="margin-top:8px;"><span class="theme-dot" style="background:#f59e0b;"></span>游戏主题</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== 记忆碎片系统 ====== -->
+  <section>
+    <div class="section-label">// Secret System</div>
+    <h2 class="section-title">隐藏的记忆碎片</h2>
+    <p style="color:#666; font-size:14px; margin-top:-32px; margin-bottom:36px;">
+      在聊天中输入 6 位密码即可解锁对应的记忆碎片——它们是作者真实的个人随笔、游戏评测与情感记录
+    </p>
+    <div class="memory-grid">
+      <div class="memory-card">
+        <div class="code">260315</div>
+        <div class="mem-title">李红宝的失联空间</div>
+        <div class="mem-hint">关于一位不回消息的朋友</div>
+      </div>
+      <div class="memory-card">
+        <div class="code">251027</div>
+        <div class="mem-title">时空"穿越"</div>
+        <div class="mem-hint">三款叙事游戏的回忆录 · 含音乐</div>
+      </div>
+      <div class="memory-card">
+        <div class="code">260410</div>
+        <div class="mem-title">神之天平隐秘画卷</div>
+        <div class="mem-hint">Astlibra 深度游戏评测</div>
+      </div>
+      <div class="memory-card">
+        <div class="code">191001</div>
+        <div class="mem-title">无名信件总有寄件人</div>
+        <div class="mem-hint">紫罗兰永恒花园观后感</div>
+      </div>
+      <div class="memory-card">
+        <div class="code">240802</div>
+        <div class="mem-title">音乐的力量</div>
+        <div class="mem-hint">年度听歌习惯与推荐曲目</div>
+      </div>
+      <div class="memory-card">
+        <div class="code">180818</div>
+        <div class="mem-title">游戏的极端</div>
+        <div class="mem-hint">对 EA 和 PvP 游戏的犀利吐槽</div>
+      </div>
+      <div class="memory-card">
+        <div class="code">240619</div>
+        <div class="mem-title">消失的 QQ</div>
+        <div class="mem-hint">为什么注销了 QQ 账号</div>
+      </div>
+      <div class="memory-card" style="border-color: rgba(0,240,255,0.2); border-style: dashed;">
+        <div class="code" style="color:var(--cyan);">160615</div>
+        <div class="mem-title" style="color:#fff;">🏁 最终篇章</div>
+        <div class="mem-hint">集齐全部碎片后解锁的结局</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== 技术栈 ====== -->
+  <section>
+    <div class="section-label">// Tech Stack</div>
+    <h2 class="section-title">技术栈</h2>
+    <div class="tech-tags">
+      <span class="tech-tag">Vue 3</span>
+      <span class="tech-tag">Composition API</span>
+      <span class="tech-tag">Vite 8</span>
+      <span class="tech-tag">Vue Router 4</span>
+      <span class="tech-tag">Element Plus</span>
+      <span class="tech-tag">CSS 3D Transforms</span>
+      <span class="tech-tag">ReadableStream SSE</span>
+      <span class="tech-tag">阿里云 OSS</span>
+      <span class="tech-tag">Python FastAPI</span>
+      <span class="tech-tag">localStorage</span>
+      <span class="tech-tag">响应式设计</span>
+      <span class="tech-tag">毛玻璃 UI</span>
+    </div>
+  </section>
+
+  <!-- ====== 设计亮点 ====== -->
+  <section>
+    <div class="section-label">// Design Highlights</div>
+    <h2 class="section-title">设计亮点</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <span class="icon">📺</span>
+        <h3>CRT 开关机动画</h3>
+        <p>仿老式电视的横向压缩 + 亮度闪烁动画，首页开机、终章关机形成首尾呼应。</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🎬</span>
+        <h3>电影级场景转场</h3>
+        <p>角色选择 → 聊天室之间采用 "zoom-in / zoom-out" 交叉淡入淡出，营造电影镜头感。</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">🎵</span>
+        <h3>音频叙事驱动</h3>
+        <p>记忆碎片页面嵌入自定义音频播放器，跳动频谱动画，单实例架构兼容移动端自动播放限制。</p>
+      </div>
+      <div class="feature-card">
+        <span class="icon">💎</span>
+        <h3>终极密码 160615</h3>
+        <p>贯穿全文的神秘数字——在终章通过字符随机落定动画揭晓其含义，形成完整叙事闭环。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== 页脚 ====== -->
+  <footer>
+    <p>一个关于 <span style="color:#888;">记忆</span>、<span style="color:#888;">告别</span> 与 <span style="color:#888;">自我表达</span> 的项目</p>
+    <p style="margin-top:12px;">核心密码 <span class="code-highlight">160615</span></p>
+    <p style="margin-top:24px; font-size:11px; color:#333;">Built with Vue 3 + Element Plus · All assets on Alibaba Cloud OSS</p>
+  </footer>
+
+</div>
+
+<script>
+// ===== 动态背景：粒子 + 连线 =====
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let particles = [];
+let w, h;
+
+function resize() {
+  w = canvas.width = window.innerWidth;
+  h = canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+const PARTICLE_COUNT = 80;
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+  particles.push({
+    x: Math.random() * w,
+    y: Math.random() * h,
+    vx: (Math.random() - 0.5) * 0.4,
+    vy: (Math.random() - 0.5) * 0.4,
+    r: Math.random() * 1.5 + 0.5,
+  });
+}
+
+function animate() {
+  ctx.clearRect(0, 0, w, h);
+
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+    if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+  });
+
+  // 连线
+  const maxDist = 150;
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < maxDist) {
+        const alpha = (1 - dist / maxDist) * 0.15;
+        ctx.strokeStyle = `rgba(0,240,255,${alpha})`;
+        ctx.lineWidth = 0.5;
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.stroke();
+      }
+    }
+  }
+
+  // 粒子
+  particles.forEach(p => {
+    ctx.fillStyle = 'rgba(0,240,255,0.6)';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  requestAnimationFrame(animate);
+}
+animate();
+
+// ===== 滚动淡入 =====
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('section, footer').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(30px)';
+  el.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+  observer.observe(el);
+});
+
+// 初始显示 hero
+setTimeout(() => {
+  const hero = document.querySelector('.hero');
+  hero.style.opacity = '1';
+  hero.style.transform = 'translateY(0)';
+  hero.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
+}, 100);
+</script>
+</body>
+</html>
