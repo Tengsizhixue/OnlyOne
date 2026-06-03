@@ -33,3 +33,25 @@ export const currentQuest = computed(() => {
 export const isAllUnlocked = computed(() => {
   return SECRET_QUESTS.every(q => unlockedCodes.value.includes(q.code))
 })
+
+// 6. 🌟 特殊条目的解锁状态（附加内容和结局）
+export const visitedExtras = ref({
+  final: false, // 结局
+  extra200326: false,
+  extra210318: false,
+  extra230602: false
+})
+
+// 从本地缓存读取特殊条目的访问记录
+const savedExtras = localStorage.getItem('visited_extras')
+if (savedExtras) {
+  Object.assign(visitedExtras.value, JSON.parse(savedExtras))
+}
+
+// 标记特殊条目为已访问
+export const markExtraAsVisited = (key) => {
+  if (!visitedExtras.value[key]) {
+    visitedExtras.value[key] = true
+    localStorage.setItem('visited_extras', JSON.stringify(visitedExtras.value))
+  }
+}
