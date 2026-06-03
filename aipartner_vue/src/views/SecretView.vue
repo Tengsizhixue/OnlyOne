@@ -25,7 +25,7 @@
           </header>
 
           <section class="gallery-prose">
-            <p>这个数字是我网址的一级域名，后面会说这个数字是怎么来的。顶级域名 .xyz 单纯是因为便宜，一年就一刀乐。</p>
+            <p>这个数字是我网址的二级域名，后面会说这个数字是怎么来的。顶级域名 .xyz 单纯是因为便宜，一年就一刀乐。</p>
              <p><del>回到侧边框后，你会看到其他的一些问题，你可以尝试着去问 AI 里面的问题。如果问的角色没错，AI 的回复中会有其他的 6 位数字；如果 AI 没给你正确的答案，可能是它抽风了，你可以多问几遍。</del></p>
             <p>现在不需要再问ai了，内容在下面已经列出</p>
             <p>内容太多，有很多的废话，如果感兴趣可以看看后面的内容</p>
@@ -61,7 +61,11 @@
               </div>
 
               <!-- 最终的废话结局 -->
-              <div class="fragment-item is-visited extra-item" @click="goToFinalFromList">
+              <div 
+                class="fragment-item extra-item" 
+                :class="{ 'is-visited': visitedExtras.final }"
+                @click="goToFinalFromList"
+              >
                 <div class="frag-index">
                   <span>终章</span>
                   <span class="num">00</span>
@@ -86,7 +90,8 @@
               <div
                 v-for="(extra, index) in EXTRA_LIST"
                 :key="extra.realCode"
-                class="fragment-item is-visited extra-item"
+                class="fragment-item extra-item"
+                :class="{ 'is-visited': visitedExtras['extra' + extra.realCode] }"
                 @click="handleExtraClick(extra)"
               >
                 <div class="frag-index">
@@ -117,7 +122,7 @@
 import { computed, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessageBox } from 'element-plus'
-import { unlockCode, SECRET_QUESTS, unlockedCodes } from '../store/questState.js'
+import { unlockCode, SECRET_QUESTS, unlockedCodes, visitedExtras, markExtraAsVisited } from '../store/questState.js'
 
 import LiHongBaoView from './secrets/LiHongBaoView.vue'
 import GameMemoryView from './secrets/GameMemoryView.vue'
@@ -161,6 +166,7 @@ const EXTRA_LIST = [
 ]
 
 const goToFinalFromList = () => {
+  markExtraAsVisited('final')
   router.push('/final')
 }
 
@@ -172,6 +178,8 @@ const handleExtraClick = (item) => {
     center: true,
     customClass: 'custom-extra-msgbox'
   }).then(() => {
+    // 标记为已访问
+    markExtraAsVisited('extra' + item.realCode)
     router.push({
       name: 'secret',
       params: { secretCode: item.realCode },
