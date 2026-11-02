@@ -98,13 +98,9 @@
           <div class="scenario-section stagger-3">
             <h3 class="scenario-title">[ 前言 ]</h3>
             <div class="scenario-tags">
-              <span class="scenario-tag holo-tag">全都是AI做的，但很耗时间</span>
               <span class="scenario-tag holo-tag">想不到还能加什么</span>
-              <span class="scenario-tag holo-tag">有的浏览器可能会巨卡</span>
-              <span class="scenario-tag holo-tag">没什么能分享的了</span>
+              <span class="scenario-tag holo-tag">有的浏览器可能会很卡</span>
               <span class="scenario-tag holo-tag">电脑和手机页面我都做了优化</span>
-              <span class="scenario-tag holo-tag">如果你会看源码，就能直接看到我加了什么</span>
-              <span class="scenario-tag holo-tag alert-tag">不推荐直接看源码</span>
               <span class="scenario-tag holo-tag alert-tag">后面没时间，不会再改了</span>
             </div>
           </div>

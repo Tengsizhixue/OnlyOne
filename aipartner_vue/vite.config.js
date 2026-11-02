@@ -28,27 +28,9 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
-      output: {
-        manualChunks(id) {
-          if (id.includes('node_modules')) {
-            // 只将 vue 核心库分离出来
-            if (id.includes('vue/dist/vue.runtime') || id.includes('vue/dist/vue.cjs')) {
-              return 'vue-vendor'
-            }
-            // vue-router 单独分离
-            if (id.includes('vue-router')) {
-              return 'vue-router-vendor'
-            }
-            // element-plus 单独分离
-            if (id.includes('element-plus')) {
-              return 'element-plus'
-            }
-            // element-plus icons 单独分离
-            if (id.includes('@element-plus/icons-vue')) {
-              return 'element-icons'
-            }
-          }
-        }
+      input: {
+        main: fileURLToPath(new URL('./index.html', import.meta.url)),
+        archive: fileURLToPath(new URL('./archive.html', import.meta.url))
       }
     },
     chunkSizeWarningLimit: 1000
