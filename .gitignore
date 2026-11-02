@@ -21,11 +21,11 @@ ENV/
 dist/
 build/
 *.egg
-
+.workbuddy/
 # 测试覆盖
 .coverage
 htmlcov/
-
+preview/
 # Jupyter Notebook
 .ipynb_checkpoints
 
@@ -37,7 +37,6 @@ htmlcov/
 .DS_Store
 Thumbs.db
 desktop.ini
-
 # 日志文件
 *.log
 
@@ -46,3 +45,10 @@ desktop.ini
 *.temp
 ~*
 *.json
+
+# 档案数据：content.json 是公开内容，要进仓库；answers.json / source.html 只放本地
+!FastAPIProject/archive/content.json
+FastAPIProject/archive/answers.json
+FastAPIProject/archive/source.html
+*.sqlite3
+*.sqlite3-*

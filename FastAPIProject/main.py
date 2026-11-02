@@ -11,10 +11,13 @@ from typing import Optional
 from openai import OpenAI
 from dotenv import load_dotenv
 
+from archive_api import router as archive_router
+
 # 加载环境变量
 load_dotenv()
 
 app = FastAPI(title="智能伙伴 API")
+app.include_router(archive_router, prefix="/api/archive")
 
 # ==================== 🌐 CORS 跨域配置 ====================
 app.add_middleware(
