@@ -105,7 +105,7 @@ const correctText = computed(() => {
 const feedback = computed(() => {
   if (props.state.feedback) return props.state.feedback
   // 答对之后上面已经有「已答对」，这里不再重复
-  return answered.value ? '' : '答对后即可查看内容。'
+  return answered.value ? '' : '答对三个问题后可查看内容。'
 })
 
 function submit() {

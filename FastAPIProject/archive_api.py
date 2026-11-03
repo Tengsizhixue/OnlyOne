@@ -51,6 +51,16 @@ _rate: dict[str, list[float]] = {}
 TOKEN_RE = re.compile(r"\{\{(p\d{3})\}\}")
 RATE_LIMIT = 60
 
+# 公开留言
+COMMENT_MAX = 300          # 单条字数上限
+NICK_MAX = 12              # 昵称字数上限
+COMMENT_GAP = 20           # 同一个浏览器两次留言的最小间隔（秒）
+COMMENT_PAGE = 200         # 每个人最多返回多少条
+URL_RE = re.compile(
+    r"(https?://|www\.|\b[a-z0-9-]+\.(?:com|cn|net|org|xyz|top|site|me|cc|io)\b)",
+    re.IGNORECASE,
+)
+
 
 class ArchiveDataError(RuntimeError):
     pass
@@ -64,6 +74,15 @@ class StageUnlockIn(BaseModel):
 class ExtraUnlockIn(BaseModel):
     id: str = Field(min_length=1, max_length=20)
     answer: str = Field(min_length=0, max_length=100)
+
+
+class CommentIn(BaseModel):
+    person: str = Field(min_length=1, max_length=20)
+    nick: str = Field(default="", max_length=NICK_MAX)
+    body: str = Field(min_length=1, max_length=COMMENT_MAX)
+    # 为空就是顶层留言；给了 parent 就是回复。只支持两级：
+    # 如果回复的是一条回复，自动挂到那条回复的顶层上（前端渲染更简单）。
+    parent: int | None = Field(default=None, ge=1)
 
 
 def _norm(value: str) -> str:
@@ -167,6 +186,7 @@ def _build_index(content: dict, answers: dict) -> dict:
         "stage_people": stage_people,
         "stage_lookup": stage_lookup,
         "extras": answers["extras"],
+        "person_ids": frozenset(names),
     }
 
 
@@ -259,8 +279,31 @@ def _init_db() -> None:
                     sid TEXT NOT NULL UNIQUE,
                     created INTEGER NOT NULL
                 );
+                CREATE TABLE IF NOT EXISTS comments (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    person TEXT NOT NULL,
+                    sid TEXT NOT NULL,
+                    nick TEXT NOT NULL DEFAULT '',
+                    body TEXT NOT NULL,
+                    created INTEGER NOT NULL,
+                    hidden INTEGER NOT NULL DEFAULT 0,
+                    parent_id INTEGER
+                );
+                CREATE INDEX IF NOT EXISTS idx_comments_person
+                    ON comments(person, id);
+                CREATE INDEX IF NOT EXISTS idx_comments_parent
+                    ON comments(parent_id, id);
                 """
             )
+            # 老库补列：之前没有 parent_id 的数据库走 ALTER TABLE 升级。
+            # 只做一次 PRAGMA 检查，开销可以忽略。
+            cols = {row[1] for row in conn.execute("PRAGMA table_info(comments)")}
+            if "parent_id" not in cols:
+                conn.execute("ALTER TABLE comments ADD COLUMN parent_id INTEGER")
+                conn.execute(
+                    "CREATE INDEX IF NOT EXISTS idx_comments_parent"
+                    " ON comments(parent_id, id)"
+                )
             conn.commit()
         finally:
             conn.close()
@@ -494,6 +537,192 @@ def unlock_extra(body: ExtraUnlockIn, request: Request, response: Response) -> d
             else {}
         ),
     }
+
+
+# ---------------------------------------------------------------- 公开留言
+def _clean_text(value: str, limit: int) -> str:
+    """去掉控制字符、压掉多余空行、截到上限。换行本身要留着。"""
+    text = (value or "").replace("\r\n", "\n").replace("\r", "\n")
+    text = "".join(ch for ch in text if ch == "\n" or ch >= " ")
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()[:limit]
+
+
+def _comment_row(row: tuple, sid: str) -> dict:
+    cid, nick, body, created, author, parent_id = row
+    return {
+        "id": cid,
+        "nick": nick,
+        "body": body,
+        "created": created,
+        "mine": author == sid,
+        "parent": parent_id,
+    }
+
+
+@router.get("/comments")
+def list_comments(person: str, request: Request, response: Response) -> dict:
+    _, _, index = _require()
+    response.headers["Cache-Control"] = "no-store"
+    if person not in index["person_ids"]:
+        raise HTTPException(status_code=404, detail="没有这个人。")
+
+    _init_db()
+    sid = _session_id(request, response)
+    conn = _connect()
+    try:
+        rows = conn.execute(
+            "SELECT id, nick, body, created, sid, parent_id FROM comments"
+            " WHERE person=? AND hidden=0 ORDER BY id ASC",
+            (person,),
+        ).fetchall()
+    finally:
+        conn.close()
+
+    total = len(rows)
+    by_id: dict[int, tuple] = {r[0]: r for r in rows}
+
+    # 找到每条回复的顶层祖先（防循环用 seen）
+    def _find_root(cid: int) -> int | None:
+        seen: set[int] = set()
+        cur = cid
+        while cur in by_id and cur not in seen:
+            seen.add(cur)
+            if by_id[cur][5] is None:
+                return cur
+            cur = by_id[cur][5]
+        return None
+
+    top_rows = [r for r in rows if r[5] is None]
+    children: dict[int, list[tuple]] = {}
+    for r in rows:
+        if r[5] is not None:
+            root = _find_root(r[0])
+            if root is not None:
+                children.setdefault(root, []).append(r)
+
+    # 顶层留言按 id 倒序（新的在前），截取 COMMENT_PAGE 条
+    top_rows.sort(key=lambda r: r[0], reverse=True)
+    top_rows = top_rows[:COMMENT_PAGE]
+
+    items = []
+    for r in top_rows:
+        item = _comment_row(r, sid)
+        replies = []
+        for c in children.get(r[0], []):
+            ri = _comment_row(c, sid)
+            # 如果是回复另一条回复，带上被回复者昵称
+            pid = c[5]
+            if pid and pid != r[0] and pid in by_id:
+                ri["replyTo"] = by_id[pid][1] or "匿名"
+            else:
+                ri["replyTo"] = ""
+            replies.append(ri)
+        item["replies"] = replies
+        items.append(item)
+
+    return {"items": items, "count": total}
+
+
+@router.post("/comments")
+def add_comment(body: CommentIn, request: Request, response: Response) -> dict:
+    _, _, index = _require()
+    _check_rate(request)
+    if body.person not in index["person_ids"]:
+        raise HTTPException(status_code=404, detail="没有这个人。")
+
+    text = _clean_text(body.body, COMMENT_MAX)
+    if not text:
+        raise HTTPException(status_code=400, detail="留言不能是空的。")
+    if URL_RE.search(text):
+        raise HTTPException(status_code=400, detail="留言里请不要带链接。")
+    nick = _clean_text(body.nick, NICK_MAX).replace("\n", " ")
+
+    sid = _session_id(request, response)
+    now = int(time.time())
+    conn = _connect()
+    try:
+        last = conn.execute(
+            "SELECT created FROM comments WHERE sid=? ORDER BY id DESC LIMIT 1", (sid,)
+        ).fetchone()
+        if last and now - last[0] < COMMENT_GAP:
+            raise HTTPException(
+                status_code=429, detail=f"刚留过言，{COMMENT_GAP} 秒后再来。"
+            )
+
+        # 验证父评论
+        parent_id = None
+        reply_to_nick = ""
+        root_id = None
+        if body.parent:
+            parent_row = conn.execute(
+                "SELECT id, person, nick, parent_id FROM comments"
+                " WHERE id=? AND hidden=0",
+                (body.parent,),
+            ).fetchone()
+            if not parent_row:
+                raise HTTPException(status_code=400, detail="回复的留言已经不在了。")
+            if parent_row[1] != body.person:
+                raise HTTPException(status_code=400, detail="只能回复同一个人下面的留言。")
+            parent_id = parent_row[0]
+            reply_to_nick = parent_row[2] or "匿名"
+            # 找到顶层 id，前端需要用来定位插入位置
+            root_id = parent_row[3] if parent_row[3] is not None else parent_row[0]
+
+        cur = conn.execute(
+            "INSERT INTO comments(person, sid, nick, body, created, parent_id)"
+            " VALUES(?, ?, ?, ?, ?, ?)",
+            (body.person, sid, nick, text, now, parent_id),
+        )
+        conn.commit()
+        cid = cur.lastrowid
+    finally:
+        conn.close()
+
+    item: dict = {
+        "id": cid, "nick": nick, "body": text,
+        "created": now, "mine": True, "parent": parent_id,
+    }
+    if parent_id:
+        item["replyTo"] = reply_to_nick
+        item["rootId"] = root_id
+    return {"ok": True, "item": item}
+
+
+@router.delete("/comments/{cid}")
+def delete_comment(cid: int, request: Request, response: Response) -> dict:
+    _require()
+    _check_rate(request)
+    _init_db()
+    sid = _session_id(request, response)
+    conn = _connect()
+    try:
+        row = conn.execute(
+            "SELECT sid, parent_id FROM comments WHERE id=?", (cid,)
+        ).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="这条留言已经不在了。")
+        if row[0] != sid:
+            raise HTTPException(status_code=403, detail="只能删除自己发的留言。")
+
+        # 级联删除：收集所有子孙（BFS）
+        to_delete = [cid]
+        queue = [cid]
+        while queue:
+            current = queue.pop(0)
+            children = conn.execute(
+                "SELECT id FROM comments WHERE parent_id=?", (current,)
+            ).fetchall()
+            for child in children:
+                to_delete.append(child[0])
+                queue.append(child[0])
+
+        placeholders = ",".join("?" * len(to_delete))
+        conn.execute(f"DELETE FROM comments WHERE id IN ({placeholders})", to_delete)
+        conn.commit()
+    finally:
+        conn.close()
+    return {"ok": True, "deleted": to_delete}
 
 
 @router.post("/admin/reload")

@@ -538,6 +538,8 @@ button{font:inherit;color:inherit}
   background:rgba(201,168,106,.07);
   color:#e0cfa6;font-size:12.5px;line-height:1.8;letter-spacing:.03em;
 }
+.extra-rank p{margin:0}
+.extra-rank p+p{margin-top:2px}
 
 @media (max-width:480px){
   .extra-progress{font-size:13.5px;line-height:1.8;margin-bottom:14px}
@@ -549,4 +551,132 @@ button{font:inherit;color:inherit}
   .extra-opt{font-size:14.5px;padding:12px;min-height:44px}
   .extra-choice-reply{font-size:14.5px}
   .extra-choice-right{font-size:13.5px}
+}
+
+/* ==========================================================================
+   公开留言  2026-11-03
+   存在服务器 sqlite 里，所有访客都能看到。用暖金色跟档案原文的冷灰区分：
+   一眼能看出哪段是别人写的。正文只用文本插值渲染，不走 v-html。
+   ========================================================================== */
+.cmt{
+  margin:-2px 0 14px;padding:12px 14px;border-radius:10px;
+  background:rgba(201,168,106,.04);
+  border:1px solid rgba(201,168,106,.14);
+}
+.cmt-head{display:flex;align-items:baseline;gap:8px;margin-bottom:11px}
+.cmt-line{
+  width:12px;height:1px;flex:none;background:rgba(201,168,106,.65);
+  transform:translateY(-3px);
+}
+.cmt-t{color:#c9a86a;font-size:11.5px;letter-spacing:.24em}
+.cmt-n{
+  color:#7b8794;font-size:11px;letter-spacing:.1em;
+  font-variant-numeric:tabular-nums;
+}
+.cmt-tip{
+  margin:0 0 10px;color:#8b97a6;font-size:12.5px;line-height:1.8;letter-spacing:.03em;
+}
+.cmt-tip.bad{color:#d9a6a6}
+.cmt-list{
+  margin:0 0 14px;padding:0;list-style:none;
+  display:flex;flex-direction:column;gap:12px;
+}
+.cmt-item{padding-left:11px;border-left:1px solid rgba(255,255,255,.08)}
+.cmt-meta{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
+.cmt-who{color:#d9c79b;font-size:12.5px;letter-spacing:.06em}
+.cmt-time{
+  color:#6f7b89;font-size:11px;letter-spacing:.04em;
+  font-variant-numeric:tabular-nums;
+}
+.cmt-del{
+  margin-left:auto;min-height:24px;padding:0 9px;border-radius:999px;cursor:pointer;
+  font-family:inherit;font-size:11px;letter-spacing:.06em;line-height:1;
+  color:#a48c8c;background:transparent;border:1px solid rgba(201,120,120,.22);
+  transition:color .25s,border-color .25s;
+}
+.cmt-del:hover{color:#d9a6a6;border-color:rgba(201,120,120,.45)}
+.cmt-body{
+  margin:0;white-space:pre-wrap;overflow-wrap:anywhere;
+  color:#c8d2df;font-size:13.5px;line-height:1.9;letter-spacing:.03em;
+}
+.cmt-form{display:flex;flex-direction:column;gap:8px}
+.cmt-nick,.cmt-input{
+  display:block;width:100%;box-sizing:border-box;padding:9px 11px;border-radius:8px;
+  border:1px solid rgba(255,255,255,.13);background:rgba(255,255,255,.03);
+  color:#e2e8f0;font:inherit;font-size:13px;line-height:1.7;
+  outline:none;transition:border-color .25s,background .25s;
+}
+.cmt-input{min-height:64px;resize:vertical}
+.cmt-nick:focus,.cmt-input:focus{
+  border-color:rgba(201,168,106,.5);background:rgba(201,168,106,.06);
+}
+.cmt-nick::placeholder,.cmt-input::placeholder{color:rgba(160,171,184,.48)}
+.cmt-acts{display:flex;align-items:center;gap:10px}
+.cmt-btn{
+  min-height:34px;padding:6px 16px;border-radius:999px;cursor:pointer;
+  font-family:inherit;font-size:12.5px;letter-spacing:.08em;
+  color:#1b1a15;background:rgba(224,207,166,.92);
+  border:1px solid rgba(224,207,166,.92);
+  transition:opacity .25s;
+}
+.cmt-btn:hover{opacity:.86}
+.cmt-btn:disabled{cursor:default;opacity:.5}
+.cmt-count{
+  margin-left:auto;color:#6f7b89;font-size:11px;
+  font-variant-numeric:tabular-nums;letter-spacing:.04em;
+}
+
+/* ---------- 回复按钮 ---------- */
+.cmt-reply-btn{
+  margin-left:6px;min-height:24px;padding:0 9px;border-radius:999px;cursor:pointer;
+  font-family:inherit;font-size:11px;letter-spacing:.06em;line-height:1;
+  color:#8b9daa;background:transparent;border:1px solid rgba(255,255,255,.12);
+  transition:color .25s,border-color .25s;
+}
+.cmt-reply-btn:hover{color:#c9a86a;border-color:rgba(201,168,106,.4)}
+
+/* ---------- 回复列表（嵌套在顶层留言下） ---------- */
+.cmt-replies{
+  margin:10px 0 0;padding:0 0 0 12px;list-style:none;
+  border-left:1px solid rgba(201,168,106,.18);
+  display:flex;flex-direction:column;gap:10px;
+}
+.cmt-reply{
+  padding:6px 0 6px 10px;border-left:1px solid rgba(255,255,255,.06);
+}
+.cmt-reply-to{
+  color:#9aa9bb;font-size:11px;letter-spacing:.04em;
+}
+
+/* ---------- 内联回复表单 ---------- */
+.cmt-reply-form{
+  margin:10px 0 0;padding:10px 12px;border-radius:8px;
+  background:rgba(201,168,106,.04);border:1px solid rgba(201,168,106,.14);
+  display:flex;flex-direction:column;gap:8px;
+  animation:quote-in .3s ease-out both;
+}
+.cmt-reply-hint{
+  margin:0;color:#c9a86a;font-size:12px;letter-spacing:.06em;
+}
+.cmt-cancel{
+  min-height:30px;padding:4px 14px;border-radius:999px;cursor:pointer;
+  font-family:inherit;font-size:12px;letter-spacing:.06em;
+  color:#8b97a6;background:transparent;border:1px solid rgba(255,255,255,.12);
+  transition:color .25s,border-color .25s;
+}
+.cmt-cancel:hover{color:#cbd5e1;border-color:rgba(255,255,255,.25)}
+
+@media (max-width:480px){
+  .cmt{padding:13px 13px;margin-bottom:16px}
+  .cmt-t{font-size:12px}
+  .cmt-body{font-size:14.5px;line-height:1.85}
+  .cmt-nick,.cmt-input{font-size:16px;padding:11px 12px}
+  .cmt-input{min-height:76px}
+  .cmt-btn{min-height:44px;font-size:14px;padding:10px 20px}
+  .cmt-del{min-height:32px;padding:0 12px;font-size:12px}
+  .cmt-reply-btn{min-height:32px;padding:0 12px;font-size:12px}
+  .cmt-replies{padding-left:10px}
+  .cmt-reply{padding:8px 0 8px 8px}
+  .cmt-reply-form{padding:12px}
+  .cmt-cancel{min-height:38px;font-size:13px}
 }

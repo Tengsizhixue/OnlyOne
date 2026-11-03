@@ -42,3 +42,20 @@ export function unlockExtra(id, answer) {
     body: JSON.stringify({ id, answer }),
   })
 }
+
+export function listComments(person) {
+  return request(`/comments?person=${encodeURIComponent(person)}`)
+}
+
+export function addComment(person, nick, body, parent = null) {
+  const payload = { person, nick, body }
+  if (parent) payload.parent = parent
+  return request('/comments', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function deleteComment(id) {
+  return request(`/comments/${id}`, { method: 'DELETE' })
+}
