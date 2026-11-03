@@ -605,9 +605,9 @@ def list_comments(person: str, request: Request, response: Response) -> dict:
             if root is not None:
                 children.setdefault(root, []).append(r)
 
-    # 顶层留言按 id 倒序（新的在前），截取 COMMENT_PAGE 条
-    top_rows.sort(key=lambda r: r[0], reverse=True)
-    top_rows = top_rows[:COMMENT_PAGE]
+    # 顶层留言按发表时间正序（老的在上、新的在下）；超过上限时保留最近的若干条
+    if len(top_rows) > COMMENT_PAGE:
+        top_rows = top_rows[-COMMENT_PAGE:]
 
     items = []
     for r in top_rows:

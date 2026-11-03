@@ -173,6 +173,20 @@ function toggleGroup(id) {
   openGroups[id] = !openGroups[id]
 }
 
+// 手机上同时只留一个人展开：描述是整幅宽的，同时开两条会把旁边那个人名
+// 顶到很远的地方，看着就像「点开一个，另一个不见了」。桌面端保持可同时展开。
+const COMPACT =
+  typeof window !== 'undefined' && window.matchMedia
+    ? window.matchMedia('(max-width: 820px)')
+    : null
+
+function openOnly(id) {
+  if (COMPACT && COMPACT.matches) {
+    for (const key of Object.keys(openPeople)) openPeople[key] = false
+  }
+  openPeople[id] = true
+}
+
 function togglePerson(person) {
   // 划去的人：如果同阶段存在同名且未划去的条目，跳过去
   if (person.deleted && props.names[person.id]) {
@@ -184,7 +198,7 @@ function togglePerson(person) {
     )
     if (target) {
       openGroups[target.groupId] = true
-      openPeople[target.id] = true
+      openOnly(target.id)
       nextTick(() => {
         const el = document.getElementById('person-' + target.id)
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
@@ -192,12 +206,24 @@ function togglePerson(person) {
       return
     }
   }
-  openPeople[person.id] = !openPeople[person.id]
-  // 收起长文时把人名拉回视口：否则内容一收缩，刚才那行已经跑到屏幕外
-  if (!openPeople[person.id]) {
+  if (openPeople[person.id]) {
+    openPeople[person.id] = false
+    // 收起长文时把人名拉回视口：否则内容一收缩，刚才那行已经跑到屏幕外
     nextTick(() => {
       const el = document.getElementById('person-' + person.id)
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+    return
+  }
+  // 手机上换人时，上一条描述会塌掉，页面高度骤减，手指底下的内容会窜位；
+  // 把新点开的这个名字顶到视口上方，位置就稳了。
+  const hadOther =
+    !!(COMPACT && COMPACT.matches) && Object.keys(openPeople).some((key) => openPeople[key])
+  openOnly(person.id)
+  if (hadOther) {
+    nextTick(() => {
+      const el = document.getElementById('person-' + person.id)
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
     })
   }
 }

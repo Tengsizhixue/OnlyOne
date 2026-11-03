@@ -331,11 +331,13 @@ button{font:inherit;color:inherit}
   .more-btn{font-size:14px;line-height:1.4;padding:8px 14px;min-height:40px;
     margin-left:10px;animation:none}
 
-  /* ---------- 阶段解锁表单 ---------- */
-  .phase-unlock-form{gap:8px;margin:14px 0 6px}
-  .phase-unlock-input{font-size:16px;padding:11px 12px}
-  .phase-unlock-btn{font-size:14px;padding:11px 14px;min-height:44px}
-  .phase-unlock-feedback{font-size:13.5px;line-height:1.7;min-height:24px}
+  /* ---------- 阶段解锁表单 ----------
+     手机上原来一行要占 ~54px（body 的 line-height:1.85 把输入框撑高了），
+     压 padding + line-height 收到 40px：字号仍保持 16px（iOS 聚焦不会放大整页）。 */
+  .phase-unlock-form{gap:6px;margin:10px 0 2px}
+  .phase-unlock-input{font-size:16px;padding:8px 10px;line-height:1.35}
+  .phase-unlock-btn{font-size:13.5px;padding:6px 12px;min-height:40px}
+  .phase-unlock-feedback{font-size:12.5px;line-height:1.5;min-height:19px;margin-bottom:6px}
 
   /* ---------- 状态与错误 ---------- */
   .archive-status{font-size:15px;line-height:1.9}
@@ -356,6 +358,7 @@ button{font:inherit;color:inherit}
   .extra-table{font-size:14px;min-width:360px}
   .extra-table th,.extra-table td{padding:10px 8px}
   .extra-toggle{font-size:14px;padding:9px 16px;min-height:40px}
+  .extra-collapse{min-height:44px;font-size:14px;margin-top:16px}
 }
 
 /* ==========================================================================
@@ -522,6 +525,20 @@ button{font:inherit;color:inherit}
 .extra-choice-reply{margin:14px 0 0;color:#dbe4ef;font-size:13.5px;line-height:1.9}
 .extra-choice-right{margin:10px 0 0;color:#b8d8c4;font-size:13px;letter-spacing:.03em}
 .extra-choice-exp{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)}
+
+/* 长内容底部的收起：滚到底就能收，不用滑回顶上的胶囊按钮 */
+.extra-collapse{
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  width:100%;margin:14px 0 0;padding:9px 0;border-radius:8px;cursor:pointer;
+  font-family:inherit;font-size:12.5px;letter-spacing:.16em;text-indent:.16em;
+  color:#98a4b3;background:rgba(255,255,255,.035);
+  border:1px solid rgba(255,255,255,.1);
+  transition:color .25s,background .25s,border-color .25s;
+}
+.extra-collapse:hover{
+  color:#e2e8f0;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.22);
+}
+.extra-collapse-ar{font-size:12px;letter-spacing:0;text-indent:0}
 
 /* ---------- 一道一道出现 / 排行榜 ---------- */
 .extra-step{animation:extra-step-in .36s ease-out}

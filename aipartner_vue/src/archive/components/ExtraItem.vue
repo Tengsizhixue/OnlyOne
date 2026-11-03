@@ -66,6 +66,12 @@
           </template>
         </div>
       </div>
+
+      <!-- 内容很长，底部再给一次收起，省得滚回顶部 -->
+      <button v-if="tab" class="extra-collapse" type="button" @click="tab = ''">
+        <span class="extra-collapse-ar" aria-hidden="true">↑</span>
+        收起
+      </button>
     </template>
   </div>
 </template>

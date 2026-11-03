@@ -20,10 +20,7 @@
         />
       </div>
 
-      <div v-if="ranked" class="extra-rank">
-        <p>目前共 {{ ranking.total }} 次全部答对</p>
-        <p>你是第 {{ ranking.rank }} 个全部答对的人</p>
-      </div>
+      <p v-if="ranked" class="extra-rank">你是第 {{ ranking.rank }} 个全部答对的人</p>
     </section>
   </details>
 </template>

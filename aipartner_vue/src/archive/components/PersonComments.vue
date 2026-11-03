@@ -235,7 +235,8 @@ async function submit() {
   busy.value = true
   try {
     const res = await addComment(props.personId, nick.value.trim(), text)
-    items.value = [res.item, ...items.value]
+    // 按发表时间正序，新的接在最后
+    items.value = [...items.value, res.item]
     count.value += 1
     draft.value = ''
     writeNick(nick.value.trim())
