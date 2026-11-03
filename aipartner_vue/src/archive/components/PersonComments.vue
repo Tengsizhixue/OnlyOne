@@ -15,36 +15,20 @@
         <div class="cmt-meta">
           <span class="cmt-who">{{ item.nick || '匿名' }}</span>
           <span class="cmt-time">{{ when(item.created) }}</span>
-          <button class="cmt-reply-btn" type="button" @click="openReply(item.id, item.nick)">
-            回复
-          </button>
-          <button v-if="item.mine" class="cmt-del" type="button" @click="remove(item)">
-            删除
-          </button>
+          <span class="cmt-ops">
+            <button class="cmt-reply-btn" type="button" @click="openReply(item)">
+              回复
+            </button>
+            <button v-if="item.mine" class="cmt-del" type="button" @click="remove(item)">
+              删除
+            </button>
+          </span>
         </div>
         <p class="cmt-body">{{ item.body }}</p>
 
-        <!-- 回复列表 -->
-        <ul v-if="item.replies && item.replies.length" class="cmt-replies">
-          <li v-for="r in item.replies" :key="r.id" class="cmt-reply">
-            <div class="cmt-meta">
-              <span class="cmt-who">{{ r.nick || '匿名' }}</span>
-              <span v-if="r.replyTo" class="cmt-reply-to">回复 @{{ r.replyTo }}</span>
-              <span class="cmt-time">{{ when(r.created) }}</span>
-              <button class="cmt-reply-btn" type="button" @click="openReply(r.id, r.nick)">
-                回复
-              </button>
-              <button v-if="r.mine" class="cmt-del" type="button" @click="removeReply(item, r)">
-                删除
-              </button>
-            </div>
-            <p class="cmt-body">{{ r.body }}</p>
-          </li>
-        </ul>
-
-        <!-- 内联回复表单 -->
-        <div v-if="replyTarget === item.id || (replyTarget && isChildOf(item, replyTarget))" class="cmt-reply-form">
-          <p class="cmt-reply-hint">回复 @{{ replyTargetNick }}</p>
+        <!-- 内联回复框：回复目标是这条顶层留言 -->
+        <div v-if="replyTarget && replyTarget.id === item.id" class="cmt-reply-form">
+          <p class="cmt-reply-hint">回复 @{{ replyTarget.nick }}「{{ replyTarget.snippet }}」</p>
           <textarea
             ref="replyInput"
             v-model="replyDraft"
@@ -54,16 +38,58 @@
             rows="2"
           ></textarea>
           <div class="cmt-acts">
-            <button class="cmt-btn" type="button" :disabled="busy" @click="submitReply(item)">
-              {{ busy ? '发送中…' : '发表回复' }}
+            <button class="cmt-btn cmt-btn-sm" type="button" :disabled="busy" @click="submitReply(item)">
+              {{ busy ? '发送中…' : '发送' }}
             </button>
             <button class="cmt-cancel" type="button" @click="closeReply">取消</button>
           </div>
         </div>
+
+        <!-- 回复区：这一楼下的讨论 -->
+        <ul v-if="item.replies && item.replies.length" class="cmt-replies">
+          <li v-for="r in item.replies" :key="r.id" class="cmt-reply">
+            <div class="cmt-meta">
+              <span class="cmt-who">{{ r.nick || '匿名' }}</span>
+              <span class="cmt-time">{{ when(r.created) }}</span>
+              <span class="cmt-ops">
+                <button class="cmt-reply-btn" type="button" @click="openReply(r)">
+                  回复
+                </button>
+                <button v-if="r.mine" class="cmt-del" type="button" @click="removeReply(item, r)">
+                  删除
+                </button>
+              </span>
+            </div>
+            <p v-if="r.replyTo" class="cmt-ref">
+              ↳ 回复 @{{ r.replyTo }}「{{ r.replyToSnippet }}」
+            </p>
+            <p class="cmt-body">{{ r.body }}</p>
+
+            <!-- 内联回复框：回复目标是这条回复 -->
+            <div v-if="replyTarget && replyTarget.id === r.id" class="cmt-reply-form">
+              <p class="cmt-reply-hint">回复 @{{ replyTarget.nick }}「{{ replyTarget.snippet }}」</p>
+              <textarea
+                ref="replyInput"
+                v-model="replyDraft"
+                class="cmt-input"
+                maxlength="300"
+                placeholder="写下你的回复…"
+                rows="2"
+              ></textarea>
+              <div class="cmt-acts">
+                <button class="cmt-btn cmt-btn-sm" type="button" :disabled="busy" @click="submitReply(item)">
+                  {{ busy ? '发送中…' : '发送' }}
+                </button>
+                <button class="cmt-cancel" type="button" @click="closeReply">取消</button>
+              </div>
+            </div>
+          </li>
+        </ul>
       </li>
     </ul>
 
     <div class="cmt-form">
+      <p class="cmt-form-head">发表新留言</p>
       <input
         v-model="nick"
         class="cmt-nick"
@@ -111,8 +137,7 @@ const draft = ref('')
 const nick = ref(readNick())
 
 // 回复相关
-const replyTarget = ref(null)     // 被回复的评论 id
-const replyTargetNick = ref('')   // 被回复者昵称
+const replyTarget = ref(null)     // 被回复留言的 {id, nick, snippet}
 const replyDraft = ref('')
 const replyInput = ref(null)
 
@@ -147,10 +172,10 @@ function when(seconds) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
-/** 检查 replyTarget 是否是某个顶层 item 的子回复 */
-function isChildOf(item, targetId) {
-  if (!item.replies) return false
-  return item.replies.some((r) => r.id === targetId)
+/** 把留言正文压成单行短引用，用于引用行与回复框标题 */
+function snippetOf(text) {
+  const flat = (text || '').replace(/\s+/g, ' ').trim()
+  return flat.length > 15 ? `${flat.slice(0, 15)}…` : flat
 }
 
 async function load() {
@@ -224,9 +249,12 @@ async function submit() {
 }
 
 // -------- 回复 --------
-function openReply(targetId, targetNick) {
-  replyTarget.value = targetId
-  replyTargetNick.value = targetNick || '匿名'
+function openReply(target) {
+  replyTarget.value = {
+    id: target.id,
+    nick: target.nick || '匿名',
+    snippet: snippetOf(target.body),
+  }
   replyDraft.value = ''
   nextTick(() => {
     if (replyInput.value) {
@@ -238,7 +266,6 @@ function openReply(targetId, targetNick) {
 
 function closeReply() {
   replyTarget.value = null
-  replyTargetNick.value = ''
   replyDraft.value = ''
 }
 
@@ -250,7 +277,7 @@ async function submitReply(parentItem) {
   tip.value = ''
   tipBad.value = false
   try {
-    const res = await addComment(props.personId, nick.value.trim(), text, replyTarget.value)
+    const res = await addComment(props.personId, nick.value.trim(), text, replyTarget.value.id)
     // 插入到对应的顶层留言的 replies 里
     const newItem = res.item
     const target = items.value.find((i) => i.id === (newItem.rootId || parentItem.id))

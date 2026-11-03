@@ -626,26 +626,27 @@ button{font:inherit;color:inherit}
   font-variant-numeric:tabular-nums;letter-spacing:.04em;
 }
 
-/* ---------- 回复按钮 ---------- */
+/* ---------- meta 行操作区：无边框小字、右对齐 ---------- */
+.cmt-ops{margin-left:auto;display:inline-flex;align-items:center;gap:12px}
 .cmt-reply-btn{
-  margin-left:6px;min-height:24px;padding:0 9px;border-radius:999px;cursor:pointer;
+  min-height:24px;padding:0 2px;border:0;background:none;cursor:pointer;
   font-family:inherit;font-size:11px;letter-spacing:.06em;line-height:1;
-  color:#8b9daa;background:transparent;border:1px solid rgba(255,255,255,.12);
-  transition:color .25s,border-color .25s;
+  color:#7b8794;opacity:.8;transition:color .25s,opacity .25s;
 }
-.cmt-reply-btn:hover{color:#c9a86a;border-color:rgba(201,168,106,.4)}
+.cmt-reply-btn:hover{color:#c9a86a;opacity:1}
 
-/* ---------- 回复列表（嵌套在顶层留言下） ---------- */
+/* ---------- 回复区：这一楼下的讨论，整体分组 ---------- */
 .cmt-replies{
-  margin:10px 0 0;padding:0 0 0 12px;list-style:none;
+  margin:10px 0 0;padding:10px 12px;list-style:none;
   border-left:1px solid rgba(201,168,106,.18);
-  display:flex;flex-direction:column;gap:10px;
+  background:rgba(255,255,255,.02);border-radius:0 8px 8px 0;
+  display:flex;flex-direction:column;
 }
-.cmt-reply{
-  padding:6px 0 6px 10px;border-left:1px solid rgba(255,255,255,.06);
-}
-.cmt-reply-to{
-  color:#9aa9bb;font-size:11px;letter-spacing:.04em;
+.cmt-reply{padding:6px 0}
+.cmt-reply + .cmt-reply{border-top:1px solid rgba(255,255,255,.05);margin-top:4px;padding-top:10px}
+/* 引用行：这条回复在接谁的话，重名时靠内容片段区分 */
+.cmt-ref{
+  margin:0 0 2px;color:#8b97a6;font-size:12px;line-height:1.7;letter-spacing:.03em;
 }
 
 /* ---------- 内联回复表单 ---------- */
@@ -658,6 +659,10 @@ button{font:inherit;color:inherit}
 .cmt-reply-hint{
   margin:0;color:#c9a86a;font-size:12px;letter-spacing:.06em;
 }
+/* 回复框比主表单紧凑：输入区矮一点，按钮小一号 */
+.cmt-reply-form .cmt-input{min-height:56px}
+.cmt-btn-sm{min-height:30px;padding:4px 14px;font-size:12px}
+.cmt-form-head{margin:0 0 6px;color:#c9a86a;font-size:11.5px;letter-spacing:.2em}
 .cmt-cancel{
   min-height:30px;padding:4px 14px;border-radius:999px;cursor:pointer;
   font-family:inherit;font-size:12px;letter-spacing:.06em;
@@ -674,9 +679,13 @@ button{font:inherit;color:inherit}
   .cmt-input{min-height:76px}
   .cmt-btn{min-height:44px;font-size:14px;padding:10px 20px}
   .cmt-del{min-height:32px;padding:0 12px;font-size:12px}
-  .cmt-reply-btn{min-height:32px;padding:0 12px;font-size:12px}
-  .cmt-replies{padding-left:10px}
-  .cmt-reply{padding:8px 0 8px 8px}
+  .cmt-reply-btn{min-height:32px;font-size:12.5px}
+  .cmt-replies{padding:10px}
+  .cmt-reply{padding:8px 0}
+  .cmt-ref{font-size:13px}
   .cmt-reply-form{padding:12px}
+  .cmt-reply-form .cmt-input{min-height:64px}
+  .cmt-btn-sm{min-height:38px;font-size:13px}
   .cmt-cancel{min-height:38px;font-size:13px}
+  .cmt-form-head{font-size:12.5px}
 }
