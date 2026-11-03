@@ -20,7 +20,10 @@
         />
       </div>
 
-      <p v-if="rankingText" class="extra-rank">{{ rankingText }}</p>
+      <div v-if="ranked" class="extra-rank">
+        <p>目前共 {{ ranking.total }} 次全部答对</p>
+        <p>你是第 {{ ranking.rank }} 个全部答对的人</p>
+      </div>
     </section>
   </details>
 </template>
@@ -66,10 +69,9 @@ const progressText = computed(() => {
   return `已答对 ${done}/${total} 人，下面等着第 ${done + 1} 个。`
 })
 
-const rankingText = computed(() => {
+const ranked = computed(() => {
   const data = props.ranking
-  if (!data || !data.total || !data.rank) return ''
-  return `共 ${data.total} 次全部答对，你是第 ${data.rank} 个。`
+  return !!(data && data.total && data.rank)
 })
 
 function onSubmit(payload) {

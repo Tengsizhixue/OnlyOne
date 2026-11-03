@@ -7,7 +7,7 @@
     </div>
 
     <main class="wrap">
-      <div v-if="loading" class="archive-status" v-cloak>正在调取档案…</div>
+      <div v-if="loading" class="archive-status" v-cloak>正在加载…</div>
       <div v-else-if="loadError" class="archive-status error">{{ loadError }}</div>
 
       <div v-else class="board">
