@@ -1,5 +1,5 @@
 <template>
-  <li
+  <div
     class="p"
     :class="{ 'is-del': person.deleted, 'is-open': open, 'is-reveal': revealing }"
     :id="'person-' + person.id"
@@ -9,13 +9,11 @@
       <span aria-hidden="true" class="p-dot"></span>
       <span class="p-tx">{{ displayName }}</span>
     </button>
-    <p
-      v-if="open && descHtml"
-      class="quote"
-      :class="{ 'quote-del': person.deleted }"
-      v-html="descHtml"
-    ></p>
-  </li>
+  </div>
+  <!-- 描述单独成块：手机两列时它跨满整行，人名仍留在原来那一列里，点开不会跳到左边 -->
+  <div v-if="open && descHtml" class="p-body">
+    <p class="quote" :class="{ 'quote-del': person.deleted }" v-html="descHtml"></p>
+  </div>
 </template>
 
 <script setup>

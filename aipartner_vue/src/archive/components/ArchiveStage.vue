@@ -4,8 +4,6 @@
     :class="{ 'is-unlocked': unlocked, 'is-revealing': revealing }"
     :data-stage="stage.id"
   >
-    <span aria-hidden="true" class="rail-bead"></span>
-
     <div class="col-head">
       <span aria-hidden="true" class="cdot"></span>
       <h2 class="col-title">{{ stage.title }}</h2>
@@ -38,7 +36,7 @@
         <span class="cnt-n">{{ shownCount[group.id] }}</span>
       </button>
 
-      <ul v-show="openGroups[group.id]" class="roster">
+      <div v-show="openGroups[group.id]" class="roster">
         <PersonRow
           v-for="person in group.people"
           :key="person.id"
@@ -50,7 +48,7 @@
           :reveal-index="revealIndexMap[person.id] || 0"
           @toggle="togglePerson"
         />
-      </ul>
+      </div>
     </div>
   </section>
 </template>
@@ -155,7 +153,7 @@ const feedbackText = computed(() => {
   if (props.feedback && props.feedback.text) return props.feedback.text
   return props.unlocked
     ? '本阶段已解锁。'
-    : '本阶段人物及描述中的姓名均为匿名状态。'
+    : '根据描述给出任意一个人的姓名或拼音'
 })
 
 function displayName(person) {
