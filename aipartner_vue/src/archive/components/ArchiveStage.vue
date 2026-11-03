@@ -1,5 +1,11 @@
 <template>
-  <section class="col" :data-stage="stage.id">
+  <section
+    class="col"
+    :class="{ 'is-unlocked': unlocked, 'is-revealing': revealing }"
+    :data-stage="stage.id"
+  >
+    <span aria-hidden="true" class="rail-bead"></span>
+
     <div class="col-head">
       <span aria-hidden="true" class="cdot"></span>
       <h2 class="col-title">{{ stage.title }}</h2>
@@ -29,7 +35,7 @@
         @click="toggleGroup(group.id)"
       >
         <span class="cnt-t"><span aria-hidden="true" class="tick"></span>{{ group.title }}</span>
-        <span class="cnt-n">{{ countOf(group) }}</span>
+        <span class="cnt-n">{{ shownCount[group.id] }}</span>
       </button>
 
       <ul v-show="openGroups[group.id]" class="roster">
@@ -40,6 +46,8 @@
           :display-name="displayName(person)"
           :open="!!openPeople[person.id]"
           :desc-html="descFor(person)"
+          :revealing="revealing"
+          :reveal-index="revealIndexMap[person.id] || 0"
           @toggle="togglePerson"
         />
       </ul>
@@ -48,7 +56,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, reactive, ref } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref } from 'vue'
 import PersonRow from './PersonRow.vue'
 import { renderTokens } from '../render.js'
 
@@ -57,13 +65,83 @@ const props = defineProps({
   names: { type: Object, default: () => ({}) },
   unlocked: { type: Boolean, default: false },
   feedback: { type: Object, default: null },
+  revealing: { type: Boolean, default: false },
+  order: { type: Number, default: 0 },
 })
 
 const emit = defineEmits(['unlock'])
 
+const REDUCED =
+  typeof window !== 'undefined' &&
+  window.matchMedia &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
 const input = ref('')
 const openGroups = reactive({})
 const openPeople = reactive({})
+
+// 分组人数：入场时从 0 滚到实际值，像清点一遍档案
+const shownCount = reactive({})
+
+function targetCount(group) {
+  return group.people.filter((person) => !person.deleted).length
+}
+
+// 初值直接给真实人数：rAF 第一帧会立刻把它覆盖成 0 再数上去（那一帧肉眼看不见）。
+// 万一 rAF 不跑，页面显示的就是正确人数，绝不会停在 0。
+for (const group of props.stage.groups) {
+  shownCount[group.id] = targetCount(group)
+}
+
+// 兜底一旦落地，就锁住计数，避免残余的 rAF 再把数字写回 0
+let countSettled = false
+
+function countUp(id, target, delay) {
+  const duration = 460
+  let startAt = 0
+  let frames = 0
+  function frame(now) {
+    if (countSettled) return
+    frames += 1
+    // 先空转两帧再开始计数：万一 rAF 只被调度了一两次就断掉，
+    // 数字会停在初始的真实人数上，而不是被改成 0。
+    if (frames < 3) {
+      requestAnimationFrame(frame)
+      return
+    }
+    if (!startAt) startAt = now + delay
+    const progress = Math.min(1, Math.max(0, (now - startAt) / duration))
+    shownCount[id] = Math.round(target * (1 - Math.pow(1 - progress, 3)))
+    if (progress < 1) requestAnimationFrame(frame)
+    else shownCount[id] = target
+  }
+  requestAnimationFrame(frame)
+}
+
+onMounted(() => {
+  if (REDUCED) return
+  props.stage.groups.forEach((group, groupIndex) => {
+    countUp(group.id, targetCount(group), 220 + props.order * 130 + groupIndex * 90)
+  })
+  // 兜底：rAF 万一没跑起来（后台标签页、省电模式等），1.6 秒后直接落到真实人数，
+  // 绝不让计数停在一个错的数字上。
+  setTimeout(() => {
+    countSettled = true
+    for (const group of props.stage.groups) {
+      if (shownCount[group.id] !== targetCount(group)) {
+        shownCount[group.id] = targetCount(group)
+      }
+    }
+  }, 1600)
+})
+
+// 渐显错位索引：按组内序号，展开哪一组就从哪一组的第一行开始依次出现
+const revealIndexMap = {}
+for (const group of props.stage.groups) {
+  group.people.forEach((person, index) => {
+    revealIndexMap[person.id] = index
+  })
+}
 
 const allPeople = computed(() =>
   props.stage.groups.flatMap((group) =>
@@ -86,10 +164,6 @@ function displayName(person) {
 
 function descFor(person) {
   return openPeople[person.id] ? renderTokens(person.desc, props.names) : ''
-}
-
-function countOf(group) {
-  return group.people.filter((person) => !person.deleted).length
 }
 
 function submit() {
@@ -121,5 +195,12 @@ function togglePerson(person) {
     }
   }
   openPeople[person.id] = !openPeople[person.id]
+  // 收起长文时把人名拉回视口：否则内容一收缩，刚才那行已经跑到屏幕外
+  if (!openPeople[person.id]) {
+    nextTick(() => {
+      const el = document.getElementById('person-' + person.id)
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+  }
 }
 </script>

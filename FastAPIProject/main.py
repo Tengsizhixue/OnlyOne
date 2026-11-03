@@ -1,5 +1,6 @@
 # main.py
 import os
+import sys
 import json
 import re
 from datetime import datetime, timedelta, timezone
@@ -10,6 +11,13 @@ from pydantic import BaseModel
 from typing import Optional
 from openai import OpenAI
 from dotenv import load_dotenv
+
+# archive_api.py 与本文件同目录，但启动时的工作目录可能是项目根 Onlyone（PyCharm 默认如此，
+# 服务器上是 /root/ai_backend），那样 archive_api 就不在 sys.path 里 → ModuleNotFoundError。
+# 这里按脚本自身位置补一次，与工作目录无关，两种环境都能导入。
+_HERE = os.path.dirname(os.path.abspath(__file__))
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
 
 from archive_api import router as archive_router
 
@@ -344,3 +352,17 @@ def chat_completions(request: ChatRequest):
             "X-Accel-Buffering": "no"
         }
     )
+
+
+# ==================== 🐞 本地调试启动入口 ====================
+# 只在 `python main.py` 直接运行时生效；服务器用 uvicorn CLI 起服务，不会走到这里。
+# 为什么不用 uvicorn.run()：PyCharm 调试器会把 asyncio.run 换成只接受 (coro, *, debug)
+# 的老包装，而 uvicorn>=0.32 的 Server.run() 会传 loop_factory=... → TypeError。
+# 这里直接 asyncio.run(server.serve())，不经过 Server.run()，调试模式下即可正常启动。
+if __name__ == "__main__":
+    import asyncio
+
+    import uvicorn
+
+    _dev_config = uvicorn.Config(app, host="127.0.0.1", port=8000, log_level="info")
+    asyncio.run(uvicorn.Server(_dev_config).serve())

@@ -1,5 +1,10 @@
 <template>
-  <li class="p" :class="{ 'is-del': person.deleted, 'is-open': open }" :id="'person-' + person.id">
+  <li
+    class="p"
+    :class="{ 'is-del': person.deleted, 'is-open': open, 'is-reveal': revealing }"
+    :id="'person-' + person.id"
+    :style="{ '--i': revealIndex }"
+  >
     <button class="p-btn" type="button" :aria-expanded="open" @click="$emit('toggle', person)">
       <span aria-hidden="true" class="p-dot"></span>
       <span class="p-tx">{{ displayName }}</span>
@@ -19,6 +24,8 @@ defineProps({
   displayName: { type: String, default: '***' },
   open: { type: Boolean, default: false },
   descHtml: { type: String, default: '' },
+  revealing: { type: Boolean, default: false },
+  revealIndex: { type: Number, default: 0 },
 })
 
 defineEmits(['toggle'])
