@@ -79,6 +79,10 @@ button{font:inherit;color:inherit}
 .roster{margin:0 0 8px}
 .p{border-bottom:1px solid rgba(255,255,255,.04)}
 .p:last-child{border-bottom:0}
+/* 展开时描边改由描述块收尾，名字行与文字之间不留一条横线 */
+.p.is-open{border-bottom:0}
+.p-body{border-bottom:1px solid rgba(255,255,255,.04)}
+.roster > :last-child{border-bottom:0}
 .p-btn,.p-txt{
   display:flex;align-items:center;gap:9px;
   width:100%;min-height:44px;padding:8px 4px;
@@ -153,7 +157,7 @@ button{font:inherit;color:inherit}
 .more-q{padding-top:8px}
 .has-more .quote{overflow-wrap:anywhere}
 .more-btn{white-space:nowrap}
-.p.is-open .quote{cursor:default}
+.p-body .quote{cursor:default}
 @keyframes hint{0%,100%{opacity:.58}50%{opacity:1}}
 
 /* ---------- 页脚 ---------- */
@@ -319,7 +323,8 @@ button{font:inherit;color:inherit}
      展开的那条跨满整行，描述仍然按整幅宽排版。 */
   .roster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:10px}
   .p{min-width:0}
-  .p.is-open{grid-column:1/-1}
+  /* 展开的描述跨满整行，人名本身留在原来那格，点开不会跳到左边 */
+  .p-body{grid-column:1/-1;min-width:0}
 
   /* 描述正文 */
   .quote{font-size:15.5px;line-height:1.85;letter-spacing:.02em;margin-bottom:16px}
@@ -412,27 +417,8 @@ button{font:inherit;color:inherit}
 /* ---------- ④ 数字宽度固定，计数时不抖动 ---------- */
 .cnt-n{min-width:2ch;text-align:right}
 
-/* ---------- 时间轴版（?timeline=1）---------- */
-/* 每栏左侧一条竖线，列标题的菱形与分组的小菱形都落在线上 */
-.board.is-timeline .col{padding-left:42px}
-.board.is-timeline .col::before{
-  content:"";position:absolute;left:45px;top:36px;bottom:16px;width:1px;pointer-events:none;
-  background:linear-gradient(to bottom,
-    rgba(203,213,225,.34),rgba(203,213,225,.10) 62%,rgba(203,213,225,.02));
-}
-/* 吸顶时左侧留出透明区，让竖线不被标题背景盖断 */
-.board.is-timeline .cnt{
-  background:linear-gradient(90deg,transparent 0 24px,rgba(10,11,14,.94) 24px);
-}
-
 @media (max-width:480px){
   .cnt{--cnt-pad:16px;--cnt-out:14px}
-
-  .board.is-timeline .col{padding-left:34px}
-  .board.is-timeline .col::before{left:37px;top:33px;bottom:12px}
-  .board.is-timeline .cnt{
-    background:linear-gradient(90deg,transparent 0 18px,rgba(10,11,14,.94) 18px);
-  }
 }
 
 @media (prefers-reduced-motion:reduce){
@@ -442,33 +428,10 @@ button{font:inherit;color:inherit}
 
 /* ==========================================================================
    观感增强  2026-11-02
-   ① 时间轴刻度 + 走针（仅 ?timeline=1）
    ② 纸面颗粒 + 环境柔光（桌面跟指针，手机跟阅读位置）
    ③ 解锁后环境光转暖
    全部只写 transform / opacity，不加滤镜、不加常驻动画。
    ========================================================================== */
-
-/* ---------- ① 刻度：一人一行，横跨竖线 ---------- */
-.board.is-timeline .p{position:relative}
-.board.is-timeline .p::before{
-  content:"";position:absolute;left:0;top:50%;
-  width:7px;height:1px;pointer-events:none;
-  background:rgba(203,213,225,.34);
-}
-
-/* ---------- ① 走针：sticky 亮点，滚到哪儿就亮到哪儿 ---------- */
-/* 竖线始终落在「内容左边界 + 3px」，刻度与走针都用这个偏移对齐 */
-.rail-bead{display:none}
-.board.is-timeline .rail-bead{
-  display:block;position:sticky;top:38vh;z-index:2;
-  height:0;margin-top:12px;pointer-events:none;
-}
-.board.is-timeline .rail-bead::before{
-  content:"";position:absolute;left:-2px;top:-1px;
-  width:11px;height:2px;border-radius:1px;
-  background:#dbe4ef;
-  box-shadow:0 0 9px rgba(222,234,250,.4);
-}
 
 /* ---------- ② 纸面颗粒 ---------- */
 .bg{overflow:hidden}
@@ -501,13 +464,89 @@ button{font:inherit;color:inherit}
   .bg .noise{opacity:.075}
 }
 
-@media (max-width:480px){
-  /* 两列名单里只有左列贴着竖线，右列的刻度会跑到卡片中间，只留奇数行 */
-  .board.is-timeline .p::before{display:none}
-  .board.is-timeline .p:nth-child(odd)::before{display:block}
-  .board.is-timeline .rail-bead{margin-top:13px}
-}
-
 @media (prefers-reduced-motion:reduce){
   .bg .lamp{transition:opacity .3s}
+}
+
+/* ==========================================================================
+   附加内容：AI 总结 / 原文 双面板 + 选择题  2026-11-03
+   三题全部答对才解锁；两个面板一次只开一个，避免整页拉得太长。
+   ========================================================================== */
+.extra-progress{margin:-4px 0 14px;color:#c9a86a;font-size:12.5px;line-height:1.8;letter-spacing:.03em}
+.extra-done{margin:0;color:#b8d8c4;font-size:13px;letter-spacing:.06em}
+
+.extra-tabs{display:flex;gap:8px;margin:14px 0 0}
+.extra-tab{
+  padding:7px 16px;border-radius:999px;cursor:pointer;
+  font-family:inherit;font-size:12.5px;letter-spacing:.1em;text-indent:.1em;
+  color:#98a4b3;background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.13);
+  transition:color .3s,background .3s,border-color .3s;
+}
+.extra-tab:hover{color:#e2e8f0;background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.24)}
+.extra-tab.on{color:#f1f5f9;background:rgba(203,213,225,.14);border-color:rgba(203,213,225,.34)}
+
+.extra-panel{
+  margin-top:12px;padding:15px 16px;
+  border-left:1px solid rgba(255,255,255,.22);
+  background:rgba(255,255,255,.025);
+  color:#b6c2d1;font-size:13px;line-height:2;letter-spacing:.025em;
+  overflow-wrap:anywhere;
+}
+.extra-panel p{margin:0 0 12px}
+.extra-panel p:last-child{margin-bottom:0}
+.extra-panel code{font-family:inherit;padding:1px 5px;border-radius:3px;
+  background:rgba(255,255,255,.07);color:#cfd8e4}
+
+.extra-figure{margin:16px 0 6px}
+.extra-figure img{display:block;width:100%;height:auto;border-radius:8px;
+  border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03)}
+
+/* ---------- 选择题 ---------- */
+.extra-choice{margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.09)}
+.extra-choice-q{margin:0 0 12px;color:#dbe4ef;font-size:14px;letter-spacing:.04em}
+.extra-choice-opts{display:grid;gap:8px}
+.extra-opt{
+  display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;
+  padding:10px 12px;border-radius:8px;cursor:pointer;
+  font-family:inherit;font-size:13.5px;line-height:1.7;color:#cbd5e1;
+  background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.1);
+  transition:color .25s,background .25s,border-color .25s;
+}
+.extra-opt:hover{color:#fff;background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.2)}
+.extra-opt.sel{color:#fff;background:rgba(203,213,225,.13);border-color:rgba(203,213,225,.36)}
+.extra-opt-k{flex:0 0 auto;font-weight:600;color:#9aa9bb}
+.extra-opt.sel .extra-opt-k{color:#f1f5f9}
+.extra-opt-t{flex:1;min-width:0}
+
+.extra-choice-reply{margin:14px 0 0;color:#dbe4ef;font-size:13.5px;line-height:1.9}
+.extra-choice-right{margin:10px 0 0;color:#b8d8c4;font-size:13px;letter-spacing:.03em}
+.extra-choice-exp{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)}
+
+/* ---------- 一道一道出现 / 排行榜 ---------- */
+.extra-step{animation:extra-step-in .36s ease-out}
+@keyframes extra-step-in{
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .extra-step{animation:none}
+}
+.extra-rank{
+  margin:16px 0 0;padding:11px 14px;
+  border-left:2px solid rgba(201,168,106,.55);
+  background:rgba(201,168,106,.07);
+  color:#e0cfa6;font-size:12.5px;line-height:1.8;letter-spacing:.03em;
+}
+
+@media (max-width:480px){
+  .extra-progress{font-size:13.5px;line-height:1.8;margin-bottom:14px}
+  .extra-rank{font-size:14px;line-height:1.75;padding:12px 13px}
+  .extra-done{font-size:14px}
+  .extra-tab{font-size:14px;padding:10px 18px;min-height:44px}
+  .extra-panel{font-size:15px;line-height:1.9;padding:14px}
+  .extra-choice-q{font-size:15px}
+  .extra-opt{font-size:14.5px;padding:12px;min-height:44px}
+  .extra-choice-reply{font-size:14.5px}
+  .extra-choice-right{font-size:13.5px}
 }

@@ -7,8 +7,10 @@
 
 产出：
     FastAPIProject/archive/content.json   公开：结构 + *** + {{pNNN}} 引用
-    FastAPIProject/archive/answers.json   服务端：88 个真名 + 6 个答案 + 6 篇长文
-    aipartner_vue/src/archive/archive.css 页面样式（从 HTML 的 <style> 原样搬出）
+    FastAPIProject/archive/answers.json   服务端：88 个真名 + 附加内容（答案 + AI 总结 + 原文）
+
+附加内容的源是 FastAPIProject/archive/extras.json（手写，改完跑一次脚本即可）。
+页面样式不再由本脚本导出，见 aipartner_vue/src/archive/archive.css。
 """
 
 from __future__ import annotations
@@ -25,7 +27,29 @@ ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_SRC = ROOT / "FastAPIProject" / "archive" / "source.html"
 OUT_CONTENT = ROOT / "FastAPIProject" / "archive" / "content.json"
 OUT_ANSWERS = ROOT / "FastAPIProject" / "archive" / "answers.json"
-OUT_CSS = ROOT / "aipartner_vue" / "src" / "archive" / "archive.css"
+EXTRAS_SRC = ROOT / "FastAPIProject" / "archive" / "extras.json"
+ALIASES_SRC = ROOT / "FastAPIProject" / "archive" / "aliases.json"
+
+try:
+    from pypinyin import Style, lazy_pinyin
+except ImportError as exc:  # 只有构建期需要拼音，服务端读的是算好的结果
+    raise SystemExit(
+        "缺少 pypinyin，先装一下：FastAPIProject/.venv/Scripts/python.exe -m pip install pypinyin"
+    ) from exc
+
+
+def pinyin_of(value: str) -> str:
+    """整串全拼：小写、无音调、无分隔符（"周好东" -> "zhouhaodong"）。"""
+    return "".join(lazy_pinyin(value, style=Style.NORMAL, errors="ignore")).lower()
+
+
+def pinyin_variants(values) -> list[str]:
+    out: list[str] = []
+    for value in values:
+        py = pinyin_of(value)
+        if py and py not in out:
+            out.append(py)
+    return out
 
 REF_SPAN = re.compile(
     r'<span class="anon-name-ref"([^>]*)>.*?</span>', re.S
@@ -123,37 +147,37 @@ def parse(raw: str):
         p["desc"] = REF_SPAN.sub(ref_to_token, p["desc"])
 
     # ---------- 附加条目 ----------
-    extra_intro = ""
-    m = re.search(r'<p class="extra-intro">(.*?)</p>', raw, re.S)
-    if m:
-        extra_intro = text_of(m.group(1))
+    # 附加内容改由 archive/extras.json 单独维护：三篇长文（AI 总结 + 原文）和选择题
+    # 都是手写文本，塞回 100KB 的 source.html 里既难改也容易解析错，所以单独放一份。
+    if not EXTRAS_SRC.exists():
+        raise SystemExit(f"找不到附加内容源文件：{EXTRAS_SRC}")
+    spec = json.loads(EXTRAS_SRC.read_text(encoding="utf-8"))
+    extra_intro = spec.get("intro", "")
 
     extras_public = []
     extras_answers = {}
-    ei = 0
-    for em in re.finditer(
-        r'<div class="extra-item" data-answer="([^"]*)">(.*?)(?=<div class="extra-item"|</section>)',
-        raw,
-        re.S,
-    ):
-        answer, body = em.group(1), em.group(2)
-        ei += 1
-        eid = f"e{ei}"
-        hint = text_of(inner_of(body, "p"))
-        dm = re.search(
-            r'<div class="extra-description"[^>]*>(.*?)</div>\s*<button[^>]*extra-toggle',
-            body,
-            re.S,
-        )
-        if not dm:
-            raise SystemExit(f"附加条目 {eid} 找不到描述")
-        desc = REF_SPAN.sub(ref_to_token, dm.group(1))
-        extras_public.append({"id": eid, "hint": hint})
-        extras_answers[eid] = {
-            "answer": html.unescape(answer).strip(),
-            "aliases": [],
-            "description": desc,
+    for item in spec["items"]:
+        eid = item["id"]
+        extras_public.append({"id": eid, "hint": item["hint"]})
+        secret = {
+            "answer": item["answer"],
+            "aliases": item.get("aliases", []),
+            "ai": item["ai"],
+            "raw": item["raw"],
         }
+        if item.get("choice"):
+            secret["choice"] = item["choice"]
+        secret["pinyin"] = pinyin_variants([item["answer"], *item.get("aliases", [])])
+        extras_answers[eid] = secret
+
+    # ---------- 外号对应的原名（可选） ----------
+    alias_map: dict[str, list[str]] = {}
+    if ALIASES_SRC.exists():
+        raw_alias = json.loads(ALIASES_SRC.read_text(encoding="utf-8"))
+        for pid, value in raw_alias.items():
+            if pid.startswith("_"):
+                continue
+            alias_map[pid] = [value] if isinstance(value, str) else list(value)
 
     # ---------- 组装 ----------
     content = {
@@ -182,6 +206,11 @@ def parse(raw: str):
     }
     answers = {
         "names": {p["id"]: p["name"] for p in people_all},
+        "aliases": alias_map,
+        "pinyin": {
+            p["id"]: pinyin_variants([p["name"], *alias_map.get(p["id"], [])])
+            for p in people_all
+        },
         "extras": extras_answers,
     }
     stats = {
@@ -193,7 +222,7 @@ def parse(raw: str):
             len(re.findall(r"\{\{p\d{3}\}\}", p["desc"])) for p in people_all
         )
         + sum(
-            len(re.findall(r"\{\{p\d{3}\}\}", e["description"]))
+            len(re.findall(r"\{\{p\d{3}\}\}", e.get("ai", "") + e.get("raw", "")))
             for e in extras_answers.values()
         ),
         "missing_refs": missing,
@@ -220,7 +249,9 @@ def validate(content, answers, stats):
                     errors.append(f"缺少姓名：{p['id']}")
                 walk_desc(p["desc"])
     for e in answers["extras"].values():
-        walk_desc(e["description"])
+        walk_desc(e.get("ai", ""))
+        walk_desc(e.get("raw", ""))
+        walk_desc((e.get("choice") or {}).get("explanation", ""))
     bad = refs - ids
     if bad:
         errors.append(f"引用指向不存在的 ID：{sorted(bad)}")
@@ -231,10 +262,35 @@ def validate(content, answers, stats):
     if leaked:
         errors.append(f"content.json 中出现真名：{leaked}")
 
+    # 外号对应的原名：id 必须存在，且不能和别人的真名撞车
+    for pid, alias_list in (answers.get("aliases") or {}).items():
+        if pid not in ids:
+            errors.append(f"aliases.json 里的 {pid} 不存在")
+            continue
+        for alias in alias_list:
+            owner = [i for i, n in answers["names"].items() if n == alias]
+            if owner and owner[0] != pid:
+                errors.append(f"{pid} 的别名「{alias}」和 {owner[0]} 的真名重复")
+            if alias in blob:
+                errors.append(f"别名「{alias}」出现在 content.json 里")
+
+    # 同一阶段里拼音撞车只提示：运行时会把撞车的键丢掉，不会认错人
+    for st in content["stages"]:
+        seen: dict[str, str] = {}
+        for g in st["groups"]:
+            for p in g["people"]:
+                for py in answers.get("pinyin", {}).get(p["id"], []):
+                    if py in seen and seen[py] != p["id"]:
+                        warnings.append(
+                            f"{st['title']} 里 {p['id']} 和 {seen[py]} 的拼音都是 {py}，两人都无法用拼音解锁"
+                        )
+                    seen.setdefault(py, p["id"])
+
     # 只做提示：附加描述里没出现答案名，可能是换成了昵称
     for eid, e in answers["extras"].items():
-        if e["answer"] not in re.sub(r"<[^>]+>", "", e["description"]):
-            warnings.append(f"{eid} 的描述里没有答案名 {e['answer']}，确认一下是否取对了块")
+        plain = re.sub(r"<[^>]+>", "", e.get("ai", ""))
+        if e["answer"] not in plain:
+            warnings.append(f"{eid} 的 AI 总结里没有答案名 {e['answer']}，确认一下是否取对了块")
     return errors, warnings
 
 
@@ -257,32 +313,18 @@ def main():
             print("  -", e, file=sys.stderr)
         raise SystemExit(1)
 
-    # 只读页面的收尾样式：去掉编辑态的 hover / 占位文案
-    css += """
-
-/* ---------- 只读页面：去掉编辑态残留 ---------- */
-.col-title:hover,.col-title:focus,
-.p-tx:hover,.p-tx:focus,
-.quote:hover,.quote:focus{background:none;box-shadow:none}
-.quote:empty::before{content:none}
-[v-cloak]{display:none}
-.archive-status{min-height:60vh;display:flex;align-items:center;justify-content:center;
-  color:#8996a6;font-size:13px;letter-spacing:.08em;text-align:center;padding:0 24px}
-.archive-status.error{color:#c9a0a0}
-"""
-
-    for p in (OUT_CONTENT, OUT_ANSWERS, OUT_CSS):
+    # 注意：不再从 source.html 导出 CSS。页面的样式（移动端档位、动效、附加题）
+    # 已经由 Vue 版手工维护，覆盖回去会把这些改动全部冲掉。
+    for p in (OUT_CONTENT, OUT_ANSWERS):
         p.parent.mkdir(parents=True, exist_ok=True)
     OUT_CONTENT.write_text(json.dumps(content, ensure_ascii=False, indent=2), encoding="utf-8")
     OUT_ANSWERS.write_text(json.dumps(answers, ensure_ascii=False, indent=2), encoding="utf-8")
-    OUT_CSS.write_text(css.strip() + "\n", encoding="utf-8")
 
     print("源文件：", src)
     print("人数：", stats["people"], "| 划去：", stats["deleted"], "| 组：", stats["groups"])
     print("附加：", stats["extras"], "| 匿名引用：", stats["tokens"])
     print("content.json：", OUT_CONTENT, len(OUT_CONTENT.read_bytes()), "B")
     print("answers.json：", OUT_ANSWERS, len(OUT_ANSWERS.read_bytes()), "B")
-    print("archive.css：", OUT_CSS, len(OUT_CSS.read_bytes()), "B")
 
 
 if __name__ == "__main__":

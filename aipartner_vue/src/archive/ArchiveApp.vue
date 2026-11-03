@@ -10,7 +10,7 @@
       <div v-if="loading" class="archive-status" v-cloak>正在调取档案…</div>
       <div v-else-if="loadError" class="archive-status error">{{ loadError }}</div>
 
-      <div v-else class="board" :class="{ 'is-timeline': isTimeline }">
+      <div v-else class="board">
         <p v-if="stateError" class="archive-inline-error">{{ stateError }}</p>
 
         <ArchiveStage
@@ -30,6 +30,9 @@
           :intro="content.extraIntro"
           :names="names"
           :states="extraStates"
+          :texts="extraTexts"
+          :all="extrasAll"
+          :ranking="ranking"
           @unlock="onUnlockExtra"
         />
       </div>
@@ -52,8 +55,9 @@ const unlockedStages = ref({})
 const revealingStages = reactive({})
 const stageFeedback = reactive({})
 const extraStates = reactive({})
-
-const isTimeline = ref(false)
+const extraTexts = ref({})
+const extrasAll = ref(false)
+const ranking = ref(null)
 
 // 只要揭开过任意一栏，环境光就从冷灰缓缓转暖（纯视觉，不加任何文字）
 const lit = computed(() => Object.keys(unlockedStages.value).length > 0)
@@ -64,9 +68,6 @@ const stateError = ref('')
 
 onMounted(async () => {
   initAmbientLight()
-
-  // ?timeline=1 打开时间轴版，用于对比，不影响默认版面
-  isTimeline.value = new URLSearchParams(window.location.search).has('timeline')
 
   const [contentResult, stateResult] = await Promise.allSettled([getContent(), getState()])
 
@@ -85,12 +86,13 @@ onMounted(async () => {
       unlockedStages.value[id] = true
     }
     for (const id of state.extras || []) {
-      extraStates[id] = {
-        unlocked: true,
-        description: (state.descriptions || {})[id] || '',
-        feedback: '回答正确，已解锁。',
-        busy: false,
-      }
+      extraStates[id] = { answered: true, feedback: '', busy: false }
+    }
+    // 三题全对时后端才会把内容发下来
+    if (state.extraTexts && Object.keys(state.extraTexts).length) {
+      extraTexts.value = state.extraTexts
+      extrasAll.value = true
+      ranking.value = state.ranking || null
     }
   } else {
     stateError.value = '进度读取失败，本次解锁可能无法保存。'
@@ -124,11 +126,14 @@ async function onUnlockExtra(id, value) {
   }
   try {
     const res = await unlockExtra(id, answer)
-    extraStates[id] = {
-      unlocked: true,
-      description: res.description || '',
-      feedback: '回答正确，已解锁。',
-      busy: false,
+    extraStates[id] = { answered: true, feedback: '', busy: false }
+    for (const eid of res.answered || []) {
+      if (eid !== id) extraStates[eid] = { ...(extraStates[eid] || {}), answered: true, busy: false }
+    }
+    if (res.all && res.texts) {
+      extraTexts.value = res.texts
+      extrasAll.value = true
+      ranking.value = res.ranking || null
     }
   } catch (e) {
     extraStates[id] = {
