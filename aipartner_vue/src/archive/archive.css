@@ -108,8 +108,13 @@ button{font:inherit;color:inherit}
   margin:0 0 14px;padding:4px 0 4px 14px;
   border-left:1px solid rgba(255,255,255,.2);
   font-size:15px;line-height:2.05;letter-spacing:.06em;color:#b6c2d1;
-  animation:rise .6s ease-out both;
+  animation:quote-in .55s cubic-bezier(.22,.8,.3,1) both;
   outline:none;
+}
+/* 描述一律不做透明度过渡：点了就必须读得到，不能有任何"暂时看不见"的时刻 */
+@keyframes quote-in{
+  0%{transform:translateY(10px)}
+  100%{transform:translateY(0)}
 }
 .quote[hidden]{display:none}
 .quote-del{border-left-color:rgba(255,255,255,.12);color:#8b95a2}
@@ -118,7 +123,7 @@ button{font:inherit;color:inherit}
 .pic[hidden]{display:none}
 .pic{margin:0 0 14px;padding-left:14px;
   border-left:1px solid rgba(255,255,255,.2);
-  animation:rise .6s ease-out both}
+  animation:quote-in .55s cubic-bezier(.22,.8,.3,1) both}
 .pic img{display:block;width:100%;height:auto;border-radius:8px;
   border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03)}
 .quote:hover{background:rgba(255,255,255,.03)}
@@ -155,8 +160,8 @@ button{font:inherit;color:inherit}
 .foot{padding:48px 0 96px;text-align:center}
 
 @keyframes rise{
-  0%{opacity:0;transform:translateY(18px)}
-  100%{opacity:1;transform:translateY(0)}
+  0%{transform:translateY(18px)}
+  100%{transform:translateY(0)}
 }
 
 @media (hover:hover){
@@ -283,3 +288,226 @@ button{font:inherit;color:inherit}
 .archive-status{min-height:60vh;display:flex;align-items:center;justify-content:center;
   color:#8996a6;font-size:13px;letter-spacing:.08em;text-align:center;padding:0 24px}
 .archive-status.error{color:#c9a0a0}
+
+/* ---------- 解锁状态：只改明暗，不加任何文字 ---------- */
+.col.is-unlocked{border-color:rgba(203,213,225,.16);background:rgba(255,255,255,.032)}
+.col.is-unlocked .cdot{opacity:1;background:#eaf0f7}
+.col.is-unlocked .col-title{color:#fff}
+
+/* ==========================================================================
+   移动端可读性覆盖（≤480px）  2026-11-02
+   ① 输入框一律 16px —— iOS Safari / 微信 WebView 在 <16px 时聚焦会强制放大整页
+   ② 辅助文字抬到 13.5–15px（原先 11–13px，是手机上主要看不清的部分）
+   ③ 触控目标 ≥44px
+   ④ 字距从 2.2px 收到 1px、行高 2 → 1.85
+   放在文件末尾，靠"同权重后写覆盖"生效；桌面 / 平板档不做任何改动。
+   ========================================================================== */
+@media (max-width:480px){
+  body{line-height:1.85}
+
+  /* ---------- 阶段卡片 ---------- */
+  .col-title{letter-spacing:.18em;text-indent:.18em}
+  .cnt{min-height:52px}
+  .cnt-t{font-size:15.5px;letter-spacing:.1em}
+
+  /* 人名：字距 2.2px → 1px，展开态也不再撑到 4px */
+  .p-btn,.p-txt{padding:10px 4px;letter-spacing:1px}
+  .p.is-open .p-btn,.p.is-open .p-txt{letter-spacing:1px}
+  .p.is-del.is-open .p-btn,.p.is-del.is-open .p-txt{letter-spacing:1px}
+
+  /* 姓名两列：88 人单列滚动过长，390px 下每列约 155px，放三个字绰绰有余。
+     展开的那条跨满整行，描述仍然按整幅宽排版。 */
+  .roster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:10px}
+  .p{min-width:0}
+  .p.is-open{grid-column:1/-1}
+
+  /* 描述正文 */
+  .quote{font-size:15.5px;line-height:1.85;letter-spacing:.02em;margin-bottom:16px}
+  .more-btn{font-size:14px;line-height:1.4;padding:8px 14px;min-height:40px;
+    margin-left:10px;animation:none}
+
+  /* ---------- 阶段解锁表单 ---------- */
+  .phase-unlock-form{gap:8px;margin:14px 0 6px}
+  .phase-unlock-input{font-size:16px;padding:11px 12px}
+  .phase-unlock-btn{font-size:14px;padding:11px 14px;min-height:44px}
+  .phase-unlock-feedback{font-size:13.5px;line-height:1.7;min-height:24px}
+
+  /* ---------- 状态与错误 ---------- */
+  .archive-status{font-size:15px;line-height:1.9}
+  .archive-inline-error{font-size:13.5px;line-height:1.8}
+
+  /* ---------- 附加内容 ---------- */
+  .extra-fold-summary{font-size:16px;padding:17px 16px}
+  .extra-fold-state{font-size:13px}
+  .extra-col{padding:16px}
+  .extra-intro{font-size:15px;line-height:1.9;margin-bottom:16px}
+  .extra-hint{font-size:15px;line-height:1.8}
+  .extra-form{gap:8px}
+  .extra-input{font-size:16px;padding:11px 12px}
+  .extra-check{font-size:14px;padding:11px 14px;min-height:44px}
+  .extra-feedback{font-size:13.5px;line-height:1.7;min-height:24px}
+  .extra-description{font-size:14.5px;line-height:1.85;padding:14px;max-height:300px}
+  .extra-subhead{font-size:15px}
+  .extra-table{font-size:14px;min-width:360px}
+  .extra-table th,.extra-table td{padding:10px 8px}
+  .extra-toggle{font-size:14px;padding:9px 16px;min-height:40px}
+}
+
+/* ==========================================================================
+   层次与动效  2026-11-02
+   ① 解锁翻牌：逐行错位淡入 + 整栏一次扫光
+   ② 分组标题吸顶
+   ③ 人名进入视口渐显
+   ④ 分组数字入场计数
+   ========================================================================== */
+
+/* ---------- ① 解锁翻牌 ---------- */
+/* 扫光只播一次：类名常驻，animation 不会重播；刷新后不会挂这个类，所以不闪 */
+.col.is-revealing::after{
+  content:"";position:absolute;left:0;right:0;top:0;height:1px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(226,232,240,.45) 30%,rgba(226,232,240,.45) 70%,transparent);
+  animation:scan-line 1.05s cubic-bezier(.4,0,.2,1) both;
+}
+@keyframes scan-line{
+  0%{top:0;opacity:0}
+  14%{opacity:1}
+  80%{opacity:.75}
+  100%{top:100%;opacity:0}
+}
+
+.p.is-reveal{
+  animation:reveal-flip .48s cubic-bezier(.22,.8,.3,1) backwards;
+  animation-delay:calc(min(var(--i,0),24) * 40ms);
+}
+@keyframes reveal-flip{
+  0%{transform:translateY(9px)}
+  100%{transform:translateY(0)}
+}
+
+/* ---------- ③ 人名渐显 ---------- */
+/* 只做位移，从不改 opacity：动画万一不播，元素也只是偏下几个像素，
+   任何情况下都读得到。父级 display:none 时浏览器自动暂停，展开时从头播。 */
+.p{
+  animation:reveal-up .42s cubic-bezier(.22,.8,.3,1) backwards;
+  animation-delay:calc(min(var(--i,0),20) * 26ms);
+}
+@keyframes reveal-up{
+  0%{transform:translateY(6px)}
+  100%{transform:translateY(0)}
+}
+
+/* ---------- ② 分组标题吸顶 ---------- */
+/* 负 margin 把背景铺到卡片内边，padding 再把内容推回原位：
+   无论 .col 的 padding 是多少，文字都与列标题保持对齐。
+   width 必须同步加宽，否则 border-box 会吃掉 2×padding 的文字区域。 */
+.cnt{
+  --cnt-pad:22px;--cnt-out:20px;
+  position:sticky;top:0;z-index:3;
+  margin:0 calc(-1 * var(--cnt-out));
+  padding:10px var(--cnt-pad);
+  width:calc(100% + 2 * var(--cnt-out));
+  background:rgba(10,11,14,.94);
+}
+
+/* ---------- ④ 数字宽度固定，计数时不抖动 ---------- */
+.cnt-n{min-width:2ch;text-align:right}
+
+/* ---------- 时间轴版（?timeline=1）---------- */
+/* 每栏左侧一条竖线，列标题的菱形与分组的小菱形都落在线上 */
+.board.is-timeline .col{padding-left:42px}
+.board.is-timeline .col::before{
+  content:"";position:absolute;left:45px;top:36px;bottom:16px;width:1px;pointer-events:none;
+  background:linear-gradient(to bottom,
+    rgba(203,213,225,.34),rgba(203,213,225,.10) 62%,rgba(203,213,225,.02));
+}
+/* 吸顶时左侧留出透明区，让竖线不被标题背景盖断 */
+.board.is-timeline .cnt{
+  background:linear-gradient(90deg,transparent 0 24px,rgba(10,11,14,.94) 24px);
+}
+
+@media (max-width:480px){
+  .cnt{--cnt-pad:16px;--cnt-out:14px}
+
+  .board.is-timeline .col{padding-left:34px}
+  .board.is-timeline .col::before{left:37px;top:33px;bottom:12px}
+  .board.is-timeline .cnt{
+    background:linear-gradient(90deg,transparent 0 18px,rgba(10,11,14,.94) 18px);
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .col.is-revealing::after{display:none}
+  .p,.p.is-reveal{animation:none}
+}
+
+/* ==========================================================================
+   观感增强  2026-11-02
+   ① 时间轴刻度 + 走针（仅 ?timeline=1）
+   ② 纸面颗粒 + 环境柔光（桌面跟指针，手机跟阅读位置）
+   ③ 解锁后环境光转暖
+   全部只写 transform / opacity，不加滤镜、不加常驻动画。
+   ========================================================================== */
+
+/* ---------- ① 刻度：一人一行，横跨竖线 ---------- */
+.board.is-timeline .p{position:relative}
+.board.is-timeline .p::before{
+  content:"";position:absolute;left:0;top:50%;
+  width:7px;height:1px;pointer-events:none;
+  background:rgba(203,213,225,.34);
+}
+
+/* ---------- ① 走针：sticky 亮点，滚到哪儿就亮到哪儿 ---------- */
+/* 竖线始终落在「内容左边界 + 3px」，刻度与走针都用这个偏移对齐 */
+.rail-bead{display:none}
+.board.is-timeline .rail-bead{
+  display:block;position:sticky;top:38vh;z-index:2;
+  height:0;margin-top:12px;pointer-events:none;
+}
+.board.is-timeline .rail-bead::before{
+  content:"";position:absolute;left:-2px;top:-1px;
+  width:11px;height:2px;border-radius:1px;
+  background:#dbe4ef;
+  box-shadow:0 0 9px rgba(222,234,250,.4);
+}
+
+/* ---------- ② 纸面颗粒 ---------- */
+.bg{overflow:hidden}
+.bg .noise{opacity:.065}
+
+/* ---------- ② 环境柔光 ---------- */
+.bg .lamp{
+  position:absolute;left:0;top:0;width:640px;height:640px;
+  margin:-320px 0 0 -320px;border-radius:50%;
+  background:radial-gradient(circle at 50% 50%,
+    rgba(200,216,238,.075),rgba(200,216,238,.03) 45%,rgba(3,3,5,0) 72%);
+  opacity:0;transform:translate3d(-999px,-999px,0);
+  transition:opacity .9s ease,transform .55s cubic-bezier(.22,.8,.3,1);
+}
+.bg.is-lamp .lamp{opacity:1}
+
+/* ---------- ③ 解锁后环境光转暖 ---------- */
+.bg .warm{
+  position:absolute;inset:0;opacity:0;transition:opacity 1.4s ease;
+  background-image:
+    radial-gradient(52% 46% at 0% -10%,
+      rgba(226,200,166,.10), rgba(210,186,152,.035) 48%, rgba(3,3,5,0) 76%),
+    radial-gradient(52% 46% at 100% 110%,
+      rgba(226,200,166,.07), rgba(210,186,152,.025) 48%, rgba(3,3,5,0) 76%);
+}
+.bg.is-lit .warm{opacity:1}
+
+@media (max-width:820px){
+  .bg .lamp{width:460px;height:460px;margin:-230px 0 0 -230px}
+  .bg .noise{opacity:.075}
+}
+
+@media (max-width:480px){
+  /* 两列名单里只有左列贴着竖线，右列的刻度会跑到卡片中间，只留奇数行 */
+  .board.is-timeline .p::before{display:none}
+  .board.is-timeline .p:nth-child(odd)::before{display:block}
+  .board.is-timeline .rail-bead{margin-top:13px}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .bg .lamp{transition:opacity .3s}
+}

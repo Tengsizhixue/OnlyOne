@@ -1,20 +1,26 @@
 <template>
   <div class="archive-page">
-    <div aria-hidden="true" class="bg"><span class="noise"></span></div>
+    <div aria-hidden="true" class="bg" :class="{ 'is-lit': lit }">
+      <span class="warm"></span>
+      <span class="lamp"></span>
+      <span class="noise"></span>
+    </div>
 
     <main class="wrap">
       <div v-if="loading" class="archive-status" v-cloak>正在调取档案…</div>
       <div v-else-if="loadError" class="archive-status error">{{ loadError }}</div>
 
-      <div v-else class="board">
+      <div v-else class="board" :class="{ 'is-timeline': isTimeline }">
         <p v-if="stateError" class="archive-inline-error">{{ stateError }}</p>
 
         <ArchiveStage
-          v-for="stage in content.stages"
+          v-for="(stage, index) in content.stages"
           :key="stage.id"
           :stage="stage"
           :names="names"
           :unlocked="!!unlockedStages[stage.id]"
+          :revealing="!!revealingStages[stage.id]"
+          :order="index"
           :feedback="stageFeedback[stage.id]"
           @unlock="onUnlockStage"
         />
@@ -34,22 +40,34 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import ArchiveStage from './components/ArchiveStage.vue'
 import ExtraSection from './components/ExtraSection.vue'
 import { getContent, getState, unlockExtra, unlockStage } from './api.js'
+import { initAmbientLight } from './fx.js'
 
 const content = ref(null)
 const names = ref({})
 const unlockedStages = ref({})
+const revealingStages = reactive({})
 const stageFeedback = reactive({})
 const extraStates = reactive({})
+
+const isTimeline = ref(false)
+
+// 只要揭开过任意一栏，环境光就从冷灰缓缓转暖（纯视觉，不加任何文字）
+const lit = computed(() => Object.keys(unlockedStages.value).length > 0)
 
 const loading = ref(true)
 const loadError = ref('')
 const stateError = ref('')
 
 onMounted(async () => {
+  initAmbientLight()
+
+  // ?timeline=1 打开时间轴版，用于对比，不影响默认版面
+  isTimeline.value = new URLSearchParams(window.location.search).has('timeline')
+
   const [contentResult, stateResult] = await Promise.allSettled([getContent(), getState()])
 
   if (contentResult.status === 'rejected') {
@@ -89,6 +107,7 @@ async function onUnlockStage(stageId, value) {
     const res = await unlockStage(stageId, name)
     names.value = { ...names.value, ...(res.names || {}) }
     unlockedStages.value[stageId] = true
+    revealingStages[stageId] = true
     stageFeedback[stageId] = { text: '本阶段已解锁。', ok: true, busy: false }
   } catch (e) {
     stageFeedback[stageId] = { text: e.message, ok: false, busy: false }
