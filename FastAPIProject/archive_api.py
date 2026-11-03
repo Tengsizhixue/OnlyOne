@@ -54,7 +54,6 @@ RATE_LIMIT = 60
 # 公开留言
 COMMENT_MAX = 300          # 单条字数上限
 NICK_MAX = 12              # 昵称字数上限
-COMMENT_GAP = 20           # 同一个浏览器两次留言的最小间隔（秒）
 COMMENT_PAGE = 200         # 每个人最多返回多少条
 URL_RE = re.compile(
     r"(https?://|www\.|\b[a-z0-9-]+\.(?:com|cn|net|org|xyz|top|site|me|cc|io)\b)",
@@ -291,8 +290,6 @@ def _init_db() -> None:
                 );
                 CREATE INDEX IF NOT EXISTS idx_comments_person
                     ON comments(person, id);
-                CREATE INDEX IF NOT EXISTS idx_comments_parent
-                    ON comments(parent_id, id);
                 """
             )
             # 老库补列：之前没有 parent_id 的数据库走 ALTER TABLE 升级。
@@ -300,10 +297,11 @@ def _init_db() -> None:
             cols = {row[1] for row in conn.execute("PRAGMA table_info(comments)")}
             if "parent_id" not in cols:
                 conn.execute("ALTER TABLE comments ADD COLUMN parent_id INTEGER")
-                conn.execute(
-                    "CREATE INDEX IF NOT EXISTS idx_comments_parent"
-                    " ON comments(parent_id, id)"
-                )
+            # 索引放在迁移之后：旧库没有 parent_id 列时直接建索引会报错
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_comments_parent"
+                " ON comments(parent_id, id)"
+            )
             conn.commit()
         finally:
             conn.close()
@@ -548,6 +546,12 @@ def _clean_text(value: str, limit: int) -> str:
     return text.strip()[:limit]
 
 
+def _snippet(text: str, limit: int = 15) -> str:
+    """把留言正文压成单行短引用，用于回复的引用行消歧重名。"""
+    flat = re.sub(r"\s+", " ", text or "").strip()
+    return flat[:limit] + ("…" if len(flat) > limit else "")
+
+
 def _comment_row(row: tuple, sid: str) -> dict:
     cid, nick, body, created, author, parent_id = row
     return {
@@ -611,12 +615,15 @@ def list_comments(person: str, request: Request, response: Response) -> dict:
         replies = []
         for c in children.get(r[0], []):
             ri = _comment_row(c, sid)
-            # 如果是回复另一条回复，带上被回复者昵称
+            # 如果是回复另一条回复，带上被回复者昵称和内容片段，
+            # 重名时靠“当时说了什么”区分
             pid = c[5]
             if pid and pid != r[0] and pid in by_id:
                 ri["replyTo"] = by_id[pid][1] or "匿名"
+                ri["replyToSnippet"] = _snippet(by_id[pid][2])
             else:
                 ri["replyTo"] = ""
+                ri["replyToSnippet"] = ""
             replies.append(ri)
         item["replies"] = replies
         items.append(item)
@@ -642,21 +649,14 @@ def add_comment(body: CommentIn, request: Request, response: Response) -> dict:
     now = int(time.time())
     conn = _connect()
     try:
-        last = conn.execute(
-            "SELECT created FROM comments WHERE sid=? ORDER BY id DESC LIMIT 1", (sid,)
-        ).fetchone()
-        if last and now - last[0] < COMMENT_GAP:
-            raise HTTPException(
-                status_code=429, detail=f"刚留过言，{COMMENT_GAP} 秒后再来。"
-            )
-
         # 验证父评论
         parent_id = None
         reply_to_nick = ""
+        reply_to_snippet = ""
         root_id = None
         if body.parent:
             parent_row = conn.execute(
-                "SELECT id, person, nick, parent_id FROM comments"
+                "SELECT id, person, nick, parent_id, body FROM comments"
                 " WHERE id=? AND hidden=0",
                 (body.parent,),
             ).fetchone()
@@ -666,6 +666,7 @@ def add_comment(body: CommentIn, request: Request, response: Response) -> dict:
                 raise HTTPException(status_code=400, detail="只能回复同一个人下面的留言。")
             parent_id = parent_row[0]
             reply_to_nick = parent_row[2] or "匿名"
+            reply_to_snippet = _snippet(parent_row[4])
             # 找到顶层 id，前端需要用来定位插入位置
             root_id = parent_row[3] if parent_row[3] is not None else parent_row[0]
 
@@ -685,6 +686,7 @@ def add_comment(body: CommentIn, request: Request, response: Response) -> dict:
     }
     if parent_id:
         item["replyTo"] = reply_to_nick
+        item["replyToSnippet"] = reply_to_snippet
         item["rootId"] = root_id
     return {"ok": True, "item": item}
 
