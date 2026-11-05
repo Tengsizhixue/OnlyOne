@@ -28,6 +28,7 @@ DEFAULT_SRC = ROOT / "FastAPIProject" / "archive" / "source.html"
 OUT_CONTENT = ROOT / "FastAPIProject" / "archive" / "content.json"
 OUT_ANSWERS = ROOT / "FastAPIProject" / "archive" / "answers.json"
 EXTRAS_SRC = ROOT / "FastAPIProject" / "archive" / "extras.json"
+PHOTOS_SRC = ROOT / "FastAPIProject" / "archive" / "photos.json"
 ALIASES_SRC = ROOT / "FastAPIProject" / "archive" / "aliases.json"
 
 try:
@@ -195,6 +196,39 @@ def parse(raw: str):
         for item in spec["items"]
     ]
 
+    # ---------- 相册 ----------
+    # 照片同样是「答题才给」的：公开部分只放题面和张数/体积（用来提前提示流量），
+    # 答案与图片地址一律进 answers.json，服务端答对了才下发地址。
+    photos_public = []
+    photos_private = {}
+    if PHOTOS_SRC.exists():
+        photo_spec = json.loads(PHOTOS_SRC.read_text(encoding="utf-8"))
+        for album in photo_spec["albums"]:
+            images = [i["src"] for i in album["images"]]
+            photos_public.append(
+                {
+                    "id": album["id"],
+                    "title": mask_names(album["title"]),
+                    "note": mask_names(album.get("note", "")),
+                    "question": mask_names(album["question"]),
+                    "count": len(images),
+                    "bytes": sum(int(i.get("bytes") or 0) for i in album["images"]),
+                    "bytes_min": min(
+                        (int(i.get("bytes") or 0) for i in album["images"] if i.get("bytes")),
+                        default=0,
+                    ),
+                    "bytes_max": max(
+                        (int(i.get("bytes") or 0) for i in album["images"]), default=0
+                    ),
+                    # 缩略图总量（Cloudflare /cdn-cgi/image/ 实测），用来提示首屏流量
+                    "thumb_bytes": int(album.get("thumb_bytes") or 0),
+                }
+            )
+            photos_private[album["id"]] = {
+                "answers": [a for a in album["answers"] if a],
+                "images": images,
+            }
+
     # ---------- 组装 ----------
     content = {
         "version": 1,
@@ -223,6 +257,8 @@ def parse(raw: str):
             }
             for s in stages
         ],
+        # 相册横跨「高中」和「高中以前」，不挂在某一栏里，所以放顶层
+        **({"photos": {"albums": photos_public}} if photos_public else {}),
     }
     answers = {
         "names": {p["id"]: p["name"] for p in people_all},
@@ -231,12 +267,15 @@ def parse(raw: str):
             p["id"]: pinyin_variants([p["name"], *alias_map.get(p["id"], [])])
             for p in people_all
         },
+        **({"photos": photos_private} if photos_private else {}),
     }
     stats = {
         "people": len(people_all),
         "deleted": sum(1 for p in people_all if p["deleted"]),
         "groups": sum(len(s["groups"]) for s in stages),
         "extras": len(extras_public),
+        "albums": len(photos_public),
+        "photos": sum(a["count"] for a in photos_public),
         "tokens": sum(
             len(re.findall(r"\{\{p\d{3}\}\}", p["desc"])) for p in people_all
         ),
@@ -312,6 +351,39 @@ def validate(content, answers, stats):
             for field in ("hint", "now", "ai", "raw"):
                 if "{{" in (item.get(field) or ""):
                     errors.append(f"附加条目 {item.get('id')} 的 {field} 里还有未替换的引用")
+
+    # 相册：公开只许有题面/张数/体积，答案与图片地址必须在 answers.json
+    albums = (content.get("photos") or {}).get("albums") or []
+    priv = answers.get("photos") or {}
+    seen_albums: set[str] = set()
+    for album in albums:
+        aid = album.get("id")
+        if not aid:
+            errors.append("相册缺少 id")
+            continue
+        if aid in seen_albums:
+            errors.append(f"相册 id 重复：{aid}")
+        seen_albums.add(aid)
+        if not album.get("question"):
+            errors.append(f"相册 {aid} 缺少题目")
+        if not album.get("count"):
+            errors.append(f"相册 {aid} 没有图片")
+        if not (album.get("bytes") or 0) > 0:
+            errors.append(f"相册 {aid} 的总字节数为 0（先跑 fetch_photos.py）")
+        private = priv.get(aid)
+        if not private:
+            errors.append(f"相册 {aid} 在 answers.json 里没有答案")
+            continue
+        if not private.get("answers"):
+            errors.append(f"相册 {aid} 的答案为空")
+        if len(private.get("images") or []) != album.get("count"):
+            errors.append(f"相册 {aid} 的图片数与 count 对不上")
+        for answer in private.get("answers") or []:
+            if answer in blob:
+                errors.append(f"相册 {aid} 的答案「{answer}」出现在 content.json 里")
+    extra_priv = set(priv) - seen_albums
+    if extra_priv:
+        errors.append(f"answers.json 里有 content.json 不存在的相册：{sorted(extra_priv)}")
     return errors, warnings
 
 
@@ -344,6 +416,8 @@ def main():
     print("源文件：", src)
     print("人数：", stats["people"], "| 划去：", stats["deleted"], "| 组：", stats["groups"])
     print("附加：", stats["extras"], "| 匿名引用：", stats["tokens"])
+    if stats["albums"]:
+        print("相册：", stats["albums"], "个 /", stats["photos"], "张")
     print("content.json：", OUT_CONTENT, len(OUT_CONTENT.read_bytes()), "B")
     print("answers.json：", OUT_ANSWERS, len(OUT_ANSWERS.read_bytes()), "B")
 

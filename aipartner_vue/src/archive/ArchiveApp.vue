@@ -34,6 +34,12 @@
         />
       </div>
 
+      <PhotoSection
+        v-if="photoAlbums.length"
+        :albums="photoAlbums"
+        :unlocked="photoUnlocked"
+      />
+
       <div class="foot"></div>
     </main>
 
@@ -61,14 +67,19 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import ArchiveStage from './components/ArchiveStage.vue'
+import PhotoSection from './components/PhotoSection.vue'
 import { getContent, getState, unlockStage } from './api.js'
 import { initAmbientLight, initTouchFeedback } from './fx.js'
 
 const content = ref(null)
 const names = ref({})
 const unlockedStages = ref({})
+const photoUnlocked = ref({})
 const revealingStages = reactive({})
 const stageFeedback = reactive({})
+
+// 相册横跨两栏，挂在页面底部整行显示
+const photoAlbums = computed(() => content.value?.photos?.albums || [])
 
 // 只要揭开过任意一栏，环境光就从冷灰缓缓转暖（纯视觉，不加任何文字）
 const lit = computed(() => Object.keys(unlockedStages.value).length > 0)
@@ -102,6 +113,7 @@ onMounted(async () => {
   if (stateResult.status === 'fulfilled') {
     const state = stateResult.value
     names.value = state.names || {}
+    photoUnlocked.value = state.photos || {}
     for (const id of state.stages || []) {
       unlockedStages.value[id] = true
     }

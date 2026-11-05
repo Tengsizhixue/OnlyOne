@@ -36,6 +36,14 @@ export function unlockStage(stage, name) {
   })
 }
 
+// 答对才把图片地址发回来，答错后端不返回任何地址
+export function unlockPhoto(album, answer) {
+  return request('/unlock/photo', {
+    method: 'POST',
+    body: JSON.stringify({ album, answer }),
+  })
+}
+
 export function listComments(person) {
   return request(`/comments?person=${encodeURIComponent(person)}`)
 }

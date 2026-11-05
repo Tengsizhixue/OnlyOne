@@ -1,5 +1,5 @@
 # archive_api.py
-"""记忆档案的接口：内容、解锁状态、阶段解锁、附加条目解锁。
+"""记忆档案的接口：内容、解锁状态、阶段解锁、相册解锁。
 
 数据文件放在 archive/ 下：
     content.json  公开内容（没有人名、没有答案）
@@ -70,6 +70,11 @@ class StageUnlockIn(BaseModel):
     name: str = Field(min_length=1, max_length=40)
 
 
+class PhotoUnlockIn(BaseModel):
+    album: str = Field(min_length=1, max_length=20)
+    answer: str = Field(min_length=1, max_length=40)
+
+
 class CommentIn(BaseModel):
     person: str = Field(min_length=1, max_length=20)
     nick: str = Field(default="", max_length=NICK_MAX)
@@ -138,6 +143,34 @@ def _validate(content: dict, answers: dict) -> None:
     if bad:
         raise ArchiveDataError(f"引用指向不存在的 id：{sorted(bad)}")
 
+    # 相册：公开部分只有题面/张数/体积，图片地址与答案都在 answers.json
+    albums = (content.get("photos") or {}).get("albums") or []
+    priv = answers.get("photos") or {}
+    album_ids: set[str] = set()
+    for album in albums:
+        aid = album.get("id")
+        if not aid:
+            raise ArchiveDataError("相册缺少 id")
+        if aid in album_ids:
+            raise ArchiveDataError(f"相册 id 重复：{aid}")
+        album_ids.add(aid)
+        if not album.get("question"):
+            raise ArchiveDataError(f"相册 {aid} 缺少题目")
+        entry = priv.get(aid)
+        if not entry:
+            raise ArchiveDataError(f"相册 {aid} 在 answers.json 里没有答案")
+        if not entry.get("answers"):
+            raise ArchiveDataError(f"相册 {aid} 的答案为空")
+        images = entry.get("images") or []
+        if not images or len(images) != album.get("count"):
+            raise ArchiveDataError(f"相册 {aid} 的图片数与 count 对不上")
+        for src in images:
+            if not str(src).startswith("https://"):
+                raise ArchiveDataError(f"相册 {aid} 里有非 https 的图片地址")
+    unknown = set(priv) - album_ids
+    if unknown:
+        raise ArchiveDataError(f"answers.json 里有 content.json 不存在的相册：{sorted(unknown)}")
+
 
 def _build_index(content: dict, answers: dict) -> dict:
     names = answers["names"]
@@ -169,10 +202,17 @@ def _build_index(content: dict, answers: dict) -> dict:
                 lookup[key] = next(iter(owners))
 
         stage_lookup[sid] = lookup
+
+    # 相册：把每个相册的答案归一化成一个集合，比较时不区分空格/大小写
+    photo_lookup: dict[str, set[str]] = {}
+    for aid, entry in (answers.get("photos") or {}).items():
+        photo_lookup[aid] = {_norm(a) for a in (entry.get("answers") or []) if _norm(a)}
+
     return {
         "stage_people": stage_people,
         "stage_lookup": stage_lookup,
         "person_ids": frozenset(names),
+        "photo_lookup": photo_lookup,
     }
 
 
@@ -298,7 +338,8 @@ def _session_id(request: Request, response: Response) -> str:
     return sid
 
 
-def _unlocked(sid: str) -> list[str]:
+def _unlocked(sid: str) -> dict[str, list[str]]:
+    """这个会话已解锁的东西，按 kind 分组（stage / photo）。"""
     conn = _connect()
     try:
         rows = conn.execute(
@@ -306,7 +347,10 @@ def _unlocked(sid: str) -> list[str]:
         ).fetchall()
     finally:
         conn.close()
-    return sorted({key for kind, key in rows if kind == "stage"})
+    out: dict[str, list[str]] = {"stage": [], "photo": []}
+    for kind, key in rows:
+        out.setdefault(kind, []).append(key)
+    return {k: sorted(set(v)) for k, v in out.items()}
 
 
 def _record_unlock(sid: str, kind: str, key: str) -> None:
@@ -355,7 +399,7 @@ def archive_state(request: Request, response: Response) -> dict:
     sid = _session_id(request, response)
     stages = _unlocked(sid)
 
-    valid_stages = [s for s in stages if s in index["stage_people"]]
+    valid_stages = [s for s in stages["stage"] if s in index["stage_people"]]
     names: dict[str, str] = {}
     for stage_id in valid_stages:
         for pid in index["stage_people"][stage_id]:
@@ -365,6 +409,11 @@ def archive_state(request: Request, response: Response) -> dict:
         "version": content.get("version", 1),
         "stages": valid_stages,
         "names": names,
+        "photos": {
+            aid: _photo_items(answers, aid)
+            for aid in stages["photo"]
+            if aid in index["photo_lookup"]
+        },
     }
 
 
@@ -390,6 +439,52 @@ def unlock_stage(body: StageUnlockIn, request: Request, response: Response) -> d
         "ok": True,
         "stage": body.stage,
         "names": {p: answers["names"][p] for p in people},
+    }
+
+
+# ---------------------------------------------------------------- 相册缩略图
+# 图床（photo.160615.xyz）由 Worker 代理阿里云 OSS，同一 zone 上开了
+# Cloudflare Images 的 Transformations，可以直接在路径前加 /cdn-cgi/image/ 取缩略图。
+# 免费额度是「每月 5000 次唯一转换」，唯一 = 源图 + 参数，月度去重，与访问量无关，
+# 这一册 55 张图只占 55 次。onerror=redirect 让转换失败（比如额度异常）时回落到原图，
+# 宁可多花流量也不出裂图。
+THUMB_PREFIX = "/cdn-cgi/image/width=320,quality=72,format=auto,onerror=redirect/"
+
+
+def _thumb(src: str) -> str:
+    """原图地址 → 缩略图地址；认不出来的地址就返回空串，前端回落到原图。"""
+    if not src.startswith("https://"):
+        return ""
+    host, sep, path = src[len("https://"):].partition("/")
+    if not sep or not path:
+        return ""
+    return f"https://{host}{THUMB_PREFIX}{path}"
+
+
+def _photo_items(answers: dict, album_id: str) -> list[dict]:
+    """每张图同时给原图和缩略图：网格用 thumb，点开看大图用 url。"""
+    images = (answers.get("photos") or {}).get(album_id, {}).get("images") or []
+    return [{"url": src, "thumb": _thumb(src)} for src in images]
+
+
+@router.post("/unlock/photo")
+def unlock_photo(body: PhotoUnlockIn, request: Request, response: Response) -> dict:
+    """答对才把图片地址发下去。地址本身不放在 content.json 里，猜不到。"""
+    _, answers, index = _require()
+    _check_rate(request)
+    allowed = index["photo_lookup"].get(body.album)
+    if allowed is None:
+        raise HTTPException(status_code=404, detail="没有这个相册。")
+
+    if _norm(body.answer) not in allowed:
+        raise HTTPException(status_code=400, detail="答案不对，再想想。")
+
+    sid = _session_id(request, response)
+    _record_unlock(sid, "photo", body.album)
+    return {
+        "ok": True,
+        "album": body.album,
+        "images": _photo_items(answers, body.album),
     }
 
 
@@ -600,5 +695,6 @@ def archive_reload(x_admin_token: str = Header(default="")) -> dict:
             len(st.get("extras", {}).get("items", []))
             for st in content.get("stages", [])
         ),
+        "albums": len((content.get("photos") or {}).get("albums") or []),
         "updated": content.get("updated"),
     }
