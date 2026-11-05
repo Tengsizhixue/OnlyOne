@@ -2,6 +2,8 @@
 html{background:#030305;-webkit-text-size-adjust:100%}
 body{
   margin:0;min-height:100vh;overflow-x:hidden;
+  /* 禁掉移动端下拉刷新误触：页面顶部再往下拽不会突然转圈刷新 */
+  overscroll-behavior-y:contain;
   background:#030305;color:#cbd5e1;
   font-family:'Noto Serif SC','Source Han Serif SC','Songti SC','Noto Serif CJK SC',STSong,SimSun,Georgia,serif;
   font-size:16px;line-height:2;letter-spacing:.04em;
@@ -10,6 +12,8 @@ body{
 h1,h2,p,ul,li{margin:0;padding:0}
 ul{list-style:none}
 button{font:inherit;color:inherit}
+/* 长按选字的高亮跟整体暖金色调统一 */
+::selection{background:rgba(201,168,106,.3);color:#f6eeda}
 
 .bg{
   position:fixed;inset:0;z-index:0;pointer-events:none;
@@ -211,25 +215,18 @@ button{font:inherit;color:inherit}
   *{transition-duration:.01ms}
 }
 
-/* ---------- 附加内容：整体折叠、答题解锁 ---------- */
-.extra-fold{grid-column:1/-1;min-width:0;border:1px solid rgba(255,255,255,.075);border-radius:10px;background:rgba(12,15,20,.72);overflow:hidden}
-.extra-fold-summary{display:flex;align-items:center;gap:12px;padding:19px 22px;color:#e0e7ef;letter-spacing:.2em;font-size:15px;cursor:pointer;list-style:none;user-select:none}
+/* ---------- 附加内容：挂在阶段里的一块折叠区（不再答题解锁） ---------- */
+.extra-fold{min-width:0;margin:16px 0 4px;border:1px solid rgba(255,255,255,.075);border-radius:10px;background:rgba(12,15,20,.55);overflow:hidden}
+.extra-fold-summary{display:flex;align-items:center;gap:12px;padding:15px 16px;color:#e0e7ef;letter-spacing:.2em;font-size:14px;cursor:pointer;list-style:none;user-select:none}
 .extra-fold-summary::-webkit-details-marker{display:none}
 .extra-fold-dot{width:6px;height:6px;border-radius:50%;background:#9aa9bb;box-shadow:0 0 12px rgba(180,195,215,.25)}
 .extra-fold-state{margin-left:auto;color:#8996a6;font-size:11px;letter-spacing:.08em}
 .extra-fold-state::after{content:"展开"}
 .extra-fold[open] .extra-fold-state::after{content:"收起"}
-.extra-col{border:0;border-top:1px solid rgba(255,255,255,.07);border-radius:0;background:transparent;box-shadow:none;padding:20px 22px 18px}
-.extra-intro{margin:0 0 18px;color:#9aa7b7;font-size:13px;line-height:2;letter-spacing:.045em}
+.extra-body{padding:2px 16px 8px}
+.extra-intro{margin:0 0 6px;color:#9aa7b7;font-size:13px;line-height:2;letter-spacing:.045em}
 .extra-item{padding:16px 0;border-top:1px solid rgba(255,255,255,.07)}
 .extra-hint{color:#d5deea;font-size:14px;line-height:1.9;letter-spacing:.04em;margin:0 0 9px}
-.extra-form{display:flex;gap:8px;align-items:center}
-.extra-input{min-width:0;flex:1;width:100%;padding:9px 11px;border:1px solid rgba(255,255,255,.14);border-radius:6px;background:rgba(255,255,255,.035);color:#e2e8f0;font:inherit;font-size:13px;outline:none}
-.extra-input:focus{border-color:rgba(203,213,225,.45);background:rgba(255,255,255,.06)}
-.extra-check{padding:8px 13px;border:1px solid rgba(255,255,255,.16);border-radius:6px;background:rgba(255,255,255,.06);color:#dbe4ef;font:inherit;font-size:12px;white-space:nowrap;cursor:pointer}
-.extra-check:hover{background:rgba(255,255,255,.12)}
-.extra-feedback{min-height:22px;margin-top:5px;color:#9aa7b7;font-size:12px}
-.extra-feedback.ok{color:#b8d8c4}
 .extra-description{margin-top:12px;padding:15px 16px;border-left:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.025);color:#b6c2d1;font-size:13px;line-height:2;letter-spacing:.025em;overflow-wrap:anywhere}
 .extra-description[hidden]{display:none}
 .extra-description p{margin:0 0 12px}
@@ -238,13 +235,16 @@ button{font:inherit;color:inherit}
 .extra-subhead:first-child{margin-top:0}
 .extra-list{padding-left:1.5em;margin:8px 0 14px}
 .extra-list li{padding:3px 0 3px 3px}
+/* 全局 reset 把 ul 的圆点去掉了，附加长文里的并列项需要保留标记 */
+.extra-bullets{list-style:disc}
+.extra-bullets li::marker{color:rgba(203,213,225,.5)}
 .extra-quote{margin:10px 0 14px;padding:10px 13px;border-left:2px solid rgba(180,195,215,.3);background:rgba(255,255,255,.025);color:#d0dae6}
 .extra-table-wrap{width:100%;overflow-x:auto;margin:12px 0 16px}
 .extra-table{width:100%;border-collapse:collapse;min-width:440px;font-size:12px;line-height:1.8}
 .extra-table th,.extra-table td{padding:9px 10px;border:1px solid rgba(255,255,255,.09);text-align:left;vertical-align:top}
 .extra-table th{color:#dce5f0;background:rgba(255,255,255,.055);font-weight:600}
 .extra-table td{color:#b9c5d3}
-@media(max-width:480px){.extra-fold-summary{padding:16px}.extra-col{padding:16px}.extra-form{gap:6px}.extra-check{padding:8px 10px}.extra-input{font-size:14px}.extra-description{padding:12px;font-size:12.5px}.extra-table{min-width:380px}}
+@media(max-width:480px){.extra-fold-summary{padding:14px}.extra-body{padding:2px 13px 6px}.extra-description{padding:12px;font-size:12.5px}.extra-table{min-width:380px}}
 
 /* 匿名阶段解锁：叠加在原有页面设定之上，不改变既有栏目与附加内容 */
 .phase-unlock-form{display:flex;gap:8px;align-items:center;margin:12px 0 4px}
@@ -256,32 +256,6 @@ button{font:inherit;color:inherit}
 .phase-unlock-feedback.ok{color:#b8d8c4}
 .anon-name-ref{white-space:nowrap}
 @media(max-width:480px){.phase-unlock-form{gap:6px}.phase-unlock-input{font-size:14px}.phase-unlock-btn{padding:8px 10px}}
-
-/* ---------- 附加角色：长描述预览 + 展开 / 收起 ---------- */
-.extra-description{
-  position:relative;max-height:340px;overflow:hidden;
-  -webkit-mask-image:linear-gradient(to bottom,#000 calc(100% - 84px),transparent 100%);
-  mask-image:linear-gradient(to bottom,#000 calc(100% - 84px),transparent 100%);
-}
-.extra-description.is-expanded{max-height:none;overflow:visible;-webkit-mask-image:none;mask-image:none}
-.extra-toggle{
-  display:inline-flex;align-items:center;gap:7px;
-  margin-top:10px;padding:5px 14px;
-  border:1px solid rgba(255,255,255,.14);border-radius:999px;
-  background:rgba(255,255,255,.045);color:#a7b4c4;
-  font:inherit;font-size:12px;letter-spacing:.1em;cursor:pointer;
-  transition:color .3s,background .3s,border-color .3s;
-}
-.extra-toggle:hover{color:#e2e8f0;background:rgba(255,255,255,.09);border-color:rgba(255,255,255,.24)}
-.extra-toggle::after{
-  content:"";width:5px;height:5px;margin-top:-3px;
-  border-right:1px solid currentColor;border-bottom:1px solid currentColor;
-  transform:rotate(45deg);transition:transform .25s,margin-top .25s;
-}
-.extra-toggle[aria-expanded="true"]::after{transform:rotate(-135deg);margin-top:2px}
-.extra-toggle[hidden]{display:none}
-.extra-input:disabled,.extra-check:disabled{opacity:.55;cursor:default}
-@media(max-width:480px){.extra-description{max-height:300px}.extra-toggle{font-size:12.5px}}
 
 /* ---------- 只读页面：去掉编辑态残留 ---------- */
 .col-title:hover,.col-title:focus,
@@ -346,18 +320,13 @@ button{font:inherit;color:inherit}
   /* ---------- 附加内容 ---------- */
   .extra-fold-summary{font-size:16px;padding:17px 16px}
   .extra-fold-state{font-size:13px}
-  .extra-col{padding:16px}
-  .extra-intro{font-size:15px;line-height:1.9;margin-bottom:16px}
+  .extra-body{padding:2px 14px 8px}
+  .extra-intro{font-size:15px;line-height:1.9;margin-bottom:10px}
   .extra-hint{font-size:15px;line-height:1.8}
-  .extra-form{gap:8px}
-  .extra-input{font-size:16px;padding:11px 12px}
-  .extra-check{font-size:14px;padding:11px 14px;min-height:44px}
-  .extra-feedback{font-size:13.5px;line-height:1.7;min-height:24px}
-  .extra-description{font-size:14.5px;line-height:1.85;padding:14px;max-height:300px}
   .extra-subhead{font-size:15px}
+  .extra-minor{font-size:14.5px}
   .extra-table{font-size:14px;min-width:360px}
   .extra-table th,.extra-table td{padding:10px 8px}
-  .extra-toggle{font-size:14px;padding:9px 16px;min-height:40px}
   .extra-collapse{min-height:44px;font-size:14px;margin-top:16px}
 }
 
@@ -472,13 +441,11 @@ button{font:inherit;color:inherit}
 }
 
 /* ==========================================================================
-   附加内容：AI 总结 / 原文 双面板 + 选择题  2026-11-03
-   三题全部答对才解锁；两个面板一次只开一个，避免整页拉得太长。
+   附加内容：AI 总结 / 原文 双面板  2026-11-04
+   内容直接挂在「高中」一栏里，不用答题就能看；两个面板一次只开一个，
+   避免整页拉得太长。
    ========================================================================== */
-.extra-progress{margin:-4px 0 14px;color:#c9a86a;font-size:12.5px;line-height:1.8;letter-spacing:.03em}
-.extra-done{margin:0;color:#b8d8c4;font-size:13px;letter-spacing:.06em}
-
-.extra-tabs{display:flex;gap:8px;margin:14px 0 0}
+.extra-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 0}
 .extra-tab{
   padding:7px 16px;border-radius:999px;cursor:pointer;
   font-family:inherit;font-size:12.5px;letter-spacing:.1em;text-indent:.1em;
@@ -501,30 +468,17 @@ button{font:inherit;color:inherit}
 .extra-panel code{font-family:inherit;padding:1px 5px;border-radius:3px;
   background:rgba(255,255,255,.07);color:#cfd8e4}
 
+/* 二级小标题（1. / 2. / 3. 那种）比 .extra-subhead 低一级，靠字号和字重区分 */
+.extra-minor{margin:20px 0 8px;color:#e2e8f0;font-size:13.5px;line-height:1.85;font-weight:600;letter-spacing:.04em}
+/* 长文末尾的「依据：…」，压暗一档，不抢正文 */
+.extra-note{
+  margin:20px 0 0;padding-top:12px;border-top:1px solid rgba(255,255,255,.08);
+  color:#8b97a6;font-size:12px;line-height:1.9;
+}
+
 .extra-figure{margin:16px 0 6px}
 .extra-figure img{display:block;width:100%;height:auto;border-radius:8px;
   border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03)}
-
-/* ---------- 选择题 ---------- */
-.extra-choice{margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.09)}
-.extra-choice-q{margin:0 0 12px;color:#dbe4ef;font-size:14px;letter-spacing:.04em}
-.extra-choice-opts{display:grid;gap:8px}
-.extra-opt{
-  display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;
-  padding:10px 12px;border-radius:8px;cursor:pointer;
-  font-family:inherit;font-size:13.5px;line-height:1.7;color:#cbd5e1;
-  background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.1);
-  transition:color .25s,background .25s,border-color .25s;
-}
-.extra-opt:hover{color:#fff;background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.2)}
-.extra-opt.sel{color:#fff;background:rgba(203,213,225,.13);border-color:rgba(203,213,225,.36)}
-.extra-opt-k{flex:0 0 auto;font-weight:600;color:#9aa9bb}
-.extra-opt.sel .extra-opt-k{color:#f1f5f9}
-.extra-opt-t{flex:1;min-width:0}
-
-.extra-choice-reply{margin:14px 0 0;color:#dbe4ef;font-size:13.5px;line-height:1.9}
-.extra-choice-right{margin:10px 0 0;color:#b8d8c4;font-size:13px;letter-spacing:.03em}
-.extra-choice-exp{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.08)}
 
 /* 长内容底部的收起：滚到底就能收，不用滑回顶上的胶囊按钮 */
 .extra-collapse{
@@ -540,34 +494,13 @@ button{font:inherit;color:inherit}
 }
 .extra-collapse-ar{font-size:12px;letter-spacing:0;text-indent:0}
 
-/* ---------- 一道一道出现 / 排行榜 ---------- */
-.extra-step{animation:extra-step-in .36s ease-out}
-@keyframes extra-step-in{
-  from{opacity:0;transform:translateY(10px)}
-  to{opacity:1;transform:none}
-}
-@media (prefers-reduced-motion:reduce){
-  .extra-step{animation:none}
-}
-.extra-rank{
-  margin:16px 0 0;padding:11px 14px;
-  border-left:2px solid rgba(201,168,106,.55);
-  background:rgba(201,168,106,.07);
-  color:#e0cfa6;font-size:12.5px;line-height:1.8;letter-spacing:.03em;
-}
-.extra-rank p{margin:0}
-.extra-rank p+p{margin-top:2px}
-
 @media (max-width:480px){
-  .extra-progress{font-size:13.5px;line-height:1.8;margin-bottom:14px}
-  .extra-rank{font-size:14px;line-height:1.75;padding:12px 13px}
-  .extra-done{font-size:14px}
-  .extra-tab{font-size:14px;padding:10px 18px;min-height:44px}
+  /* 三个标签（现在的看法 / 原文 / AI 总结）要在 390 宽下排进一行，所以横内边距收到 15 */
+  .extra-tabs{gap:6px}
+  .extra-tab{font-size:14px;padding:10px 15px;min-height:44px}
   .extra-panel{font-size:15px;line-height:1.9;padding:14px}
-  .extra-choice-q{font-size:15px}
-  .extra-opt{font-size:14.5px;padding:12px;min-height:44px}
-  .extra-choice-reply{font-size:14.5px}
-  .extra-choice-right{font-size:13.5px}
+  .extra-minor{font-size:15px;line-height:1.75;margin:18px 0 8px}
+  .extra-note{font-size:13px;line-height:1.85}
 }
 
 /* ==========================================================================
@@ -705,4 +638,114 @@ button{font:inherit;color:inherit}
   .cmt-btn-sm{min-height:38px;font-size:13px}
   .cmt-cancel{min-height:38px;font-size:13px}
   .cmt-form-head{font-size:12.5px}
+}
+
+/* ==========================================================================
+   移动端体验优化  2026-11-04
+   ① 触屏按压反馈：粗指针设备点按时轻微缩放+变暗，安卓/iOS 一致
+   ② 骨架屏：加载期先出卡片轮廓，微光扫过代替干等
+   ③ content-visibility：屏幕外的阶段卡跳过布局与绘制，低端机滚动更顺；
+      不支持的老 iOS 自动忽略，画面零差异
+   ④ 新留言浮入：轮询拉到或刚发出的条目播一次 reveal-up
+   ========================================================================== */
+
+/* ---------- ① 触屏按压反馈 ---------- */
+/* iOS Safari 对非链接元素默认不触发 :active，靠 fx.js 里挂的空 touchstart 开启 */
+@media (pointer:coarse){
+  .cnt,.p-btn,.p-txt,.cmt-btn,.cmt-cancel,.cmt-del,.cmt-reply-btn,
+  .phase-unlock-btn,.more-btn,.extra-tab,.extra-collapse{
+    transition:transform .12s ease,opacity .12s ease,
+      background .2s ease,border-color .2s ease,color .2s ease;
+  }
+  .cnt:active,.p-btn:active,.p-txt:active,.cmt-btn:active:not(:disabled),
+  .cmt-cancel:active,.cmt-del:active,.cmt-reply-btn:active,
+  .phase-unlock-btn:active:not(:disabled),
+  .more-btn:active,.extra-tab:active,.extra-collapse:active{
+    opacity:.8;transform:scale(.98);
+  }
+}
+
+/* ---------- ② 骨架屏 ---------- */
+.skel{pointer-events:none}
+.skel-line{
+  height:13px;margin:0 0 20px;border-radius:6px;
+  background:linear-gradient(90deg,
+    rgba(255,255,255,.045) 25%,rgba(255,255,255,.10) 50%,rgba(255,255,255,.045) 75%);
+  background-size:200% 100%;
+  animation:skel-shimmer 1.5s linear infinite;
+}
+.skel-line:first-child{height:16px;margin-bottom:26px}
+.skel-w55{width:55%}
+.skel-w85{width:85%}
+.skel-w40{width:40%}
+.skel-w70{width:70%}
+.skel-w30{width:30%}
+@keyframes skel-shimmer{
+  0%{background-position:200% 0}
+  100%{background-position:-200% 0}
+}
+
+/* ---------- ③ 屏幕外阶段卡跳过布局绘制 ---------- */
+/* auto 关键字让浏览器记住上次渲染高度，滚动条不会跳 */
+.col{content-visibility:auto;contain-intrinsic-size:auto 520px}
+
+/* ---------- ④ 新留言浮入 ---------- */
+.cmt-item.is-new,.cmt-reply.is-new{
+  animation:reveal-up .45s cubic-bezier(.22,.8,.3,1) both;
+}
+
+@media (prefers-reduced-motion:reduce){
+  .skel-line{animation:none}
+  .cmt-item.is-new,.cmt-reply.is-new{animation:none}
+}
+
+/* ==========================================================================
+   回到顶部悬浮按钮  2026-11-05
+   固定右下角，向下滚过一屏后淡入。只动 opacity/transform，不碰布局；
+   z-index 30 高于内容(.wrap=2)与吸顶分组标题(.cnt=3)，互不遮挡。
+   ========================================================================== */
+.to-top{
+  position:fixed;right:22px;bottom:26px;z-index:30;
+  display:flex;align-items:center;justify-content:center;
+  width:46px;height:46px;padding:0;cursor:pointer;
+  color:#c9a86a;
+  background:rgba(16,18,24,.82);
+  border:1px solid rgba(201,168,106,.28);
+  border-radius:50%;
+  box-shadow:0 6px 20px rgba(0,0,0,.35);
+  opacity:0;visibility:hidden;pointer-events:none;
+  transform:translateY(10px) scale(.94);
+  transition:opacity .32s ease,transform .32s cubic-bezier(.22,.8,.3,1),
+    visibility .32s,background .25s,border-color .25s,color .25s;
+}
+.to-top.is-show{
+  opacity:1;visibility:visible;pointer-events:auto;
+  transform:translateY(0) scale(1);
+}
+.to-top svg{display:block}
+.to-top:focus-visible{
+  outline:none;
+  box-shadow:0 0 0 2px rgba(201,168,106,.45),0 6px 20px rgba(0,0,0,.35);
+}
+@media (hover:hover){
+  .to-top:hover{
+    color:#f0e2c0;background:rgba(28,30,38,.9);border-color:rgba(201,168,106,.5);
+  }
+}
+/* 触屏按下反馈跟其它按钮一致（缩放+变暗），transform 收到 .12s 更跟手 */
+@media (pointer:coarse){
+  .to-top{transition:opacity .32s ease,transform .12s ease,visibility .32s,
+    background .25s,border-color .25s,color .25s}
+  .to-top:active{transform:translateY(0) scale(.92);opacity:.85}
+}
+/* 手机端：略缩小并让开底部安全区（iPhone 小白条 / 手势区） */
+@media (max-width:480px){
+  .to-top{
+    right:16px;width:44px;height:44px;
+    bottom:calc(18px + env(safe-area-inset-bottom,0px));
+  }
+}
+@media (prefers-reduced-motion:reduce){
+  .to-top{transition:opacity .2s ease,visibility .2s;transform:none}
+  .to-top.is-show{transform:none}
 }

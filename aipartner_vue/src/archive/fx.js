@@ -67,3 +67,10 @@ export function initAmbientLight() {
   window.addEventListener('scroll', schedule, { passive: true })
   window.addEventListener('resize', schedule, { passive: true })
 }
+
+// iOS Safari 对非链接元素默认不触发 :active，页面上只要存在任意 touch
+// 监听就会开启。这里挂一个空的，让按压反馈在 iPhone 上也能生效。
+export function initTouchFeedback() {
+  if (typeof document === 'undefined') return
+  document.addEventListener('touchstart', () => {}, { passive: true })
+}

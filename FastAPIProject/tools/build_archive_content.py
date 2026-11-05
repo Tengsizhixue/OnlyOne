@@ -146,30 +146,6 @@ def parse(raw: str):
     for p in people_all:
         p["desc"] = REF_SPAN.sub(ref_to_token, p["desc"])
 
-    # ---------- 附加条目 ----------
-    # 附加内容改由 archive/extras.json 单独维护：三篇长文（AI 总结 + 原文）和选择题
-    # 都是手写文本，塞回 100KB 的 source.html 里既难改也容易解析错，所以单独放一份。
-    if not EXTRAS_SRC.exists():
-        raise SystemExit(f"找不到附加内容源文件：{EXTRAS_SRC}")
-    spec = json.loads(EXTRAS_SRC.read_text(encoding="utf-8"))
-    extra_intro = spec.get("intro", "")
-
-    extras_public = []
-    extras_answers = {}
-    for item in spec["items"]:
-        eid = item["id"]
-        extras_public.append({"id": eid, "hint": item["hint"]})
-        secret = {
-            "answer": item["answer"],
-            "aliases": item.get("aliases", []),
-            "ai": item["ai"],
-            "raw": item["raw"],
-        }
-        if item.get("choice"):
-            secret["choice"] = item["choice"]
-        secret["pinyin"] = pinyin_variants([item["answer"], *item.get("aliases", [])])
-        extras_answers[eid] = secret
-
     # ---------- 外号对应的原名（可选） ----------
     alias_map: dict[str, list[str]] = {}
     if ALIASES_SRC.exists():
@@ -179,11 +155,50 @@ def parse(raw: str):
                 continue
             alias_map[pid] = [value] if isinstance(value, str) else list(value)
 
+    # ---------- 附加条目 ----------
+    # 附加内容由 archive/extras.json 单独维护：三篇长文（AI 总结 + 原文）都是手写文本，
+    # 塞回 100KB 的 source.html 里既难改也容易解析错，所以单独放一份。
+    if not EXTRAS_SRC.exists():
+        raise SystemExit(f"找不到附加内容源文件：{EXTRAS_SRC}")
+    spec = json.loads(EXTRAS_SRC.read_text(encoding="utf-8"))
+    extra_intro = spec.get("intro", "")
+    extra_stage = str(spec.get("stage", "2"))
+    if extra_stage not in {s["id"] for s in stages}:
+        raise SystemExit(f"extras.json 指定的 stage={extra_stage} 不存在")
+
+    # 附加内容现在直接挂在某一栏里、不再答题解锁，所以正文里的真名必须在构建期抹掉：
+    # 一律换成 ***，和名单里未解锁的写法保持一致。长的先替换，免得短名字先吃掉长名字。
+    mask_keys = {p["name"] for p in people_all}
+    for value in alias_map.values():
+        mask_keys.update(value)
+    for item in spec["items"]:
+        mask_keys.update(item.get("aliases", []))
+    mask_keys.update(spec.get("mask", []))
+    mask_keys = sorted((k for k in mask_keys if k), key=len, reverse=True)
+
+    def mask_names(text: str) -> str:
+        for key in mask_keys:
+            if key in text:
+                text = text.replace(key, "***")
+        return text
+
+    extras_public = [
+        {
+            "id": item["id"],
+            "hint": mask_names(item["hint"]),
+            # now 是作者现在自己写的看法，排在标签第一位；缺了前端就不显示这个标签
+            "now": mask_names(item.get("now", "")),
+            "ai": mask_names(item["ai"]),
+            # raw 可选：某同学这类只保留 AI 总结的条目没有原文
+            "raw": mask_names(item.get("raw", "")),
+        }
+        for item in spec["items"]
+    ]
+
     # ---------- 组装 ----------
     content = {
         "version": 1,
         "updated": date.today().isoformat(),
-        "extraIntro": extra_intro,
         "stages": [
             {
                 "id": s["id"],
@@ -199,10 +214,15 @@ def parse(raw: str):
                     }
                     for g in s["groups"]
                 ],
+                # 附加内容挂在它所属的那一栏里，跟名单一起下发，不再需要答题解锁
+                **(
+                    {"extras": {"intro": extra_intro, "items": extras_public}}
+                    if s["id"] == extra_stage
+                    else {}
+                ),
             }
             for s in stages
         ],
-        "extras": extras_public,
     }
     answers = {
         "names": {p["id"]: p["name"] for p in people_all},
@@ -211,7 +231,6 @@ def parse(raw: str):
             p["id"]: pinyin_variants([p["name"], *alias_map.get(p["id"], [])])
             for p in people_all
         },
-        "extras": extras_answers,
     }
     stats = {
         "people": len(people_all),
@@ -220,10 +239,6 @@ def parse(raw: str):
         "extras": len(extras_public),
         "tokens": sum(
             len(re.findall(r"\{\{p\d{3}\}\}", p["desc"])) for p in people_all
-        )
-        + sum(
-            len(re.findall(r"\{\{p\d{3}\}\}", e.get("ai", "") + e.get("raw", "")))
-            for e in extras_answers.values()
         ),
         "missing_refs": missing,
     }
@@ -248,10 +263,6 @@ def validate(content, answers, stats):
                 if p["id"] not in ids:
                     errors.append(f"缺少姓名：{p['id']}")
                 walk_desc(p["desc"])
-    for e in answers["extras"].values():
-        walk_desc(e.get("ai", ""))
-        walk_desc(e.get("raw", ""))
-        walk_desc((e.get("choice") or {}).get("explanation", ""))
     bad = refs - ids
     if bad:
         errors.append(f"引用指向不存在的 ID：{sorted(bad)}")
@@ -286,11 +297,21 @@ def validate(content, answers, stats):
                         )
                     seen.setdefault(py, p["id"])
 
-    # 只做提示：附加描述里没出现答案名，可能是换成了昵称
-    for eid, e in answers["extras"].items():
-        plain = re.sub(r"<[^>]+>", "", e.get("ai", ""))
-        if e["answer"] not in plain:
-            warnings.append(f"{eid} 的 AI 总结里没有答案名 {e['answer']}，确认一下是否取对了块")
+    # 附加内容：直接下发的公开长文，结构要完整，且不能残留未替换的引用
+    for st in content["stages"]:
+        extras = st.get("extras")
+        if not extras:
+            continue
+        if not extras.get("items"):
+            errors.append(f"{st['title']} 的附加内容没有条目")
+        for item in extras.get("items", []):
+            if not item.get("id") or not item.get("hint"):
+                errors.append("附加条目缺少 id 或 hint")
+            if not item.get("ai"):
+                errors.append(f"附加条目 {item.get('id')} 缺少 AI 总结")
+            for field in ("hint", "now", "ai", "raw"):
+                if "{{" in (item.get(field) or ""):
+                    errors.append(f"附加条目 {item.get('id')} 的 {field} 里还有未替换的引用")
     return errors, warnings
 
 

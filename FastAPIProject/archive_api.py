@@ -70,11 +70,6 @@ class StageUnlockIn(BaseModel):
     name: str = Field(min_length=1, max_length=40)
 
 
-class ExtraUnlockIn(BaseModel):
-    id: str = Field(min_length=1, max_length=20)
-    answer: str = Field(min_length=0, max_length=100)
-
-
 class CommentIn(BaseModel):
     person: str = Field(min_length=1, max_length=20)
     nick: str = Field(default="", max_length=NICK_MAX)
@@ -111,13 +106,26 @@ def _validate(content: dict, answers: dict) -> None:
                 ids.add(pid)
                 tokens.update(TOKEN_RE.findall(person.get("desc", "")))
 
-    for extra in content.get("extras", []):
-        eid = extra.get("id")
-        if not eid:
-            raise ArchiveDataError("附加条目 id 为空")
-        if eid in extras_ids:
-            raise ArchiveDataError(f"附加条目 id 重复：{eid}")
-        extras_ids.add(eid)
+    # 附加内容现在是公开长文，直接挂在某一栏里，不需要答案：只校验结构完整
+    for stage in stages:
+        extras = stage.get("extras")
+        if not extras:
+            continue
+        items = extras.get("items") or []
+        if not items:
+            raise ArchiveDataError(f"阶段 {stage.get('id')} 的附加内容没有条目")
+        for item in items:
+            eid = item.get("id")
+            if not eid:
+                raise ArchiveDataError("附加条目 id 为空")
+            if eid in extras_ids:
+                raise ArchiveDataError(f"附加条目 id 重复：{eid}")
+            extras_ids.add(eid)
+            if not item.get("ai"):
+                raise ArchiveDataError(f"附加条目 {eid} 缺少 AI 总结")
+            for field in ("hint", "ai", "raw"):
+                if "{{" in (item.get(field) or ""):
+                    raise ArchiveDataError(f"附加条目 {eid} 的 {field} 里还有未替换的引用")
 
     names = answers.get("names")
     if not isinstance(names, dict):
@@ -125,26 +133,6 @@ def _validate(content: dict, answers: dict) -> None:
     missing = ids - set(names)
     if missing:
         raise ArchiveDataError(f"这些 id 没有姓名：{sorted(missing)}")
-
-    extra_answers = answers.get("extras")
-    if not isinstance(extra_answers, dict):
-        raise ArchiveDataError("answers.json 缺少 extras")
-    missing = extras_ids - set(extra_answers)
-    if missing:
-        raise ArchiveDataError(f"这些附加条目没有答案：{sorted(missing)}")
-
-    for eid, item in extra_answers.items():
-        if not item.get("answer"):
-            raise ArchiveDataError(f"{eid} 缺少答案")
-        if not item.get("ai") or not item.get("raw"):
-            raise ArchiveDataError(f"{eid} 缺少 AI 总结或原文")
-        tokens.update(TOKEN_RE.findall(item["ai"]))
-        tokens.update(TOKEN_RE.findall(item["raw"]))
-        choice = item.get("choice")
-        if choice:
-            if not choice.get("correct") or not choice.get("explanation"):
-                raise ArchiveDataError(f"{eid} 的选择题缺少正确答案或解析")
-            tokens.update(TOKEN_RE.findall(choice["explanation"]))
 
     bad = tokens - ids
     if bad:
@@ -184,36 +172,8 @@ def _build_index(content: dict, answers: dict) -> dict:
     return {
         "stage_people": stage_people,
         "stage_lookup": stage_lookup,
-        "extras": answers["extras"],
         "person_ids": frozenset(names),
     }
-
-
-def _extra_ids(content: dict) -> list[str]:
-    """附加条目按公开内容里的顺序排列，用于判断"是否全部答对"。"""
-    return [e["id"] for e in content.get("extras", []) if e.get("id")]
-
-
-def _extra_payload(item: dict, names: dict[str, str]) -> dict:
-    """答对三题之后才发下去的内容。
-
-    这里的姓名直接换成真名：三题全对本身就是一道门，而且原文里本来就是真名，
-    再显示 *** 会和原文自相矛盾。
-    """
-
-    def fill(text: str) -> str:
-        return TOKEN_RE.sub(lambda m: names.get(m.group(1), "***"), text or "")
-
-    payload = {"ai": fill(item["ai"]), "raw": fill(item["raw"])}
-    choice = item.get("choice")
-    if choice:
-        payload["choice"] = {
-            "question": choice["question"],
-            "options": choice["options"],
-            "correct": choice["correct"],
-            "explanation": fill(choice["explanation"]),
-        }
-    return payload
 
 
 def _load(force: bool = False) -> None:
@@ -272,11 +232,6 @@ def _init_db() -> None:
                     key TEXT NOT NULL,
                     created INTEGER NOT NULL,
                     PRIMARY KEY (sid, kind, key)
-                );
-                CREATE TABLE IF NOT EXISTS completions (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    sid TEXT NOT NULL UNIQUE,
-                    created INTEGER NOT NULL
                 );
                 CREATE TABLE IF NOT EXISTS comments (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -343,7 +298,7 @@ def _session_id(request: Request, response: Response) -> str:
     return sid
 
 
-def _unlocked(sid: str) -> tuple[list[str], list[str]]:
+def _unlocked(sid: str) -> list[str]:
     conn = _connect()
     try:
         rows = conn.execute(
@@ -351,9 +306,7 @@ def _unlocked(sid: str) -> tuple[list[str], list[str]]:
         ).fetchall()
     finally:
         conn.close()
-    stages = sorted({key for kind, key in rows if kind == "stage"})
-    extras = sorted({key for kind, key in rows if kind == "extra"})
-    return stages, extras
+    return sorted({key for kind, key in rows if kind == "stage"})
 
 
 def _record_unlock(sid: str, kind: str, key: str) -> None:
@@ -366,45 +319,6 @@ def _record_unlock(sid: str, kind: str, key: str) -> None:
         conn.commit()
     finally:
         conn.close()
-
-
-# ---------------------------------------------------------------- 完成人数与名次
-def _record_completion(sid: str) -> None:
-    """三题全对的人各占一行；重复访问只保留最早那次，名次不会被刷新。"""
-    _init_db()
-    conn = _connect()
-    try:
-        conn.execute(
-            "INSERT OR IGNORE INTO completions(sid, created) VALUES(?, ?)",
-            (sid, int(time.time())),
-        )
-        conn.commit()
-    finally:
-        conn.close()
-
-
-def _ranking(sid: str) -> dict:
-    """按首次完成时间排位：total 是全部答对过的人数，rank 是本人的位次。
-
-    没有账号体系，所以身份用 cookie 里的 sid 表示（浏览器维度），而不是 IP：
-    手机流量、公司/校园网都是多人共用一个出口 IP，按 IP 统计会把人算少；
-    换 WiFi 又会让同一个人变成新的 IP。sid 落在浏览器上，更接近“一个人”。
-    清缓存或换设备会被当成新的一个，这是这套无账号方案能接受的上限。
-    """
-    _init_db()
-    conn = _connect()
-    try:
-        row = conn.execute("SELECT id FROM completions WHERE sid=?", (sid,)).fetchone()
-        total = conn.execute("SELECT COUNT(*) FROM completions").fetchone()[0]
-        rank = 0
-        if row:
-            # 用自增 id 排位，不用时间戳：同一秒内完成的两个人否则会算成同一名
-            rank = conn.execute(
-                "SELECT COUNT(*) FROM completions WHERE id <= ?", (row[0],)
-            ).fetchone()[0]
-    finally:
-        conn.close()
-    return {"total": total, "rank": rank}
 
 
 # ---------------------------------------------------------------- 限流
@@ -439,7 +353,7 @@ def archive_state(request: Request, response: Response) -> dict:
     content, answers, index = _require()
     response.headers["Cache-Control"] = "no-store"
     sid = _session_id(request, response)
-    stages, extras = _unlocked(sid)
+    stages = _unlocked(sid)
 
     valid_stages = [s for s in stages if s in index["stage_people"]]
     names: dict[str, str] = {}
@@ -447,26 +361,10 @@ def archive_state(request: Request, response: Response) -> dict:
         for pid in index["stage_people"][stage_id]:
             names[pid] = answers["names"][pid]
 
-    required = _extra_ids(content)
-    answered = [eid for eid in required if eid in extras]
-    texts: dict[str, dict] = {}
-    ranking = {"total": 0, "rank": 0}
-    # 三题全部答对才把内容发下来；只答对一两题时前端只知道"已经答过哪几题"
-    if required and len(answered) == len(required):
-        texts = {eid: _extra_payload(index["extras"][eid], answers["names"]) for eid in required}
-        ranking = _ranking(sid)
-        # 加排行榜之前就答完的人没有记录，这里补一条，否则回访看不到名次
-        if not ranking["rank"]:
-            _record_completion(sid)
-            ranking = _ranking(sid)
-
     return {
         "version": content.get("version", 1),
         "stages": valid_stages,
-        "extras": answered,
         "names": names,
-        "extraTexts": texts,
-        "ranking": ranking,
     }
 
 
@@ -492,48 +390,6 @@ def unlock_stage(body: StageUnlockIn, request: Request, response: Response) -> d
         "ok": True,
         "stage": body.stage,
         "names": {p: answers["names"][p] for p in people},
-    }
-
-
-@router.post("/unlock/extra")
-def unlock_extra(body: ExtraUnlockIn, request: Request, response: Response) -> dict:
-    content, answers, index = _require()
-    _check_rate(request)
-    item = index["extras"].get(body.id)
-    if not item:
-        raise HTTPException(status_code=404, detail="没有这个附加条目。")
-
-    value = _norm(body.answer)
-    allowed = {_norm(item["answer"])}
-    allowed.update(_norm(a) for a in item.get("aliases", []))
-    allowed.update(_norm(p) for p in item.get("pinyin", []))
-    if not value or value not in allowed:
-        raise HTTPException(status_code=400, detail="答案不正确，请再试一次。")
-
-    sid = _session_id(request, response)
-    _record_unlock(sid, "extra", body.id)
-
-    _, unlocked = _unlocked(sid)
-    required = _extra_ids(content)
-    answered = [eid for eid in required if eid in unlocked]
-    remaining = [eid for eid in required if eid not in unlocked]
-    all_done = bool(required) and not remaining
-    ranking = {"total": 0, "rank": 0}
-    if all_done:
-        _record_completion(sid)
-        ranking = _ranking(sid)
-    return {
-        "ok": True,
-        "id": body.id,
-        "answered": answered,
-        "remaining": remaining,
-        "all": all_done,
-        "ranking": ranking,
-        "texts": (
-            {eid: _extra_payload(index["extras"][eid], answers["names"]) for eid in required}
-            if all_done
-            else {}
-        ),
     }
 
 
@@ -740,6 +596,9 @@ def archive_reload(x_admin_token: str = Header(default="")) -> dict:
     return {
         "ok": True,
         "people": len(answers["names"]),
-        "extras": len(content.get("extras", [])),
+        "extras": sum(
+            len(st.get("extras", {}).get("items", []))
+            for st in content.get("stages", [])
+        ),
         "updated": content.get("updated"),
     }

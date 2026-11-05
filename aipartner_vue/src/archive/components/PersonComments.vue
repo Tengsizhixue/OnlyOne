@@ -11,7 +11,7 @@
     <p v-else-if="!items.length" class="cmt-tip">这里还没有其他人的看法。</p>
 
     <ul v-if="items.length" class="cmt-list">
-      <li v-for="item in items" :key="item.id" class="cmt-item">
+      <li v-for="item in items" :key="item.id" class="cmt-item" :class="{ 'is-new': freshIds.has(item.id) }">
         <div class="cmt-meta">
           <span class="cmt-who">{{ item.nick || '匿名' }}</span>
           <span class="cmt-time">{{ when(item.created) }}</span>
@@ -47,7 +47,7 @@
 
         <!-- 回复区：这一楼下的讨论 -->
         <ul v-if="item.replies && item.replies.length" class="cmt-replies">
-          <li v-for="r in item.replies" :key="r.id" class="cmt-reply">
+          <li v-for="r in item.replies" :key="r.id" class="cmt-reply" :class="{ 'is-new': freshIds.has(r.id) }">
             <div class="cmt-meta">
               <span class="cmt-who">{{ r.nick || '匿名' }}</span>
               <span class="cmt-time">{{ when(r.created) }}</span>
@@ -144,6 +144,9 @@ const replyInput = ref(null)
 // 轮询定时器
 let pollTimer = null
 
+// 轮询拉到或刚发出的新留言 id，播一次入场动画后清除
+const freshIds = ref(new Set())
+
 function readNick() {
   try {
     return window.localStorage.getItem(NICK_KEY) || ''
@@ -178,6 +181,30 @@ function snippetOf(text) {
   return flat.length > 15 ? `${flat.slice(0, 15)}…` : flat
 }
 
+/** 收集列表里所有留言与回复的 id */
+function idsOf(list) {
+  const s = new Set()
+  for (const i of list) {
+    s.add(i.id)
+    for (const r of i.replies || []) s.add(r.id)
+  }
+  return s
+}
+
+/** 把不在 oldIds 里的条目标记为新，播一次浮入动画 */
+function markFresh(list, oldIds) {
+  const fresh = new Set()
+  for (const i of list) {
+    if (!oldIds.has(i.id)) fresh.add(i.id)
+    for (const r of i.replies || []) if (!oldIds.has(r.id)) fresh.add(r.id)
+  }
+  if (!fresh.size) return
+  freshIds.value = fresh
+  setTimeout(() => {
+    freshIds.value = new Set()
+  }, 900)
+}
+
 async function load() {
   loading.value = true
   loadError.value = ''
@@ -201,8 +228,10 @@ async function pollRefresh() {
     const newItems = data.items || []
     // 只在数据真正变化时更新，避免不必要的 DOM 重排
     if (JSON.stringify(newItems) !== JSON.stringify(items.value)) {
+      const oldIds = idsOf(items.value)
       items.value = newItems
       count.value = data.count || 0
+      markFresh(newItems, oldIds)
     }
   } catch (e) {
     // 轮询失败不提示，等下一轮
@@ -236,8 +265,10 @@ async function submit() {
   try {
     const res = await addComment(props.personId, nick.value.trim(), text)
     // 按发表时间正序，新的接在最后
+    const oldIds = idsOf(items.value)
     items.value = [...items.value, res.item]
     count.value += 1
+    markFresh(items.value, oldIds)
     draft.value = ''
     writeNick(nick.value.trim())
     tip.value = '已发表，其他人刷新页面就能看到。'
@@ -281,12 +312,14 @@ async function submitReply(parentItem) {
     const res = await addComment(props.personId, nick.value.trim(), text, replyTarget.value.id)
     // 插入到对应的顶层留言的 replies 里
     const newItem = res.item
+    const oldIds = idsOf(items.value)
     const target = items.value.find((i) => i.id === (newItem.rootId || parentItem.id))
     if (target) {
       if (!target.replies) target.replies = []
       target.replies.push(newItem)
     }
     count.value += 1
+    markFresh(items.value, oldIds)
     writeNick(nick.value.trim())
     closeReply()
   } catch (e) {

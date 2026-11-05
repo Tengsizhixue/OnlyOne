@@ -50,12 +50,16 @@
         />
       </div>
     </div>
+
+    <!-- 附加内容直接挂在本阶段里，跟着名单一起下发，不用答题就能看 -->
+    <ExtraSection v-if="hasExtras" :section="stage.extras" />
   </section>
 </template>
 
 <script setup>
 import { computed, nextTick, onMounted, reactive, ref } from 'vue'
 import PersonRow from './PersonRow.vue'
+import ExtraSection from './ExtraSection.vue'
 import { renderTokens } from '../render.js'
 
 const props = defineProps({
@@ -148,6 +152,9 @@ const allPeople = computed(() =>
 )
 
 const busy = computed(() => !!(props.feedback && props.feedback.busy))
+const hasExtras = computed(
+  () => !!(props.stage.extras && props.stage.extras.items && props.stage.extras.items.length)
+)
 const feedbackOk = computed(() => props.unlocked || !!(props.feedback && props.feedback.ok))
 const feedbackText = computed(() => {
   if (props.feedback && props.feedback.text) return props.feedback.text

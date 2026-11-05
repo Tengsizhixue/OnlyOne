@@ -36,13 +36,6 @@ export function unlockStage(stage, name) {
   })
 }
 
-export function unlockExtra(id, answer) {
-  return request('/unlock/extra', {
-    method: 'POST',
-    body: JSON.stringify({ id, answer }),
-  })
-}
-
 export function listComments(person) {
   return request(`/comments?person=${encodeURIComponent(person)}`)
 }
