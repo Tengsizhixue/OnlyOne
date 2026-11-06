@@ -2,13 +2,11 @@
   <details class="extra-fold photo-fold">
     <summary class="extra-fold-summary">
       <span aria-hidden="true" class="extra-fold-dot"></span>
-      <span>照片</span>
+      <span>拓展</span>
       <span aria-hidden="true" class="extra-fold-state"></span>
     </summary>
 
     <div class="extra-body">
-      <p class="photo-tip">加载速度慢，点开图片后可能需要好几秒才能显示原图。</p>
-
       <PhotoAlbum
         v-for="album in albums"
         :key="album.id"

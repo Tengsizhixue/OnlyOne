@@ -29,8 +29,9 @@ export function getState() {
   return request('/state')
 }
 
-export function unlockStage(stage, name) {
-  return request('/unlock/stage', {
+// 输对姓名/拼音/外号只揭示这一个人，不再整栏放开
+export function unlockPerson(stage, name) {
+  return request('/unlock/person', {
     method: 'POST',
     body: JSON.stringify({ stage, name }),
   })

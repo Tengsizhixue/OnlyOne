@@ -1,5 +1,5 @@
 # archive_api.py
-"""记忆档案的接口：内容、解锁状态、阶段解锁、相册解锁。
+"""记忆档案的接口：内容、解锁状态、逐人解锁、相册解锁。
 
 数据文件放在 archive/ 下：
     content.json  公开内容（没有人名、没有答案）
@@ -203,10 +203,13 @@ def _build_index(content: dict, answers: dict) -> dict:
 
         stage_lookup[sid] = lookup
 
-    # 相册：把每个相册的答案归一化成一个集合，比较时不区分空格/大小写
+    # 相册：把每个相册的答案归一化成一个集合，比较时不区分空格/大小写；
+    # 除了姓名，也接受拼音（和阶段解锁一致），拼音由构建脚本预先算好
     photo_lookup: dict[str, set[str]] = {}
     for aid, entry in (answers.get("photos") or {}).items():
-        photo_lookup[aid] = {_norm(a) for a in (entry.get("answers") or []) if _norm(a)}
+        keys = {_norm(a) for a in (entry.get("answers") or []) if _norm(a)}
+        keys.update(_norm(a) for a in (entry.get("pinyin") or []) if _norm(a))
+        photo_lookup[aid] = keys
 
     return {
         "stage_people": stage_people,
@@ -339,7 +342,11 @@ def _session_id(request: Request, response: Response) -> str:
 
 
 def _unlocked(sid: str) -> dict[str, list[str]]:
-    """这个会话已解锁的东西，按 kind 分组（stage / photo）。"""
+    """这个会话已解锁的东西，按 kind 分组（person / photo）。
+
+    早期的 stage 记录（整栏解锁）不再读取：现在只按人解锁，
+    旧记录留在库里不动，不参与任何判断。
+    """
     conn = _connect()
     try:
         rows = conn.execute(
@@ -347,7 +354,7 @@ def _unlocked(sid: str) -> dict[str, list[str]]:
         ).fetchall()
     finally:
         conn.close()
-    out: dict[str, list[str]] = {"stage": [], "photo": []}
+    out: dict[str, list[str]] = {"person": [], "photo": []}
     for kind, key in rows:
         out.setdefault(kind, []).append(key)
     return {k: sorted(set(v)) for k, v in out.items()}
@@ -397,28 +404,30 @@ def archive_state(request: Request, response: Response) -> dict:
     content, answers, index = _require()
     response.headers["Cache-Control"] = "no-store"
     sid = _session_id(request, response)
-    stages = _unlocked(sid)
+    state = _unlocked(sid)
 
-    valid_stages = [s for s in stages["stage"] if s in index["stage_people"]]
-    names: dict[str, str] = {}
-    for stage_id in valid_stages:
-        for pid in index["stage_people"][stage_id]:
-            names[pid] = answers["names"][pid]
+    # 只按人解锁：输对谁就只显示谁，不再整栏放开
+    people = [pid for pid in state["person"] if pid in index["person_ids"]]
+    names = {pid: answers["names"][pid] for pid in people}
 
     return {
         "version": content.get("version", 1),
-        "stages": valid_stages,
+        "people": people,
         "names": names,
+        # 旧前端会读 stages：现在没有整栏解锁，一律给空数组
+        "stages": [],
         "photos": {
             aid: _photo_items(answers, aid)
-            for aid in stages["photo"]
+            for aid in state["photo"]
             if aid in index["photo_lookup"]
         },
     }
 
 
-@router.post("/unlock/stage")
-def unlock_stage(body: StageUnlockIn, request: Request, response: Response) -> dict:
+@router.post("/unlock/stage", include_in_schema=False)
+@router.post("/unlock/person")
+def unlock_person(body: StageUnlockIn, request: Request, response: Response) -> dict:
+    """输入姓名 / 拼音 / 外号，只揭示输入对的那一个人，不放开整栏。"""
     _, answers, index = _require()
     _check_rate(request)
     lookup = index["stage_lookup"].get(body.stage)
@@ -427,18 +436,17 @@ def unlock_stage(body: StageUnlockIn, request: Request, response: Response) -> d
 
     pid = lookup.get(_norm(body.name))
     if not pid:
-        raise HTTPException(
-            status_code=400,
-            detail="姓名不正确，请输入本阶段名单中的任意一个人名。",
-        )
+        raise HTTPException(status_code=400, detail="姓名或拼音不对，再想想。")
 
     sid = _session_id(request, response)
-    _record_unlock(sid, "stage", body.stage)
-    people = index["stage_people"][body.stage]
+    _record_unlock(sid, "person", pid)
+    name = answers["names"][pid]
     return {
         "ok": True,
         "stage": body.stage,
-        "names": {p: answers["names"][p] for p in people},
+        "person": pid,
+        "name": name,
+        "names": {pid: name},  # 兼容只读 names 的旧前端
     }
 
 

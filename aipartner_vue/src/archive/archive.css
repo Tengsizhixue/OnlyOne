@@ -267,10 +267,10 @@ button{font:inherit;color:inherit}
   color:#8996a6;font-size:13px;letter-spacing:.08em;text-align:center;padding:0 24px}
 .archive-status.error{color:#c9a0a0}
 
-/* ---------- 解锁状态：只改明暗，不加任何文字 ---------- */
-.col.is-unlocked{border-color:rgba(203,213,225,.16);background:rgba(255,255,255,.032)}
-.col.is-unlocked .cdot{opacity:1;background:#eaf0f7}
-.col.is-unlocked .col-title{color:#fff}
+/* ---------- 揭示状态：只要这一栏揭示过一个人就点亮，只改明暗 ---------- */
+.col.is-lit{border-color:rgba(203,213,225,.16);background:rgba(255,255,255,.032)}
+.col.is-lit .cdot{opacity:1;background:#eaf0f7}
+.col.is-lit .col-title{color:#fff}
 
 /* ==========================================================================
    移动端可读性覆盖（≤480px）  2026-11-02
@@ -338,20 +338,8 @@ button{font:inherit;color:inherit}
    ④ 分组数字入场计数
    ========================================================================== */
 
-/* ---------- ① 解锁翻牌 ---------- */
-/* 扫光只播一次：类名常驻，animation 不会重播；刷新后不会挂这个类，所以不闪 */
-.col.is-revealing::after{
-  content:"";position:absolute;left:0;right:0;top:0;height:1px;pointer-events:none;
-  background:linear-gradient(90deg,transparent,rgba(226,232,240,.45) 30%,rgba(226,232,240,.45) 70%,transparent);
-  animation:scan-line 1.05s cubic-bezier(.4,0,.2,1) both;
-}
-@keyframes scan-line{
-  0%{top:0;opacity:0}
-  14%{opacity:1}
-  80%{opacity:.75}
-  100%{top:100%;opacity:0}
-}
-
+/* ---------- ① 揭示翻牌 ---------- */
+/* 只给刚被揭示的那一行挂 is-reveal，播一次翻牌；扫光不再整栏播放 */
 .p.is-reveal{
   animation:reveal-flip .48s cubic-bezier(.22,.8,.3,1) backwards;
   animation-delay:calc(min(var(--i,0),24) * 40ms);
@@ -394,7 +382,6 @@ button{font:inherit;color:inherit}
 }
 
 @media (prefers-reduced-motion:reduce){
-  .col.is-revealing::after{display:none}
   .p,.p.is-reveal{animation:none}
 }
 
@@ -786,9 +773,9 @@ button{font:inherit;color:inherit}
 }
 .photo-submit:hover:not(:disabled){color:#f1f5f9;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.26)}
 .photo-submit:disabled{opacity:.55;cursor:default}
-/* 照片区顶部的加载提示：比正文暗一档，但必须读得清 */
+/* 每个相册内部的加载提示：解锁之后才出现，比正文暗一档但必须读得清 */
 .photo-tip{
-  margin:0 0 4px;color:#8b97a8;font-size:12px;line-height:1.9;letter-spacing:.03em;
+  margin:10px 0 0;color:#8b97a8;font-size:12px;line-height:1.9;letter-spacing:.03em;
 }
 .photo-error{margin:8px 0 0;color:#d3a2a2;font-size:12.5px;line-height:1.8}
 

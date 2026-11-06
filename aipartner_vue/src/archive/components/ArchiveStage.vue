@@ -1,9 +1,5 @@
 <template>
-  <section
-    class="col"
-    :class="{ 'is-unlocked': unlocked, 'is-revealing': revealing }"
-    :data-stage="stage.id"
-  >
+  <section class="col" :class="{ 'is-lit': lit }" :data-stage="stage.id">
     <div class="col-head">
       <span aria-hidden="true" class="cdot"></span>
       <h2 class="col-title">{{ stage.title }}</h2>
@@ -12,15 +8,15 @@
     <form autocomplete="off" class="phase-unlock-form" @submit.prevent="submit">
       <input
         v-model="input"
-        :aria-label="'输入' + stage.title + '任意人物姓名'"
+        :aria-label="'输入' + stage.title + '任意人物的姓名或拼音'"
         autocomplete="off"
         class="phase-unlock-input"
-        :disabled="unlocked"
-        placeholder="输入本阶段任意人名"
+        :disabled="busy"
+        placeholder="输入本阶段任意姓名或拼音"
         type="text"
       />
-      <button class="phase-unlock-btn" type="submit" :disabled="unlocked || busy">
-        {{ unlocked ? '已解锁' : '解锁本阶段' }}
+      <button class="phase-unlock-btn" type="submit" :disabled="busy">
+        {{ busy ? '核对中…' : '揭示' }}
       </button>
     </form>
     <p class="phase-unlock-feedback" :class="{ ok: feedbackOk }">{{ feedbackText }}</p>
@@ -44,8 +40,8 @@
           :display-name="displayName(person)"
           :open="!!openPeople[person.id]"
           :desc-html="descFor(person)"
-          :revealing="revealing"
-          :reveal-index="revealIndexMap[person.id] || 0"
+          :revealing="person.id === flashId"
+          :reveal-index="person.id === flashId ? 0 : revealIndexMap[person.id] || 0"
           @toggle="togglePerson"
         />
       </div>
@@ -57,7 +53,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, reactive, ref } from 'vue'
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
 import PersonRow from './PersonRow.vue'
 import ExtraSection from './ExtraSection.vue'
 import { renderTokens } from '../render.js'
@@ -65,9 +61,9 @@ import { renderTokens } from '../render.js'
 const props = defineProps({
   stage: { type: Object, required: true },
   names: { type: Object, default: () => ({}) },
-  unlocked: { type: Boolean, default: false },
   feedback: { type: Object, default: null },
-  revealing: { type: Boolean, default: false },
+  // 父级刚揭示的人：{ stage, person }，只给那一行播一次翻牌动画
+  justRevealed: { type: Object, default: null },
   order: { type: Number, default: 0 },
 })
 
@@ -137,6 +133,17 @@ onMounted(() => {
   }, 1600)
 })
 
+// 本阶段是否已揭示过至少一个人：只影响卡片点亮，不参与解锁判断
+const lit = computed(() =>
+  props.stage.groups.some((group) => group.people.some((person) => !!props.names[person.id]))
+)
+
+// 父级刚揭示的那一行挂一次动画，其他人不动
+const flashId = computed(() => {
+  const just = props.justRevealed
+  return just && just.stage === props.stage.id ? just.person : ''
+})
+
 // 渐显错位索引：按组内序号，展开哪一组就从哪一组的第一行开始依次出现
 const revealIndexMap = {}
 for (const group of props.stage.groups) {
@@ -155,12 +162,10 @@ const busy = computed(() => !!(props.feedback && props.feedback.busy))
 const hasExtras = computed(
   () => !!(props.stage.extras && props.stage.extras.items && props.stage.extras.items.length)
 )
-const feedbackOk = computed(() => props.unlocked || !!(props.feedback && props.feedback.ok))
+const feedbackOk = computed(() => !!(props.feedback && props.feedback.ok))
 const feedbackText = computed(() => {
   if (props.feedback && props.feedback.text) return props.feedback.text
-  return props.unlocked
-    ? '本阶段已解锁。'
-    : '根据描述给出任意一个人的姓名或拼音'
+  return '逐个人输入你记得的姓名或拼音，输对谁就显示谁'
 })
 
 function displayName(person) {
@@ -171,9 +176,19 @@ function descFor(person) {
   return openPeople[person.id] ? renderTokens(person.desc, props.names) : ''
 }
 
+// 揭示成功后清空输入框，方便接着输下一个
+watch(
+  () => props.feedback,
+  (feedback) => {
+    if (feedback && feedback.ok) input.value = ''
+  },
+)
+
 function submit() {
-  if (props.unlocked || busy.value) return
-  emit('unlock', props.stage.id, input.value)
+  if (busy.value) return
+  const value = input.value.trim()
+  if (!value) return
+  emit('unlock', props.stage.id, value)
 }
 
 function toggleGroup(id) {

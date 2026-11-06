@@ -226,6 +226,15 @@ def parse(raw: str):
             )
             photos_private[album["id"]] = {
                 "answers": [a for a in album["answers"] if a],
+                # 答案也接受拼音输入（跟阶段解锁一致），这里预算好整串全拼
+                "pinyin": sorted(
+                    {
+                        py
+                        for a in album["answers"]
+                        if a
+                        for py in pinyin_variants([a])
+                    }
+                ),
                 "images": images,
             }
 

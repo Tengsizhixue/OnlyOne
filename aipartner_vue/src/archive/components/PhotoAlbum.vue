@@ -16,7 +16,7 @@
           autocomplete="off"
           autocapitalize="off"
           spellcheck="false"
-          placeholder="输入名字"
+          placeholder="输入姓名或拼音"
           :disabled="busy"
         />
         <button class="photo-submit" type="submit" :disabled="busy">
@@ -27,8 +27,9 @@
     </form>
 
     <template v-else>
-      <!-- 说明文字只在解锁之后出现，答题前不透露内容 -->
+      <!-- 说明文字和加载提示都只在解锁之后出现，答题前不透露内容 -->
       <p v-if="album.note" class="photo-note">{{ album.note }}</p>
+      <p class="photo-tip">加载速度慢，点开图片后可能需要好几秒才能显示原图。</p>
 
       <div class="photo-grid">
         <button

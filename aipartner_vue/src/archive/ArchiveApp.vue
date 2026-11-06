@@ -26,11 +26,10 @@
           :key="stage.id"
           :stage="stage"
           :names="names"
-          :unlocked="!!unlockedStages[stage.id]"
-          :revealing="!!revealingStages[stage.id]"
+          :just-revealed="justRevealed"
           :order="index"
           :feedback="stageFeedback[stage.id]"
-          @unlock="onUnlockStage"
+          @unlock="onUnlockPerson"
         />
       </div>
 
@@ -68,21 +67,20 @@
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import ArchiveStage from './components/ArchiveStage.vue'
 import PhotoSection from './components/PhotoSection.vue'
-import { getContent, getState, unlockStage } from './api.js'
+import { getContent, getState, unlockPerson } from './api.js'
 import { initAmbientLight, initTouchFeedback } from './fx.js'
 
 const content = ref(null)
 const names = ref({})
-const unlockedStages = ref({})
 const photoUnlocked = ref({})
-const revealingStages = reactive({})
+const justRevealed = ref(null)
 const stageFeedback = reactive({})
 
 // 相册横跨两栏，挂在页面底部整行显示
 const photoAlbums = computed(() => content.value?.photos?.albums || [])
 
-// 只要揭开过任意一栏，环境光就从冷灰缓缓转暖（纯视觉，不加任何文字）
-const lit = computed(() => Object.keys(unlockedStages.value).length > 0)
+// 只要揭示过任意一个人，环境光就从冷灰缓缓转暖（纯视觉，不加任何文字）
+const lit = computed(() => Object.keys(names.value).length > 0)
 
 const loading = ref(true)
 const loadError = ref('')
@@ -112,11 +110,9 @@ onMounted(async () => {
 
   if (stateResult.status === 'fulfilled') {
     const state = stateResult.value
+    // names 里只有已经揭示过的人，没揭示的一律没有键
     names.value = state.names || {}
     photoUnlocked.value = state.photos || {}
-    for (const id of state.stages || []) {
-      unlockedStages.value[id] = true
-    }
   } else {
     stateError.value = '进度读取失败，本次解锁可能无法保存。'
   }
@@ -124,16 +120,16 @@ onMounted(async () => {
   loading.value = false
 })
 
-async function onUnlockStage(stageId, value) {
+async function onUnlockPerson(stageId, value) {
   const name = (value || '').trim()
   if (!name) return
   stageFeedback[stageId] = { text: '核对中…', ok: false, busy: true }
   try {
-    const res = await unlockStage(stageId, name)
+    const res = await unlockPerson(stageId, name)
+    // 后端只返回输对的那一个人，其余人名依然不显示
     names.value = { ...names.value, ...(res.names || {}) }
-    unlockedStages.value[stageId] = true
-    revealingStages[stageId] = true
-    stageFeedback[stageId] = { text: '本阶段已解锁。', ok: true, busy: false }
+    justRevealed.value = { stage: stageId, person: res.person }
+    stageFeedback[stageId] = { text: `已揭示「${res.name}」`, ok: true, busy: false }
   } catch (e) {
     stageFeedback[stageId] = { text: e.message, ok: false, busy: false }
   }
