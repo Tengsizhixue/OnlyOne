@@ -33,9 +33,8 @@
       </button>
     </div>
 
-    <div v-if="tab === 'now'" class="extra-panel" v-html="item.now"></div>
-    <div v-else-if="tab === 'raw'" class="extra-panel" v-html="item.raw"></div>
-    <div v-else-if="tab === 'ai'" class="extra-panel" v-html="item.ai"></div>
+    <!-- 正文里的人名引用跟着已揭示的人名走：揭示过就显示真名，否则仍是 *** -->
+    <div v-if="tab" class="extra-panel" v-html="panelHtml"></div>
 
     <!-- 内容很长，底部再给一次收起，省得滚回顶部 -->
     <button v-if="tab" class="extra-collapse" type="button" @click="tab = ''">
@@ -46,13 +45,21 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { renderTokens } from '../render.js'
 
-defineProps({
+const props = defineProps({
   item: { type: Object, required: true },
+  // 已揭示的人名：{ p047: '真名', ... }，只由 /state 与解锁接口下发
+  names: { type: Object, default: () => ({}) },
 })
 
 const tab = ref('')
+
+// 用 computed 而不是挂载后改 DOM：解锁人名导致 names 变化时，正文会跟着重渲染
+const panelHtml = computed(() =>
+  tab.value ? renderTokens(props.item[tab.value] || '', props.names) : ''
+)
 
 // 三个面板一次只展开一个，避免整页拉得很长；再点一次收起
 function toggle(name) {

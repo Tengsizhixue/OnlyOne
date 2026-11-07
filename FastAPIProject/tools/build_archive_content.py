@@ -6,8 +6,8 @@
     python FastAPIProject/tools/build_archive_content.py --src path/to/index.html
 
 产出：
-    FastAPIProject/archive/content.json   公开：结构 + *** + {{pNNN}} 引用
-    FastAPIProject/archive/answers.json   服务端：88 个真名 + 附加内容（答案 + AI 总结 + 原文）
+    FastAPIProject/archive/content.json   公开：结构 + *** / {{pNNN}} 引用（附加长文也在这里）
+    FastAPIProject/archive/answers.json   服务端：88 个真名、外号、拼音 + 相册答案与图片地址
 
 附加内容的源是 FastAPIProject/archive/extras.json（手写，改完跑一次脚本即可）。
 页面样式不再由本脚本导出，见 aipartner_vue/src/archive/archive.css。
@@ -28,6 +28,8 @@ DEFAULT_SRC = ROOT / "FastAPIProject" / "archive" / "source.html"
 OUT_CONTENT = ROOT / "FastAPIProject" / "archive" / "content.json"
 OUT_ANSWERS = ROOT / "FastAPIProject" / "archive" / "answers.json"
 EXTRAS_SRC = ROOT / "FastAPIProject" / "archive" / "extras.json"
+# 纯文字阶段（没有人名、不需要答题），例如「初二到高一」那段三年总结
+INTERLUDE_SRC = ROOT / "FastAPIProject" / "archive" / "interlude.json"
 PHOTOS_SRC = ROOT / "FastAPIProject" / "archive" / "photos.json"
 ALIASES_SRC = ROOT / "FastAPIProject" / "archive" / "aliases.json"
 
@@ -110,6 +112,31 @@ def parse(raw: str):
             groups.append({"id": "", "title": gm_title, "people": people})
         stages.append({"id": stage_id, "title": title, "groups": groups})
 
+    # ---------- 纯文字阶段 ----------
+    # 没有人名、不参与解锁，只是时间线上的一段介绍。单独一份 JSON 维护，
+    # 改文案不用碰 source.html；after 指定插在哪一栏后面（id，不是下标）。
+    if INTERLUDE_SRC.exists():
+        spec_i = json.loads(INTERLUDE_SRC.read_text(encoding="utf-8"))
+        after = str(spec_i.get("after", ""))
+        pos = next((i for i, s in enumerate(stages) if s["id"] == after), None)
+        if pos is None:
+            raise SystemExit(f"interlude.json 指定的 after={after} 不存在")
+        interlude_id = str(spec_i.get("id", ""))
+        if not interlude_id or interlude_id in {s["id"] for s in stages}:
+            raise SystemExit(f"interlude.json 的 id 为空或和已有栏重复：{interlude_id}")
+        stages.insert(
+            pos + 1,
+            {
+                "id": interlude_id,
+                "title": spec_i["title"],
+                "groups": [],  # 后端 _build_index 会遍历它，必须存在
+                "interlude": {
+                    "intro": spec_i.get("intro", ""),
+                    "lines": [ln for ln in spec_i.get("lines", []) if ln],
+                },
+            },
+        )
+
     # ---------- 分配稳定 ID ----------
     n = 0
     g = 0
@@ -167,8 +194,10 @@ def parse(raw: str):
     if extra_stage not in {s["id"] for s in stages}:
         raise SystemExit(f"extras.json 指定的 stage={extra_stage} 不存在")
 
-    # 附加内容现在直接挂在某一栏里、不再答题解锁，所以正文里的真名必须在构建期抹掉：
-    # 一律换成 ***，和名单里未解锁的写法保持一致。长的先替换，免得短名字先吃掉长名字。
+    # 附加内容挂在某一栏里，正文里的真名必须在构建期抹掉。
+    # 能对应到名单里某个人的称呼写成 {{pNNN}}：前端按「这个人是否已揭示」决定显示真名还是 ***；
+    # 对应不到人的（例如 mask 里额外指定、但不在名单上的名字）仍一律换成 ***。
+    # 长的先替换，免得短名字先吃掉长名字。
     mask_keys = {p["name"] for p in people_all}
     for value in alias_map.values():
         mask_keys.update(value)
@@ -177,10 +206,23 @@ def parse(raw: str):
     mask_keys.update(spec.get("mask", []))
     mask_keys = sorted((k for k in mask_keys if k), key=len, reverse=True)
 
-    def mask_names(text: str) -> str:
+    # 名字 / 外号 -> 匿名 ID。只有能对应到名单里某个人的称呼才能写成引用。
+    key_to_pid = dict(by_name)
+    for pid, alias_list in alias_map.items():
+        for alias in alias_list:
+            key_to_pid.setdefault(alias, pid)
+    for item in spec["items"]:
+        owner = by_name.get(item.get("answer", ""))
+        if owner:
+            for alias in item.get("aliases", []):
+                key_to_pid.setdefault(alias, owner)
+
+    def mask_names(text: str, refs: bool = False) -> str:
         for key in mask_keys:
             if key in text:
-                text = text.replace(key, "***")
+                pid = key_to_pid.get(key)
+                replacement = "{{%s}}" % pid if (refs and pid) else "***"
+                text = text.replace(key, replacement)
         return text
 
     # 附加内容要答对三个问题才显示：题目与答对后的那句说明随 content.json 公开下发，
@@ -192,12 +234,14 @@ def parse(raw: str):
     extras_public = [
         {
             "id": item["id"],
+            # hint 是纯文本插值、不走 v-html，保持 *** 写法
             "hint": mask_names(item["hint"]),
+            # now / ai / raw 用 v-html 渲染，写成引用才能跟着解锁状态变
             # now 是作者现在自己写的看法，排在标签第一位；缺了前端就不显示这个标签
-            "now": mask_names(item.get("now", "")),
-            "ai": mask_names(item["ai"]),
+            "now": mask_names(item.get("now", ""), refs=True),
+            "ai": mask_names(item["ai"], refs=True),
             # raw 可选：某同学这类只保留 AI 总结的条目没有原文
-            "raw": mask_names(item.get("raw", "")),
+            "raw": mask_names(item.get("raw", ""), refs=True),
         }
         for item in spec["items"]
     ]
@@ -249,7 +293,17 @@ def parse(raw: str):
         "version": 1,
         "updated": date.today().isoformat(),
         "stages": [
+            # 纯文字阶段：只有标题和一段介绍，没有人名、没有答题框。
+            # 文本也要过一次真名遮罩，保证公开内容里不出现任何真名。
             {
+                "id": s["id"],
+                "title": s["title"],
+                "groups": [],
+                "intro": mask_names(s["interlude"]["intro"]),
+                "lines": [mask_names(x) for x in s["interlude"]["lines"]],
+            }
+            if s.get("interlude")
+            else {
                 "id": s["id"],
                 "title": s["title"],
                 "groups": [
@@ -318,6 +372,12 @@ def validate(content, answers, stats):
     def walk_desc(s):
         refs.update(re.findall(r"\{\{(p\d{3})\}\}", s or ""))
     for st in content["stages"]:
+        # 纯文字阶段只许有介绍，不许混进名单
+        if st.get("lines"):
+            if st.get("groups"):
+                errors.append(f"{st['title']} 是纯文字阶段，不该有人名分组")
+            if not st.get("intro") or not all(st["lines"]):
+                errors.append(f"{st['title']} 的介绍文字不完整")
         for g in st["groups"]:
             for p in g["people"]:
                 if p["id"] not in ids:
@@ -357,7 +417,8 @@ def validate(content, answers, stats):
                         )
                     seen.setdefault(py, p["id"])
 
-    # 附加内容：答题后才展示的公开长文，题目与结构要完整，且不能残留未替换的引用
+    # 附加内容：答题后才展示的公开长文，题目与结构要完整。
+    # 正文里的名字是 {{pNNN}} 引用，前端按解锁状态填真名或 ***；只许这种格式，且 ID 必须存在。
     for st in content["stages"]:
         extras = st.get("extras")
         if not extras:
@@ -377,8 +438,17 @@ def validate(content, answers, stats):
             if not item.get("ai"):
                 errors.append(f"附加条目 {item.get('id')} 缺少 AI 总结")
             for field in ("hint", "now", "ai", "raw"):
-                if "{{" in (item.get(field) or ""):
-                    errors.append(f"附加条目 {item.get('id')} 的 {field} 里还有未替换的引用")
+                text = item.get(field) or ""
+                for token in re.findall(r"\{\{([^{}]*)\}\}", text):
+                    if not re.fullmatch(r"p\d{3}", token):
+                        errors.append(
+                            f"附加条目 {item.get('id')} 的 {field} 里有未替换的引用：{token}"
+                        )
+                unknown = set(re.findall(r"\{\{(p\d{3})\}\}", text)) - ids
+                if unknown:
+                    errors.append(
+                        f"附加条目 {item.get('id')} 的 {field} 引用了不存在的 ID：{sorted(unknown)}"
+                    )
 
     # 相册：公开只许有题面/张数/体积，答案与图片地址必须在 answers.json
     albums = (content.get("photos") or {}).get("albums") or []

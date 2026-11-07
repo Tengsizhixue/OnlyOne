@@ -53,6 +53,7 @@
       :section="stage.extras"
       :stage-id="stage.id"
       :unlocked="extrasUnlocked.includes(stage.id)"
+      :names="names"
       @unlocked="emit('extra-unlocked', stage.id)"
     />
   </section>

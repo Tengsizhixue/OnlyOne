@@ -12,7 +12,7 @@
       <!-- 答完三题：先给一句说明，再展开那几个人 -->
       <template v-if="unlocked">
         <p v-if="note" class="extra-note">{{ note }}</p>
-        <ExtraItem v-for="item in section.items" :key="item.id" :item="item" />
+        <ExtraItem v-for="item in section.items" :key="item.id" :item="item" :names="names" />
       </template>
 
       <!-- 没答：三个问题 + 三个输入框 -->
@@ -49,6 +49,8 @@ const props = defineProps({
   section: { type: Object, required: true },
   stageId: { type: String, required: true },
   unlocked: { type: Boolean, default: false },
+  // 已揭示的人名，继续传给条目正文去替换匿名引用
+  names: { type: Object, default: () => ({}) },
 })
 
 const emit = defineEmits(['unlocked'])

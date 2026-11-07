@@ -21,18 +21,21 @@
       <div v-else class="board">
         <p v-if="stateError" class="archive-inline-error">{{ stateError }}</p>
 
-        <ArchiveStage
-          v-for="(stage, index) in content.stages"
-          :key="stage.id"
-          :stage="stage"
-          :names="names"
-          :just-revealed="justRevealed"
-          :order="index"
-          :feedback="stageFeedback[stage.id]"
-          :extras-unlocked="extraUnlocked"
-          @unlock="onUnlockPerson"
-          @extra-unlocked="onExtraUnlocked"
-        />
+        <template v-for="(stage, index) in content.stages" :key="stage.id">
+          <!-- 纯文字阶段（只有一段介绍，没有名单）走单独组件 -->
+          <StageInterlude v-if="stage.lines" :stage="stage" />
+          <ArchiveStage
+            v-else
+            :stage="stage"
+            :names="names"
+            :just-revealed="justRevealed"
+            :order="index"
+            :feedback="stageFeedback[stage.id]"
+            :extras-unlocked="extraUnlocked"
+            @unlock="onUnlockPerson"
+            @extra-unlocked="onExtraUnlocked"
+          />
+        </template>
       </div>
 
       <PhotoSection
@@ -68,6 +71,7 @@
 <script setup>
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import ArchiveStage from './components/ArchiveStage.vue'
+import StageInterlude from './components/StageInterlude.vue'
 import PhotoSection from './components/PhotoSection.vue'
 import { getContent, getState, unlockPerson } from './api.js'
 import { initAmbientLight, initTouchFeedback } from './fx.js'

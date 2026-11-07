@@ -32,7 +32,8 @@ button{font:inherit;color:inherit}
 
 /* ---------- 版面 ---------- */
 .wrap{position:relative;z-index:2;max-width:1420px;margin:0 auto;padding:76px 34px 0}
-.board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start}
+/* 四栏：初二以前 / 初二到高一（纯文字）/ 高中 / 大学 */
+.board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;align-items:start}
 
 /* ---------- 卡片 ---------- */
 .col{
@@ -866,4 +867,39 @@ button{font:inherit;color:inherit}
   .photo-grid{grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:7px}
   .photo-viewer .pv-img{max-width:96vw;max-height:78vh}
   .pv-prev{left:8px}.pv-next{right:8px}
+}
+
+/* ==========================================================================
+   纯文字阶段（初二到高一）：只有标题 + 一句引子 + 几行总结，没有人名
+   ========================================================================== */
+/* 这一栏很短，别让离屏时 520px 的估算高度把整行撑出一大块空白 */
+.interlude-col{content-visibility:visible;contain-intrinsic-size:none}
+/* 标题行即折叠开关；右侧状态字沿用页面里其他折叠块的写法 */
+.interlude-summary{
+  display:flex;align-items:center;gap:10px;margin-bottom:16px;
+  cursor:pointer;list-style:none;user-select:none;
+}
+.interlude-summary::-webkit-details-marker{display:none}
+.interlude-state{margin-left:auto;color:#8996a6;font-size:11px;letter-spacing:.08em;white-space:nowrap}
+.interlude-state::after{content:"展开"}
+.interlude-col[open] .interlude-state::after{content:"收起"}
+.interlude-summary:hover .interlude-state{color:#cbd5e1}
+.interlude-summary:focus-visible{outline:1px solid rgba(203,213,225,.35);outline-offset:2px;border-radius:4px}
+.interlude-intro{margin:0 0 14px;color:#9aa7b7;font-size:13px;line-height:2;letter-spacing:.045em}
+.interlude-lines{list-style:none;margin:0;padding:0;border-top:1px solid rgba(255,255,255,.07)}
+.interlude-lines li{
+  position:relative;padding:11px 2px 11px 17px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  color:#b6c2d1;font-size:15px;line-height:1.85;letter-spacing:.08em;
+}
+.interlude-lines li::before{
+  content:"";position:absolute;left:3px;top:50%;
+  width:4px;height:4px;margin-top:-2px;
+  background:#cbd5e1;transform:rotate(45deg);opacity:.55;
+}
+@media (max-width:480px){
+  .interlude-intro{font-size:14px}
+  .interlude-lines li{font-size:16px;padding:12px 2px 12px 17px}
+  .interlude-state{font-size:12px}
+  .interlude-summary{min-height:44px}
 }

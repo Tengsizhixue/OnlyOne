@@ -140,9 +140,13 @@ def _validate(content: dict, answers: dict) -> None:
             extras_ids.add(eid)
             if not item.get("ai"):
                 raise ArchiveDataError(f"附加条目 {eid} 缺少 AI 总结")
-            for field in ("hint", "ai", "raw"):
-                if "{{" in (item.get(field) or ""):
+            for field in ("hint", "now", "ai", "raw"):
+                text = item.get(field) or ""
+                # 附加长文里的人名写成 {{pNNN}}：前端按这个人是否已揭示填真名或 ***。
+                # 其余形式的 {{ 都是没替换干净的引用，一律拒绝加载。
+                if "{{" in TOKEN_RE.sub("", text):
                     raise ArchiveDataError(f"附加条目 {eid} 的 {field} 里还有未替换的引用")
+                tokens.update(TOKEN_RE.findall(text))
 
     names = answers.get("names")
     if not isinstance(names, dict):
