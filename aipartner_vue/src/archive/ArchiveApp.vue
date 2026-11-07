@@ -29,7 +29,9 @@
           :just-revealed="justRevealed"
           :order="index"
           :feedback="stageFeedback[stage.id]"
+          :extras-unlocked="extraUnlocked"
           @unlock="onUnlockPerson"
+          @extra-unlocked="onExtraUnlocked"
         />
       </div>
 
@@ -73,6 +75,8 @@ import { initAmbientLight, initTouchFeedback } from './fx.js'
 const content = ref(null)
 const names = ref({})
 const photoUnlocked = ref({})
+// 已答过题的附加内容（按栏 id）；刷新后不用再答一遍
+const extraUnlocked = ref([])
 const justRevealed = ref(null)
 const stageFeedback = reactive({})
 
@@ -113,6 +117,7 @@ onMounted(async () => {
     // names 里只有已经揭示过的人，没揭示的一律没有键
     names.value = state.names || {}
     photoUnlocked.value = state.photos || {}
+    extraUnlocked.value = state.extras || []
   } else {
     stateError.value = '进度读取失败，本次解锁可能无法保存。'
   }
@@ -120,8 +125,14 @@ onMounted(async () => {
   loading.value = false
 })
 
-async function onUnlockPerson(stageId, value) {
-  const name = (value || '').trim()
+// 附加内容答完三题：把这一栏记下来，条目立刻展开，刷新也还在
+function onExtraUnlocked(stageId) {
+  if (!extraUnlocked.value.includes(stageId)) {
+    extraUnlocked.value = [...extraUnlocked.value, stageId]
+  }
+}
+
+async function onUnlockPerson(stageId, value) {  const name = (value || '').trim()
   if (!name) return
   stageFeedback[stageId] = { text: '核对中…', ok: false, busy: true }
   try {

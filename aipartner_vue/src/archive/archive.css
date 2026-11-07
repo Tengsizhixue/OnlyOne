@@ -225,6 +225,31 @@ button{font:inherit;color:inherit}
 .extra-fold[open] .extra-fold-state::after{content:"收起"}
 .extra-body{padding:2px 16px 8px}
 .extra-intro{margin:0 0 6px;color:#9aa7b7;font-size:13px;line-height:2;letter-spacing:.045em}
+/* 附加内容的三道题：答完才展开里面的人 */
+.extra-gate{margin:16px 0 8px;max-width:520px}
+.extra-q{display:block;margin:0 0 14px}
+.extra-q-text{display:block;color:#d5deea;font-size:14px;line-height:1.9;letter-spacing:.04em}
+.extra-input{
+  display:block;width:100%;margin:8px 0 0;padding:9px 11px;
+  border:1px solid rgba(255,255,255,.14);border-radius:6px;
+  background:rgba(255,255,255,.035);color:#e2e8f0;
+  font:inherit;font-size:14px;outline:none;
+  transition:border-color .25s,background .25s;
+}
+.extra-input:focus{border-color:rgba(203,213,225,.45);background:rgba(255,255,255,.06)}
+.extra-input::placeholder{color:#6b7787}
+.extra-gate-row{display:flex;justify-content:flex-end;margin:2px 0 0}
+.extra-submit{
+  padding:9px 20px;border:1px solid rgba(255,255,255,.16);border-radius:6px;
+  background:rgba(255,255,255,.06);color:#dbe4ef;font:inherit;font-size:13px;
+  letter-spacing:.12em;text-indent:.12em;cursor:pointer;
+  transition:color .25s,background .25s,border-color .25s;
+}
+.extra-submit:hover:not(:disabled){color:#f1f5f9;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.26)}
+.extra-submit:disabled{opacity:.55;cursor:default}
+.extra-error{margin:8px 0 0;color:#d3a2a2;font-size:12.5px;line-height:1.8}
+/* 答完之后那句说明：比题目亮一点，是即时反馈 */
+.extra-note{margin:2px 0 4px;color:#b6c2d1;font-size:13px;line-height:2;letter-spacing:.03em}
 .extra-item{padding:16px 0;border-top:1px solid rgba(255,255,255,.07)}
 .extra-hint{color:#d5deea;font-size:14px;line-height:1.9;letter-spacing:.04em;margin:0 0 9px}
 .extra-description{margin-top:12px;padding:15px 16px;border-left:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.025);color:#b6c2d1;font-size:13px;line-height:2;letter-spacing:.025em;overflow-wrap:anywhere}
@@ -322,6 +347,11 @@ button{font:inherit;color:inherit}
   .extra-fold-state{font-size:13px}
   .extra-body{padding:2px 14px 8px}
   .extra-intro{font-size:15px;line-height:1.9;margin-bottom:10px}
+  /* iOS 里 input 小于 16px 会在聚焦时把整页放大 */
+  .extra-q-text{font-size:15px}
+  .extra-input{font-size:16px}
+  .extra-submit{min-height:44px;font-size:14px}
+  .extra-note{font-size:14px;line-height:1.95}
   .extra-hint{font-size:15px;line-height:1.8}
   .extra-subhead{font-size:15px}
   .extra-minor{font-size:14.5px}

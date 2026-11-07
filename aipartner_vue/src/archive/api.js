@@ -37,6 +37,14 @@ export function unlockPerson(stage, name) {
   })
 }
 
+// 附加内容的三道题：都填了就放行（后端不比对答案）
+export function unlockExtra(stage, answers) {
+  return request('/unlock/extra', {
+    method: 'POST',
+    body: JSON.stringify({ stage, answers }),
+  })
+}
+
 // 答对才把图片地址发回来，答错后端不返回任何地址
 export function unlockPhoto(album, answer) {
   return request('/unlock/photo', {

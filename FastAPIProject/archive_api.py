@@ -75,6 +75,13 @@ class PhotoUnlockIn(BaseModel):
     answer: str = Field(min_length=1, max_length=40)
 
 
+class ExtraUnlockIn(BaseModel):
+    """附加内容的三道题：作者本意是「挡人」，答案不校验，只要求都填。"""
+
+    stage: str = Field(min_length=1, max_length=20)
+    answers: list[str] = Field(default_factory=list, max_length=5)
+
+
 class CommentIn(BaseModel):
     person: str = Field(min_length=1, max_length=20)
     nick: str = Field(default="", max_length=NICK_MAX)
@@ -111,11 +118,16 @@ def _validate(content: dict, answers: dict) -> None:
                 ids.add(pid)
                 tokens.update(TOKEN_RE.findall(person.get("desc", "")))
 
-    # 附加内容现在是公开长文，直接挂在某一栏里，不需要答案：只校验结构完整
+    # 附加内容：答对三题才展示，题目与那句说明随公开内容下发，结构必须完整
     for stage in stages:
         extras = stage.get("extras")
         if not extras:
             continue
+        gate = extras.get("gate") or {}
+        if not gate.get("questions"):
+            raise ArchiveDataError(f"阶段 {stage.get('id')} 的附加内容缺少题目")
+        if not gate.get("note"):
+            raise ArchiveDataError(f"阶段 {stage.get('id')} 的附加内容缺少答题后的说明")
         items = extras.get("items") or []
         if not items:
             raise ArchiveDataError(f"阶段 {stage.get('id')} 的附加内容没有条目")
@@ -409,6 +421,7 @@ def archive_state(request: Request, response: Response) -> dict:
     # 只按人解锁：输对谁就只显示谁，不再整栏放开
     people = [pid for pid in state["person"] if pid in index["person_ids"]]
     names = {pid: answers["names"][pid] for pid in people}
+    stage_ids = {s.get("id") for s in content.get("stages", [])}
 
     return {
         "version": content.get("version", 1),
@@ -416,6 +429,8 @@ def archive_state(request: Request, response: Response) -> dict:
         "names": names,
         # 旧前端会读 stages：现在没有整栏解锁，一律给空数组
         "stages": [],
+        # 已答过题的附加内容（按栏的 id），刷新后不用再答一遍
+        "extras": [sid for sid in state.get("extra", []) if sid in stage_ids],
         "photos": {
             aid: _photo_items(answers, aid)
             for aid in state["photo"]
@@ -494,6 +509,38 @@ def unlock_photo(body: PhotoUnlockIn, request: Request, response: Response) -> d
         "album": body.album,
         "images": _photo_items(answers, body.album),
     }
+
+
+# ---------------------------------------------------------------- 附加内容
+@router.post("/unlock/extra")
+def unlock_extra(body: ExtraUnlockIn, request: Request, response: Response) -> dict:
+    """三道题都填了就放行。
+
+    作者的原话是「无论答什么其实都是对的，只是想挡住一些人」，
+    所以这里不比对答案，只要求每道题都有内容——真正的作用是让人停一下。
+    """
+    content, _, _ = _require()
+    _check_rate(request)
+
+    stage = next(
+        (
+            s
+            for s in content.get("stages", [])
+            if s.get("id") == body.stage and s.get("extras")
+        ),
+        None,
+    )
+    if stage is None:
+        raise HTTPException(status_code=404, detail="没有这个阶段。")
+
+    questions = (stage["extras"].get("gate") or {}).get("questions") or []
+    answers = [(a or "").strip()[:100] for a in (body.answers or [])]
+    if len(answers) != len(questions) or any(not a for a in answers):
+        raise HTTPException(status_code=400, detail="三个问题都要填。")
+
+    sid = _session_id(request, response)
+    _record_unlock(sid, "extra", body.stage)
+    return {"ok": True, "stage": body.stage}
 
 
 # ---------------------------------------------------------------- 公开留言

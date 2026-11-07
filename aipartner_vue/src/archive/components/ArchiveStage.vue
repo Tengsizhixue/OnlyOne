@@ -47,8 +47,14 @@
       </div>
     </div>
 
-    <!-- 附加内容直接挂在本阶段里，跟着名单一起下发，不用答题就能看 -->
-    <ExtraSection v-if="hasExtras" :section="stage.extras" />
+    <!-- 附加内容挂在本阶段里：答对三道题才展开那几个人 -->
+    <ExtraSection
+      v-if="hasExtras"
+      :section="stage.extras"
+      :stage-id="stage.id"
+      :unlocked="extrasUnlocked.includes(stage.id)"
+      @unlocked="emit('extra-unlocked', stage.id)"
+    />
   </section>
 </template>
 
@@ -65,9 +71,11 @@ const props = defineProps({
   // 父级刚揭示的人：{ stage, person }，只给那一行播一次翻牌动画
   justRevealed: { type: Object, default: null },
   order: { type: Number, default: 0 },
+  // 已答过题的附加内容（按栏 id）
+  extrasUnlocked: { type: Array, default: () => [] },
 })
 
-const emit = defineEmits(['unlock'])
+const emit = defineEmits(['unlock', 'extra-unlocked'])
 
 const REDUCED =
   typeof window !== 'undefined' &&

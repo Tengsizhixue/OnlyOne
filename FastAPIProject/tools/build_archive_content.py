@@ -183,6 +183,12 @@ def parse(raw: str):
                 text = text.replace(key, "***")
         return text
 
+    # 附加内容要答对三个问题才显示：题目与答对后的那句说明随 content.json 公开下发，
+    # 答案本身不校验（作者本意是「随便答都对，只挡人」），但仍然要过一遍真名遮罩。
+    gate = spec.get("gate") or {}
+    gate_questions = [mask_names(q) for q in (gate.get("questions") or []) if q]
+    gate_note = mask_names(gate.get("note", ""))
+
     extras_public = [
         {
             "id": item["id"],
@@ -257,9 +263,15 @@ def parse(raw: str):
                     }
                     for g in s["groups"]
                 ],
-                # 附加内容挂在它所属的那一栏里，跟名单一起下发，不再需要答题解锁
+                # 附加内容挂在它所属的那一栏里，答题（三题都填）之后才展示条目
                 **(
-                    {"extras": {"intro": extra_intro, "items": extras_public}}
+                    {
+                        "extras": {
+                            "intro": extra_intro,
+                            "gate": {"questions": gate_questions, "note": gate_note},
+                            "items": extras_public,
+                        }
+                    }
                     if s["id"] == extra_stage
                     else {}
                 ),
@@ -345,13 +357,20 @@ def validate(content, answers, stats):
                         )
                     seen.setdefault(py, p["id"])
 
-    # 附加内容：直接下发的公开长文，结构要完整，且不能残留未替换的引用
+    # 附加内容：答题后才展示的公开长文，题目与结构要完整，且不能残留未替换的引用
     for st in content["stages"]:
         extras = st.get("extras")
         if not extras:
             continue
         if not extras.get("items"):
             errors.append(f"{st['title']} 的附加内容没有条目")
+        gate = extras.get("gate") or {}
+        if not gate.get("questions"):
+            errors.append(f"{st['title']} 的附加内容缺少题目")
+        elif len(gate["questions"]) != 3:
+            errors.append(f"{st['title']} 的附加内容应为 3 个问题，实际 {len(gate['questions'])} 个")
+        if not gate.get("note"):
+            errors.append(f"{st['title']} 的附加内容缺少答对后的说明")
         for item in extras.get("items", []):
             if not item.get("id") or not item.get("hint"):
                 errors.append("附加条目缺少 id 或 hint")
