@@ -70,10 +70,6 @@ def inner_of(fragment: str, tag: str) -> str:
 
 
 def parse(raw: str):
-    # ---------- 样式 ----------
-    styles = re.findall(r"<style[^>]*>(.*?)</style>", raw, re.S)
-    css = "\n\n".join(s.strip() for s in styles)
-
     # ---------- 正文结构 ----------
     stages = []
     people_all = []
@@ -356,7 +352,7 @@ def parse(raw: str):
         ),
         "missing_refs": missing,
     }
-    return content, answers, css, stats
+    return content, answers, stats
 
 
 def validate(content, answers, stats):
@@ -494,7 +490,7 @@ def main():
         raise SystemExit(f"找不到源文件：{src}")
 
     raw = src.read_text(encoding="utf-8")
-    content, answers, css, stats = parse(raw)
+    content, answers, stats = parse(raw)
     errors, warnings = validate(content, answers, stats)
     for w in warnings:
         print("提示：", w)
@@ -504,8 +500,7 @@ def main():
             print("  -", e, file=sys.stderr)
         raise SystemExit(1)
 
-    # 注意：不再从 source.html 导出 CSS。页面的样式（移动端档位、动效、附加题）
-    # 已经由 Vue 版手工维护，覆盖回去会把这些改动全部冲掉。
+    # 本脚本只产出两份 JSON；页面样式在 aipartner_vue/src/archive/archive.css 手工维护。
     for p in (OUT_CONTENT, OUT_ANSWERS):
         p.parent.mkdir(parents=True, exist_ok=True)
     OUT_CONTENT.write_text(json.dumps(content, ensure_ascii=False, indent=2), encoding="utf-8")

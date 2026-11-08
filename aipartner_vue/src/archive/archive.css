@@ -77,7 +77,6 @@ button{font:inherit;color:inherit}
   font-size:21px;font-weight:600;line-height:1;color:#f1f5f9;
   font-variant-numeric:tabular-nums;
 }
-.is-ro .cnt{cursor:default}
 
 /* ---------- 名单 ---------- */
 .roster[hidden]{display:none}
@@ -88,7 +87,7 @@ button{font:inherit;color:inherit}
 .p.is-open{border-bottom:0}
 .p-body{border-bottom:1px solid rgba(255,255,255,.04)}
 .roster > :last-child{border-bottom:0}
-.p-btn,.p-txt{
+.p-btn{
   display:flex;align-items:center;gap:9px;
   width:100%;min-height:44px;padding:8px 4px;
   background:none;border:0;text-align:left;
@@ -96,10 +95,9 @@ button{font:inherit;color:inherit}
   transition:color .4s,letter-spacing .4s,background .4s;
 }
 .p-btn{cursor:pointer}
-.p-txt{cursor:pointer}
 .p-dot{width:5px;height:5px;border-radius:50%;background:#cbd5e1;flex:0 0 auto;
   opacity:.3;transform:scale(.6);transition:opacity .4s,transform .4s}
-.p.is-open .p-btn,.p.is-open .p-txt{color:#fff;letter-spacing:5px}
+.p.is-open .p-btn{color:#fff;letter-spacing:5px}
 .p.is-open .p-dot{opacity:.9;transform:scale(1)}
 
 .p-tx{outline:none;border-radius:3px;padding:1px 3px;margin:-1px -3px;transition:background .3s}
@@ -107,10 +105,10 @@ button{font:inherit;color:inherit}
 .p-tx:focus{background:rgba(255,255,255,.1);box-shadow:0 0 0 1px rgba(255,255,255,.2)}
 
 /* 被减去的人：偏暗 + 删除线 */
-.p.is-del .p-btn,.p.is-del .p-txt{color:#5f6975}
+.p.is-del .p-btn{color:#5f6975}
 .p.is-del .p-tx{text-decoration:line-through}
 .p.is-del .p-dot{background:#5f6975;opacity:.22}
-.p.is-del.is-open .p-btn,.p.is-del.is-open .p-txt{color:#8b95a2;letter-spacing:4px}
+.p.is-del.is-open .p-btn{color:#8b95a2;letter-spacing:4px}
 .p.is-del.is-open .p-dot{background:#8b95a2;opacity:.6}
 
 .quote{
@@ -128,42 +126,12 @@ button{font:inherit;color:inherit}
 .quote[hidden]{display:none}
 .quote-del{border-left-color:rgba(255,255,255,.12);color:#8b95a2}
 
-/* 单独贴图的人：展开时显示图片 */
-.pic[hidden]{display:none}
-.pic{margin:0 0 14px;padding-left:14px;
-  border-left:1px solid rgba(255,255,255,.2);
-  animation:quote-in .55s cubic-bezier(.22,.8,.3,1) both}
-.pic img{display:block;width:100%;height:auto;border-radius:8px;
-  border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.03)}
 .quote:hover{background:rgba(255,255,255,.03)}
 .quote:focus{background:rgba(255,255,255,.06);box-shadow:0 0 0 1px rgba(255,255,255,.14)}
-.quote:empty::before{content:"（点这里写描述）";color:#4a545f}
 
-/* ---------- 多段描述：展开 / 收起 ---------- */
-.has-more.is-open .quote:not(.more-q){cursor:pointer}
-.quote + .more-q{margin-top:-6px}
-.more-q:hover{background:none}
+/* 描述正文加粗；长串英文、链接要能随时断行，别把列撑破 */
 .quote b{color:#dbe3ee;font-weight:600}
-.more-btn{
-  display:inline-flex;align-items:center;gap:4px;
-  margin:4px 0 2px 12px;padding:2px 11px;
-  border-radius:999px;cursor:pointer;
-  font-family:inherit;font-size:11.5px;line-height:1.9;
-  letter-spacing:.14em;text-indent:.14em;
-  color:#98a4b3;background:rgba(255,255,255,.045);
-  border:1px solid rgba(255,255,255,.13);
-  vertical-align:middle;
-  transition:color .3s,background .3s,border-color .3s;
-  animation:hint 2.6s ease-in-out infinite;
-}
-.more-btn:hover{color:#e2e8f0;background:rgba(255,255,255,.10);border-color:rgba(255,255,255,.26)}
-.more-btn[hidden]{display:none}
-/* 长描述采用分层阅读：先看开头，需要时再展开后续内容 */
-.more-q{padding-top:8px}
-.has-more .quote{overflow-wrap:anywhere}
-.more-btn{white-space:nowrap}
-.p-body .quote{cursor:default}
-@keyframes hint{0%,100%{opacity:.58}50%{opacity:1}}
+.p-body .quote{overflow-wrap:anywhere;cursor:default}
 
 /* ---------- 页脚 ---------- */
 .foot{padding:48px 0 96px;text-align:center}
@@ -175,10 +143,10 @@ button{font:inherit;color:inherit}
 
 @media (hover:hover){
   .col:hover{background:rgba(255,255,255,.042);border-color:rgba(255,255,255,.13)}
-  .group:not(.is-ro) .cnt:hover{opacity:.85}
-  .p-btn:hover,.p-txt:hover{color:#fff;letter-spacing:5px;background:rgba(255,255,255,.025)}
-  .p-btn:hover .p-dot,.p-txt:hover .p-dot{opacity:.9;transform:scale(1)}
-  .p.is-del .p-btn:hover,.p.is-del .p-txt:hover{color:#8b95a2;letter-spacing:4px}
+  .group .cnt:hover{opacity:.85}
+  .p-btn:hover{color:#fff;letter-spacing:5px;background:rgba(255,255,255,.025)}
+  .p-btn:hover .p-dot{opacity:.9;transform:scale(1)}
+  .p.is-del .p-btn:hover{color:#8b95a2;letter-spacing:4px}
 }
 
 @media (max-width:1279px){
@@ -204,15 +172,13 @@ button{font:inherit;color:inherit}
   .cnt{min-height:50px}
   .cnt-t{font-size:14.5px;letter-spacing:.14em}
   .cnt-n{font-size:22px}
-  .p-btn,.p-txt{font-size:16px;letter-spacing:2.2px}
-  .p.is-open .p-btn,.p.is-open .p-txt{letter-spacing:4px}
+  .p-btn{font-size:16px;letter-spacing:2.2px}
+  .p.is-open .p-btn{letter-spacing:4px}
   .quote{font-size:15px;padding-left:14px}
   .foot{padding:34px 0 84px}
-  .more-btn{font-size:12px;padding:2px 10px;margin-left:8px}
 }
 @media (prefers-reduced-motion:reduce){
   .col,.quote{animation:none}
-  .more-btn{animation:none}
   *{transition-duration:.01ms}
 }
 
@@ -253,10 +219,6 @@ button{font:inherit;color:inherit}
 .extra-note{margin:2px 0 4px;color:#b6c2d1;font-size:13px;line-height:2;letter-spacing:.03em}
 .extra-item{padding:16px 0;border-top:1px solid rgba(255,255,255,.07)}
 .extra-hint{color:#d5deea;font-size:14px;line-height:1.9;letter-spacing:.04em;margin:0 0 9px}
-.extra-description{margin-top:12px;padding:15px 16px;border-left:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.025);color:#b6c2d1;font-size:13px;line-height:2;letter-spacing:.025em;overflow-wrap:anywhere}
-.extra-description[hidden]{display:none}
-.extra-description p{margin:0 0 12px}
-.extra-description p:last-child{margin-bottom:0}
 .extra-subhead{margin:22px 0 10px;color:#dce5f0;font-size:14px;font-weight:600;letter-spacing:.06em}
 .extra-subhead:first-child{margin-top:0}
 .extra-list{padding-left:1.5em;margin:8px 0 14px}
@@ -270,7 +232,7 @@ button{font:inherit;color:inherit}
 .extra-table th,.extra-table td{padding:9px 10px;border:1px solid rgba(255,255,255,.09);text-align:left;vertical-align:top}
 .extra-table th{color:#dce5f0;background:rgba(255,255,255,.055);font-weight:600}
 .extra-table td{color:#b9c5d3}
-@media(max-width:480px){.extra-fold-summary{padding:14px}.extra-body{padding:2px 13px 6px}.extra-description{padding:12px;font-size:12.5px}.extra-table{min-width:380px}}
+@media(max-width:480px){.extra-fold-summary{padding:14px}.extra-body{padding:2px 13px 6px}.extra-table{min-width:380px}}
 
 /* 匿名阶段解锁：叠加在原有页面设定之上，不改变既有栏目与附加内容 */
 .phase-unlock-form{display:flex;gap:8px;align-items:center;margin:12px 0 4px}
@@ -280,14 +242,12 @@ button{font:inherit;color:inherit}
 .phase-unlock-btn:hover{background:rgba(255,255,255,.12)}
 .phase-unlock-feedback{min-height:20px;margin:0 0 10px;color:#8996a6;font-size:11px;letter-spacing:.03em}
 .phase-unlock-feedback.ok{color:#b8d8c4}
-.anon-name-ref{white-space:nowrap}
 @media(max-width:480px){.phase-unlock-form{gap:6px}.phase-unlock-input{font-size:14px}.phase-unlock-btn{padding:8px 10px}}
 
 /* ---------- 只读页面：去掉编辑态残留 ---------- */
 .col-title:hover,.col-title:focus,
 .p-tx:hover,.p-tx:focus,
 .quote:hover,.quote:focus{background:none;box-shadow:none}
-.quote:empty::before{content:none}
 [v-cloak]{display:none}
 .archive-status{min-height:60vh;display:flex;align-items:center;justify-content:center;
   color:#8996a6;font-size:13px;letter-spacing:.08em;text-align:center;padding:0 24px}
@@ -315,9 +275,9 @@ button{font:inherit;color:inherit}
   .cnt-t{font-size:15.5px;letter-spacing:.1em}
 
   /* 人名：字距 2.2px → 1px，展开态也不再撑到 4px */
-  .p-btn,.p-txt{padding:10px 4px;letter-spacing:1px}
-  .p.is-open .p-btn,.p.is-open .p-txt{letter-spacing:1px}
-  .p.is-del.is-open .p-btn,.p.is-del.is-open .p-txt{letter-spacing:1px}
+  .p-btn{padding:10px 4px;letter-spacing:1px}
+  .p.is-open .p-btn{letter-spacing:1px}
+  .p.is-del.is-open .p-btn{letter-spacing:1px}
 
   /* 姓名两列：88 人单列滚动过长，390px 下每列约 155px，放三个字绰绰有余。
      展开的那条跨满整行，描述仍然按整幅宽排版。 */
@@ -328,8 +288,6 @@ button{font:inherit;color:inherit}
 
   /* 描述正文 */
   .quote{font-size:15.5px;line-height:1.85;letter-spacing:.02em;margin-bottom:16px}
-  .more-btn{font-size:14px;line-height:1.4;padding:8px 14px;min-height:40px;
-    margin-left:10px;animation:none}
 
   /* ---------- 阶段解锁表单 ----------
      手机上原来一行要占 ~54px（body 的 line-height:1.85 把输入框撑高了），
@@ -670,15 +628,15 @@ button{font:inherit;color:inherit}
 /* ---------- ① 触屏按压反馈 ---------- */
 /* iOS Safari 对非链接元素默认不触发 :active，靠 fx.js 里挂的空 touchstart 开启 */
 @media (pointer:coarse){
-  .cnt,.p-btn,.p-txt,.cmt-btn,.cmt-cancel,.cmt-del,.cmt-reply-btn,
-  .phase-unlock-btn,.more-btn,.extra-tab,.extra-collapse{
+  .cnt,.p-btn,.cmt-btn,.cmt-cancel,.cmt-del,.cmt-reply-btn,
+  .phase-unlock-btn,.extra-tab,.extra-collapse{
     transition:transform .12s ease,opacity .12s ease,
       background .2s ease,border-color .2s ease,color .2s ease;
   }
-  .cnt:active,.p-btn:active,.p-txt:active,.cmt-btn:active:not(:disabled),
+  .cnt:active,.p-btn:active,.cmt-btn:active:not(:disabled),
   .cmt-cancel:active,.cmt-del:active,.cmt-reply-btn:active,
   .phase-unlock-btn:active:not(:disabled),
-  .more-btn:active,.extra-tab:active,.extra-collapse:active{
+  .extra-tab:active,.extra-collapse:active{
     opacity:.8;transform:scale(.98);
   }
 }
