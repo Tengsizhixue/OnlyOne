@@ -69,6 +69,9 @@
         />
       </svg>
     </button>
+
+    <!-- 全页只挂这一个确认框，内容按需从 confirm.js 拿；它自己 teleport 到 body -->
+    <ConfirmDialog />
   </div>
 </template>
 
@@ -78,6 +81,7 @@ import ArchiveStage from './components/ArchiveStage.vue'
 import StageInterlude from './components/StageInterlude.vue'
 import PhotoSection from './components/PhotoSection.vue'
 import NotifyBar from './components/NotifyBar.vue'
+import ConfirmDialog from './components/ConfirmDialog.vue'
 import { getContent, getState, unlockPerson } from './api.js'
 import { initAmbientLight, initTouchFeedback } from './fx.js'
 

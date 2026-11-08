@@ -144,19 +144,6 @@
       </div>
       <p v-if="tip" class="cmt-tip" :class="{ bad: tipBad }">{{ tip }}</p>
     </div>
-
-    <!-- 页面内确认框：不依赖浏览器原生 dialog，微信里也能正常弹 -->
-    <div v-if="confirmMsg" class="confirm-mask" @click.self="answerConfirm(false)">
-      <div class="confirm-box" role="dialog" aria-modal="true" :aria-label="confirmMsg">
-        <p class="confirm-msg">{{ confirmMsg }}</p>
-        <div class="confirm-acts">
-          <button class="confirm-yes" type="button" @click="answerConfirm(true)">
-            {{ confirmOkText }}
-          </button>
-          <button class="confirm-no" type="button" @click="answerConfirm(false)">取消</button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -172,6 +159,7 @@ import {
   pinComment,
 } from '../api.js'
 import { startAlignedPoll } from '../poll.js'
+import { askConfirm, settleConfirm } from '../confirm.js'
 
 const props = defineProps({
   personId: { type: String, required: true },
@@ -197,28 +185,8 @@ const nick = ref(readNick())
 // 作者模式：是否已用口令换到签名 cookie（状态由服务端 /author/status 确认）
 const isAuthor = ref(false)
 
-// 页面内确认框：不用 window.confirm —— 微信内置浏览器（X5 / iOS WKWebView）
-// 会把它降级成「是否关闭网页」的系统提示，或者干脆吞掉不返回
-const confirmMsg = ref('')
-const confirmOkText = ref('确定')
-let confirmResolve = null
-
-function askConfirm(message, okText = '确定') {
-  // 上一条还挂着就先当作取消，避免 promise 悬空
-  if (confirmResolve) answerConfirm(false)
-  confirmMsg.value = message
-  confirmOkText.value = okText
-  return new Promise((resolve) => {
-    confirmResolve = resolve
-  })
-}
-
-function answerConfirm(ok) {
-  const resolve = confirmResolve
-  confirmResolve = null
-  confirmMsg.value = ''
-  if (resolve) resolve(ok)
-}
+// 删除确认走全页共用那个弹窗：不用 window.confirm（微信内置浏览器会把它
+// 降级成「是否关闭网页」，或者干脆吞掉不返回）。实现见 ../confirm.js。
 
 // 回复相关
 const replyTarget = ref(null)     // 被回复留言的 {id, nick, snippet}
@@ -373,8 +341,8 @@ async function checkAuthor() {
 }
 
 /**
- * 留言框里输「210318」这一串暗号就进作者模式；
- * 也保留「#作者 暗号」的写法，方便以后换成更长的口令。
+ * 留言框里直接输暗号就进作者模式（暗号配在服务器 .env，不进仓库）；
+ * 也保留「#作者 暗号」的写法，方便换成更长的口令。
  * 返回 true 表示已经被当成命令处理掉，不要再发出去。
  */
 async function handleCommand(text) {
@@ -585,6 +553,6 @@ onBeforeUnmount(() => {
   stopPolling()
   document.removeEventListener('visibilitychange', onVisibility)
   // 组件被卸载时确认框还挂着的话，让 await 立即结束
-  if (confirmResolve) answerConfirm(false)
+  settleConfirm(false)
 })
 </script>
