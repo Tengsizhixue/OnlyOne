@@ -69,3 +69,32 @@ export function addComment(person, nick, body, parent = null) {
 export function deleteComment(id) {
   return request(`/comments/${id}`, { method: 'DELETE' })
 }
+
+// 留言提醒：只回「哪个人下面有新消息」，正文不在这里，所以不会漏内容
+export function getNotifications(since) {
+  return request(`/notifications?since=${Number(since) || 0}`)
+}
+
+// 作者模式：留言框里输暗号换一个服务端签名的 cookie，
+// 之后发的留言由后端标成作者；身份判断完全在服务端，前端不传 role。
+export function authorStatus() {
+  return request('/author/status')
+}
+
+export function authorLogin(key) {
+  return request('/author/login', {
+    method: 'POST',
+    body: JSON.stringify({ key }),
+  })
+}
+
+export function authorLogout() {
+  return request('/author/logout', { method: 'POST' })
+}
+
+export function pinComment(id, pinned) {
+  return request(`/comments/${id}/pin`, {
+    method: 'POST',
+    body: JSON.stringify({ pinned }),
+  })
+}

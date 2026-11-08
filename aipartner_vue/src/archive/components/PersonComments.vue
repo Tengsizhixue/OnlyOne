@@ -1,5 +1,5 @@
 <template>
-  <div class="cmt" :data-person="personId">
+  <div class="cmt" :data-person="personId" @cmt-refresh="onRefreshRequest">
     <div class="cmt-head">
       <span aria-hidden="true" class="cmt-line"></span>
       <span class="cmt-t">其他人的留言</span>
@@ -11,15 +11,30 @@
     <p v-else-if="!items.length" class="cmt-tip">这里还没有其他人的看法。</p>
 
     <ul v-if="items.length" class="cmt-list">
-      <li v-for="item in items" :key="item.id" class="cmt-item" :class="{ 'is-new': freshIds.has(item.id) }">
+      <li
+        v-for="item in items"
+        :key="item.id"
+        class="cmt-item"
+        :class="{
+          'is-new': freshIds.has(item.id),
+          'is-author': item.role === 'author',
+          'is-mine': item.mine && item.role !== 'author',
+        }"
+      >
         <div class="cmt-meta">
           <span class="cmt-who">{{ item.nick || '匿名' }}</span>
+          <span v-if="item.role === 'author'" class="cmt-badge">作者</span>
+          <span v-else-if="item.mine" class="cmt-mine-mark">我</span>
+          <span v-if="item.pinned" class="cmt-pin-mark">置顶</span>
           <span class="cmt-time">{{ when(item.created) }}</span>
           <span class="cmt-ops">
             <button class="cmt-reply-btn" type="button" @click="openReply(item)">
               回复
             </button>
-            <button v-if="item.mine" class="cmt-del" type="button" @click="remove(item)">
+            <button v-if="isAuthor" class="cmt-reply-btn" type="button" @click="togglePin(item)">
+              {{ item.pinned ? '取消置顶' : '置顶' }}
+            </button>
+            <button v-if="item.mine || isAuthor" class="cmt-del" type="button" @click="remove(item)">
               删除
             </button>
           </span>
@@ -47,15 +62,26 @@
 
         <!-- 回复区：这一楼下的讨论 -->
         <ul v-if="item.replies && item.replies.length" class="cmt-replies">
-          <li v-for="r in item.replies" :key="r.id" class="cmt-reply" :class="{ 'is-new': freshIds.has(r.id) }">
+          <li
+            v-for="r in item.replies"
+            :key="r.id"
+            class="cmt-reply"
+            :class="{
+              'is-new': freshIds.has(r.id),
+              'is-author': r.role === 'author',
+              'is-mine': r.mine && r.role !== 'author',
+            }"
+          >
             <div class="cmt-meta">
               <span class="cmt-who">{{ r.nick || '匿名' }}</span>
+              <span v-if="r.role === 'author'" class="cmt-badge">作者</span>
+              <span v-else-if="r.mine" class="cmt-mine-mark">我</span>
               <span class="cmt-time">{{ when(r.created) }}</span>
               <span class="cmt-ops">
                 <button class="cmt-reply-btn" type="button" @click="openReply(r)">
                   回复
                 </button>
-                <button v-if="r.mine" class="cmt-del" type="button" @click="removeReply(item, r)">
+                <button v-if="r.mine || isAuthor" class="cmt-del" type="button" @click="removeReply(item, r)">
                   删除
                 </button>
               </span>
@@ -89,7 +115,13 @@
     </ul>
 
     <div class="cmt-form">
-      <p class="cmt-form-head">发表新留言</p>
+      <p class="cmt-form-head">
+        发表新留言
+        <span v-if="isAuthor" class="cmt-mode">
+          作者模式 ·
+          <button class="cmt-mode-out" type="button" @click="exitAuthor">退出</button>
+        </span>
+      </p>
       <input
         v-model="nick"
         class="cmt-nick"
@@ -112,19 +144,46 @@
       </div>
       <p v-if="tip" class="cmt-tip" :class="{ bad: tipBad }">{{ tip }}</p>
     </div>
+
+    <!-- 页面内确认框：不依赖浏览器原生 dialog，微信里也能正常弹 -->
+    <div v-if="confirmMsg" class="confirm-mask" @click.self="answerConfirm(false)">
+      <div class="confirm-box" role="dialog" aria-modal="true" :aria-label="confirmMsg">
+        <p class="confirm-msg">{{ confirmMsg }}</p>
+        <div class="confirm-acts">
+          <button class="confirm-yes" type="button" @click="answerConfirm(true)">
+            {{ confirmOkText }}
+          </button>
+          <button class="confirm-no" type="button" @click="answerConfirm(false)">取消</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
-import { addComment, deleteComment, listComments } from '../api.js'
+import {
+  addComment,
+  authorLogin,
+  authorLogout,
+  authorStatus,
+  deleteComment,
+  listComments,
+  pinComment,
+} from '../api.js'
+import { startAlignedPoll } from '../poll.js'
 
 const props = defineProps({
   personId: { type: String, required: true },
 })
 
+const emit = defineEmits(['author-changed'])
+
 const NICK_KEY = 'archive.nick.v1'
-const POLL_INTERVAL = 30000 // 30 秒轮询一次
+// 留言框里以这句开头是口令，不是留言；口令本身由服务端校验
+const AUTHOR_CMD = '#作者'
+// 暗号本身就是口令：整条只有 6 位数字时先试着当暗号（失败仍然当普通留言发出去）
+const CODE_RE = /^\d{6}$/
 
 const items = ref([])
 const count = ref(0)
@@ -135,14 +194,41 @@ const tip = ref('')
 const tipBad = ref(false)
 const draft = ref('')
 const nick = ref(readNick())
+// 作者模式：是否已用口令换到签名 cookie（状态由服务端 /author/status 确认）
+const isAuthor = ref(false)
+
+// 页面内确认框：不用 window.confirm —— 微信内置浏览器（X5 / iOS WKWebView）
+// 会把它降级成「是否关闭网页」的系统提示，或者干脆吞掉不返回
+const confirmMsg = ref('')
+const confirmOkText = ref('确定')
+let confirmResolve = null
+
+function askConfirm(message, okText = '确定') {
+  // 上一条还挂着就先当作取消，避免 promise 悬空
+  if (confirmResolve) answerConfirm(false)
+  confirmMsg.value = message
+  confirmOkText.value = okText
+  return new Promise((resolve) => {
+    confirmResolve = resolve
+  })
+}
+
+function answerConfirm(ok) {
+  const resolve = confirmResolve
+  confirmResolve = null
+  confirmMsg.value = ''
+  if (resolve) resolve(ok)
+}
 
 // 回复相关
 const replyTarget = ref(null)     // 被回复留言的 {id, nick, snippet}
 const replyDraft = ref('')
 const replyInput = ref(null)
 
-// 轮询定时器
-let pollTimer = null
+// 轮询停止函数（节拍与提醒条共用，见 poll.js）
+let stopPoll = null
+// 首次加载的 promise：从提醒条跳过来时要等它，别在空列表上定位
+let firstLoad = null
 
 // 轮询拉到或刚发出的新留言 id，播一次入场动画后清除
 const freshIds = ref(new Set())
@@ -219,34 +305,134 @@ async function load() {
   }
 }
 
+/** 拉一次并落到界面上 */
+async function fetchAndApply() {
+  const data = await listComments(props.personId)
+  const next = data.items || []
+  count.value = data.count || 0
+  // 只在数据真正变化时更新，避免不必要的 DOM 重排
+  if (JSON.stringify(next) !== JSON.stringify(items.value)) {
+    const oldIds = idsOf(items.value)
+    items.value = next
+    markFresh(next, oldIds)
+  }
+}
+
 /** 轮询：静默刷新，不影响用户正在输入的内容 */
 async function pollRefresh() {
   // 用户正在写留言或回复时跳过，标签页隐藏时也跳过
   if (draft.value.trim() || replyDraft.value.trim() || document.hidden) return
   try {
-    const data = await listComments(props.personId)
-    const newItems = data.items || []
-    // 只在数据真正变化时更新，避免不必要的 DOM 重排
-    if (JSON.stringify(newItems) !== JSON.stringify(items.value)) {
-      const oldIds = idsOf(items.value)
-      items.value = newItems
-      count.value = data.count || 0
-      markFresh(newItems, oldIds)
-    }
+    await fetchAndApply()
   } catch (e) {
     // 轮询失败不提示，等下一轮
   }
 }
 
+/**
+ * 从提醒条跳过来时：先把这块的留言拉到最新，再让调用方去滚动定位，
+ * 否则会出现「提醒说有新留言，点进去却没看到」。
+ * 首次 load 还在路上时直接采信它的结果，不重复发请求。
+ */
+async function onRefreshRequest(ev) {
+  try {
+    if (loading.value) {
+      // 首次 load 还在路上：等它落地，别再发一次，也别在空列表上定位
+      if (firstLoad) await firstLoad
+    } else {
+      await fetchAndApply()
+    }
+  } catch (e) {
+    // 拉不到就按原样定位，提醒本身还有效
+  }
+  const then = ev && ev.detail ? ev.detail.then : null
+  if (typeof then === 'function') then()
+}
+
 function startPolling() {
   stopPolling()
-  pollTimer = setInterval(pollRefresh, POLL_INTERVAL)
+  stopPoll = startAlignedPoll(pollRefresh)
 }
 
 function stopPolling() {
-  if (pollTimer) {
-    clearInterval(pollTimer)
-    pollTimer = null
+  if (stopPoll) {
+    stopPoll()
+    stopPoll = null
+  }
+}
+
+// -------- 作者模式 --------
+async function checkAuthor() {
+  try {
+    const data = await authorStatus()
+    isAuthor.value = !!data.author
+  } catch (e) {
+    // 取不到就按访客处理，不影响留言本身
+    isAuthor.value = false
+  }
+}
+
+/**
+ * 留言框里输「210318」这一串暗号就进作者模式；
+ * 也保留「#作者 暗号」的写法，方便以后换成更长的口令。
+ * 返回 true 表示已经被当成命令处理掉，不要再发出去。
+ */
+async function handleCommand(text) {
+  const isCmd = text.startsWith(AUTHOR_CMD)
+  if (!isCmd && !CODE_RE.test(text)) return false
+  const key = isCmd ? text.slice(AUTHOR_CMD.length).trim() : text
+  if (!key) {
+    tip.value = '口令呢？'
+    tipBad.value = true
+    return true
+  }
+  try {
+    await authorLogin(key)
+    isAuthor.value = true
+    draft.value = ''
+    replyDraft.value = ''
+    closeReply()
+    tip.value = '已进入作者模式：所有人名都会显示，之后发的留言带「作者」标记，30 天内有效。'
+    tipBad.value = false
+    emit('author-changed', true)
+  } catch (e) {
+    // 6 位数字只是「可能是暗号」，验不过就当普通留言继续发，别把内容吞了
+    if (!isCmd) return false
+    tip.value = e.message || '这条不能发。'
+    tipBad.value = true
+  }
+  return true
+}
+
+async function exitAuthor() {
+  try {
+    await authorLogout()
+  } catch (e) {
+    // 请求失败也先在本地按访客显示，下次刷新会重新问服务端
+  }
+  isAuthor.value = false
+  tip.value = '已退出作者模式。'
+  tipBad.value = false
+  emit('author-changed', false)
+}
+
+async function togglePin(item) {
+  if (busy.value) return
+  busy.value = true
+  tip.value = ''
+  tipBad.value = false
+  try {
+    await pinComment(item.id, !item.pinned)
+    // 本地按「置顶在前、其余保持原顺序」重排，避免整列表闪烁
+    item.pinned = !item.pinned
+    const pinned = items.value.filter((i) => i.pinned)
+    const rest = items.value.filter((i) => !i.pinned)
+    items.value = [...pinned, ...rest]
+  } catch (e) {
+    tip.value = e.message || '置顶失败，请稍后再试。'
+    tipBad.value = true
+  } finally {
+    busy.value = false
   }
 }
 
@@ -261,6 +447,8 @@ async function submit() {
     tipBad.value = true
     return
   }
+  // 口令命令：走登录，不写留言
+  if (await handleCommand(text)) return
   busy.value = true
   try {
     const res = await addComment(props.personId, nick.value.trim(), text)
@@ -305,6 +493,8 @@ async function submitReply(parentItem) {
   if (busy.value) return
   const text = replyDraft.value.trim()
   if (!text) return
+  // 回复框里输的也可能是口令，别把它当回复发出去
+  if (await handleCommand(text)) return
   busy.value = true
   tip.value = ''
   tipBad.value = false
@@ -333,10 +523,17 @@ async function submitReply(parentItem) {
 // -------- 删除 --------
 async function remove(item) {
   const replyCount = (item.replies || []).length
-  const msg = replyCount
-    ? `删除这条留言？其下 ${replyCount} 条回复也会被删除，不能恢复。`
-    : '删除这条留言？删除后不能恢复。'
-  if (!window.confirm(msg)) return
+  let msg
+  if (!item.mine && isAuthor) {
+    msg = replyCount
+      ? `以作者身份删掉这条留言？其下 ${replyCount} 条回复也会一起隐藏。`
+      : '以作者身份删掉这条留言？对方将看不到它。'
+  } else if (replyCount) {
+    msg = `删除这条留言？其下 ${replyCount} 条回复也会被删除，不能恢复。`
+  } else {
+    msg = '删除这条留言？删除后不能恢复。'
+  }
+  if (!(await askConfirm(msg))) return
   busy.value = true
   tip.value = ''
   tipBad.value = false
@@ -354,7 +551,8 @@ async function remove(item) {
 }
 
 async function removeReply(parentItem, reply) {
-  if (!window.confirm('删除这条回复？')) return
+  const msg = !reply.mine && isAuthor ? '以作者身份隐藏这条回复？' : '删除这条回复？'
+  if (!(await askConfirm(msg))) return
   busy.value = true
   tip.value = ''
   tipBad.value = false
@@ -371,12 +569,22 @@ async function removeReply(parentItem, reply) {
   }
 }
 
+function onVisibility() {
+  if (!document.hidden) pollRefresh()
+}
+
 onMounted(() => {
-  load()
+  firstLoad = load()
+  checkAuthor()
   startPolling()
+  // 切回标签页立刻补一次，不用等下一个刻度
+  document.addEventListener('visibilitychange', onVisibility)
 })
 
 onBeforeUnmount(() => {
   stopPolling()
+  document.removeEventListener('visibilitychange', onVisibility)
+  // 组件被卸载时确认框还挂着的话，让 await 立即结束
+  if (confirmResolve) answerConfirm(false)
 })
 </script>

@@ -488,6 +488,7 @@ button{font:inherit;color:inherit}
   margin:-2px 0 14px;padding:12px 14px;border-radius:10px;
   background:rgba(201,168,106,.04);
   border:1px solid rgba(201,168,106,.14);
+  transition:background .45s ease,border-color .45s ease;
 }
 .cmt-head{display:flex;align-items:baseline;gap:8px;margin-bottom:11px}
 .cmt-line{
@@ -505,25 +506,68 @@ button{font:inherit;color:inherit}
 .cmt-tip.bad{color:#d9a6a6}
 .cmt-list{
   margin:0 0 14px;padding:0;list-style:none;
-  display:flex;flex-direction:column;gap:12px;
+  display:flex;flex-direction:column;gap:10px;
 }
-.cmt-item{padding-left:11px;border-left:1px solid rgba(255,255,255,.08)}
-.cmt-meta{display:flex;align-items:baseline;gap:8px;margin-bottom:4px}
-.cmt-who{color:#d9c79b;font-size:12.5px;letter-spacing:.06em}
+/* 每条顶层留言一张小卡片：之前只靠一条极淡的左线分隔，手机上整段糊成一片，
+   分不清哪条是哪条。给每块一个边框，边界才立得住。 */
+.cmt-item{
+  padding:10px 12px 11px;border-radius:9px;
+  background:rgba(255,255,255,.022);
+  border:1px solid rgba(255,255,255,.065);
+  transition:background .4s,border-color .4s;
+}
+/* 自己发的：左边亮一条 + 名字换成冷色 + 「我」标记，扫一眼就知道哪条是自己的 */
+.cmt-item.is-mine{
+  background:rgba(138,166,196,.075);
+  border-color:rgba(150,180,210,.2);
+  border-left:2px solid rgba(150,180,210,.55);
+  padding-left:11px;
+}
+.cmt-meta{display:flex;align-items:baseline;gap:7px;margin-bottom:6px}
+/* 昵称最亮最重、时间最暗最轻：一眼分得清「谁说的」和「什么时候说的」 */
+.cmt-who{
+  color:#e8dcbe;font-size:12.5px;font-weight:600;letter-spacing:.02em;
+  max-width:12em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.cmt-item.is-mine .cmt-who{color:#cadcee}
+/* ---------- 作者标记：一枚小徽章 + 左侧强调线，字号字重一律不动 ---------- */
+.cmt-badge{
+  flex:none;padding:1px 6px;border-radius:3px;
+  background:rgba(201,168,106,.9);color:#1b1a15;
+  font-size:10px;letter-spacing:.12em;line-height:1.5;
+}
+.cmt-pin-mark{flex:none;color:#c9a86a;font-size:10.5px;letter-spacing:.1em;opacity:.72}
+/* 「我」用冷色，和作者的金色徽章分得开，不会混成同一种标记 */
+.cmt-mine-mark{
+  flex:none;padding:1px 6px;border-radius:3px;
+  background:rgba(150,180,210,.18);color:#b9cfe5;
+  font-size:10px;letter-spacing:.1em;line-height:1.5;
+}
+.cmt-item.is-author{border-left:2px solid rgba(201,168,106,.6);padding-left:11px}
+.cmt-reply.is-author .cmt-who{color:#e0cfa6}
+.cmt-reply.is-mine .cmt-who{color:#cadcee}
+.cmt-mode{margin-left:9px;color:#c9a86a;font-size:11px;letter-spacing:.12em}
+.cmt-mode-out{
+  min-height:20px;padding:0;border:0;background:none;cursor:pointer;
+  font-family:inherit;font-size:11px;letter-spacing:.12em;
+  color:#7b8794;text-decoration:underline;text-underline-offset:3px;
+  transition:color .25s;
+}
+.cmt-mode-out:hover{color:#c9a86a}
 .cmt-time{
-  color:#6f7b89;font-size:11px;letter-spacing:.04em;
+  color:#647080;font-size:10.5px;letter-spacing:.02em;
   font-variant-numeric:tabular-nums;
 }
 .cmt-del{
-  margin-left:auto;min-height:24px;padding:0 9px;border-radius:999px;cursor:pointer;
-  font-family:inherit;font-size:11px;letter-spacing:.06em;line-height:1;
-  color:#a48c8c;background:transparent;border:1px solid rgba(201,120,120,.22);
+  margin-left:auto;min-height:22px;padding:0 8px;border-radius:999px;cursor:pointer;
+  font-family:inherit;font-size:10.5px;letter-spacing:.04em;line-height:1;
+  color:#9d8888;background:transparent;border:1px solid rgba(201,120,120,.18);
   transition:color .25s,border-color .25s;
 }
 .cmt-del:hover{color:#d9a6a6;border-color:rgba(201,120,120,.45)}
 .cmt-body{
   margin:0;white-space:pre-wrap;overflow-wrap:anywhere;
-  color:#c8d2df;font-size:13.5px;line-height:1.9;letter-spacing:.03em;
+  color:#cfdaea;font-size:13.5px;line-height:1.85;letter-spacing:.02em;
 }
 .cmt-form{display:flex;flex-direction:column;gap:8px}
 .cmt-nick,.cmt-input{
@@ -553,26 +597,32 @@ button{font:inherit;color:inherit}
 }
 
 /* ---------- meta 行操作区：无边框小字、右对齐 ---------- */
-.cmt-ops{margin-left:auto;display:inline-flex;align-items:center;gap:12px}
+.cmt-ops{margin-left:auto;display:inline-flex;align-items:center;gap:10px}
 .cmt-reply-btn{
-  min-height:24px;padding:0 2px;border:0;background:none;cursor:pointer;
-  font-family:inherit;font-size:11px;letter-spacing:.06em;line-height:1;
-  color:#7b8794;opacity:.8;transition:color .25s,opacity .25s;
+  min-height:22px;padding:0 2px;border:0;background:none;cursor:pointer;
+  font-family:inherit;font-size:10.5px;letter-spacing:.04em;line-height:1;
+  color:#74818f;opacity:.9;transition:color .25s,opacity .25s;
 }
 .cmt-reply-btn:hover{color:#c9a86a;opacity:1}
 
-/* ---------- 回复区：这一楼下的讨论，整体分组 ---------- */
+/* ---------- 回复区：这一楼下的讨论，整体往里沉一层 ---------- */
+/* 比外层卡片更暗：视觉上是「嵌进去」的一块。原来比卡片亮，反而像浮在上面，
+   配上几乎同色的文字，整块就成了糊在一起的一团。 */
 .cmt-replies{
-  margin:10px 0 0;padding:10px 12px;list-style:none;
-  border-left:1px solid rgba(201,168,106,.18);
-  background:rgba(255,255,255,.02);border-radius:0 8px 8px 0;
+  margin:9px 0 0;padding:8px 10px 4px;list-style:none;
+  border-left:2px solid rgba(201,168,106,.22);
+  background:rgba(0,0,0,.16);border-radius:0 8px 8px 0;
   display:flex;flex-direction:column;
 }
-.cmt-reply{padding:6px 0}
-.cmt-reply + .cmt-reply{border-top:1px solid rgba(255,255,255,.05);margin-top:4px;padding-top:10px}
+.cmt-reply{padding:5px 0}
+.cmt-reply + .cmt-reply{border-top:1px solid rgba(255,255,255,.055);margin-top:3px;padding-top:9px}
+/* 回复字号比顶层小半号，避免二层内容和顶层抢注意力 */
+.cmt-reply .cmt-meta{gap:6px;margin-bottom:3px}
+.cmt-reply .cmt-who{font-size:12px;font-weight:500}
+.cmt-reply .cmt-body{font-size:13px;color:#c4cfdd}
 /* 引用行：这条回复在接谁的话，重名时靠内容片段区分 */
 .cmt-ref{
-  margin:0 0 2px;color:#8b97a6;font-size:12px;line-height:1.7;letter-spacing:.03em;
+  margin:0 0 5px;color:#7f8a98;font-size:11.5px;line-height:1.65;letter-spacing:.02em;
 }
 
 /* ---------- 内联回复表单 ---------- */
@@ -597,8 +647,46 @@ button{font:inherit;color:inherit}
 }
 .cmt-cancel:hover{color:#cbd5e1;border-color:rgba(255,255,255,.25)}
 
+/* ---------- 页面内确认框 ---------- */
+/* 不用 window.confirm：微信内置浏览器（X5 / iOS WKWebView）会把它降级成
+   「是否关闭网页」的系统提示，或者直接吞掉不返回 */
+.confirm-mask{
+  position:fixed;inset:0;z-index:70;
+  display:flex;align-items:center;justify-content:center;padding:24px;
+  background:rgba(3,4,6,.82);
+  animation:cfm-fade .16s ease both;
+}
+@keyframes cfm-fade{from{opacity:0}to{opacity:1}}
+.confirm-box{
+  width:100%;max-width:330px;padding:20px 18px 16px;
+  background:#12161c;border:1px solid rgba(255,255,255,.13);
+  border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.7);
+}
+.confirm-msg{
+  color:#dbe3ee;font-size:13.5px;line-height:1.85;letter-spacing:.02em;text-align:center;
+}
+.confirm-acts{display:flex;justify-content:center;gap:10px;margin-top:16px}
+.confirm-yes{
+  min-height:36px;padding:0 20px;border-radius:999px;cursor:pointer;
+  font-family:inherit;font-size:12.5px;letter-spacing:.08em;line-height:1;
+  color:#f0d6d6;background:rgba(172,78,78,.22);border:1px solid rgba(201,120,120,.42);
+  transition:background .25s,border-color .25s;
+}
+.confirm-yes:hover{background:rgba(172,78,78,.34);border-color:rgba(201,120,120,.66)}
+.confirm-no{
+  min-height:36px;padding:0 20px;border-radius:999px;cursor:pointer;
+  font-family:inherit;font-size:12.5px;letter-spacing:.08em;line-height:1;
+  color:#8b97a6;background:transparent;border:1px solid rgba(255,255,255,.12);
+  transition:color .25s,border-color .25s;
+}
+.confirm-no:hover{color:#cbd5e1;border-color:rgba(255,255,255,.25)}
+
 @media (max-width:480px){
   .cmt{padding:13px 13px;margin-bottom:16px}
+  /* 手机上两个按钮各占一半，别挤成两个小胶囊 */
+  .confirm-acts{gap:8px}
+  .confirm-acts .confirm-yes,
+  .confirm-acts .confirm-no{flex:1;padding:0}
   .cmt-t{font-size:12px}
   .cmt-body{font-size:14.5px;line-height:1.85}
   .cmt-nick,.cmt-input{font-size:16px;padding:11px 12px}
@@ -860,4 +948,81 @@ button{font:inherit;color:inherit}
   .interlude-lines li{font-size:16px;padding:12px 2px 12px 17px}
   .interlude-state{font-size:12px}
   .interlude-summary{min-height:44px}
+}
+
+/* ---------- 顶部留言提醒 ---------- */
+/* 高度用一个变量统一：条本身固定在最上面，正文靠 padding-top 让开这么高 */
+:root{--notify-h:38px}
+.notify-bar{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  display:flex;align-items:center;gap:10px;
+  min-height:var(--notify-h);padding:0 34px;
+  background:rgba(14,16,21,.95);
+  border-bottom:1px solid rgba(201,168,106,.26);
+  box-shadow:0 8px 22px rgba(0,0,0,.42);
+  animation:notify-in .45s cubic-bezier(.25,.8,.25,1) both;
+}
+html.has-notify .archive-page{padding-top:var(--notify-h)}
+.notify-dot{
+  flex:none;width:6px;height:6px;border-radius:50%;
+  background:#c9a86a;box-shadow:0 0 0 3px rgba(201,168,106,.14);
+}
+.notify-msg{
+  flex:1 1 auto;min-width:0;margin:0;padding:0;border:0;background:none;
+  color:#e2e8f0;font:inherit;font-size:13px;line-height:1.5;letter-spacing:.03em;
+  text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  cursor:pointer;transition:color .3s;
+}
+.notify-msg:hover{color:#f6eeda}
+.notify-go{
+  flex:none;padding:3px 12px;cursor:pointer;border:0;border-radius:999px;
+  color:#0b0c10;background:rgba(201,168,106,.88);
+  font-size:12px;letter-spacing:.08em;transition:background .3s;
+}
+.notify-go:hover{background:#d8b978}
+.notify-x{
+  flex:none;width:22px;height:22px;padding:0;cursor:pointer;
+  color:#8b94a3;background:none;border:0;border-radius:50%;
+  font-size:16px;line-height:1;transition:color .3s,background .3s;
+}
+.notify-x:hover{color:#e2e8f0;background:rgba(255,255,255,.06)}
+@keyframes notify-in{
+  0%{opacity:0;transform:translateY(-100%)}
+  100%{opacity:1;transform:translateY(0)}
+}
+/* 从提醒条跳过来时，把这块留言亮一下，眼睛能接住 */
+.cmt.is-flash{background:rgba(201,168,106,.10);border-color:rgba(201,168,106,.55)}
+
+/* 窄屏把提醒条放到底部：拇指够得到，点「查看」不用往上够；
+   顶部标题也不再被压住，所以上方不再需要留白，改为下方让位。 */
+@media (max-width:820px){
+  :root{--notify-h:36px}
+  .notify-bar{
+    top:auto;bottom:0;
+    padding:0 16px calc(env(safe-area-inset-bottom,0px));
+    gap:8px;
+    border-bottom:0;border-top:1px solid rgba(201,168,106,.26);
+    box-shadow:0 -8px 22px rgba(0,0,0,.42);
+    animation-name:notify-in-up;
+  }
+  html.has-notify .archive-page{
+    padding-top:0;
+    padding-bottom:calc(var(--notify-h) + env(safe-area-inset-bottom,0px));
+  }
+  /* 回到顶部按钮让开提醒条，别压在「查看 / ×」上 */
+  html.has-notify .to-top{bottom:calc(var(--notify-h) + 20px + env(safe-area-inset-bottom,0px))}
+  .notify-msg{font-size:12.5px}
+}
+@keyframes notify-in-up{
+  0%{opacity:0;transform:translateY(100%)}
+  100%{opacity:1;transform:translateY(0)}
+}
+@media (max-width:480px){
+  :root{--notify-h:34px}
+  .notify-msg{font-size:12px}
+  .notify-go{font-size:11.5px;padding:2px 10px}
+  html.has-notify .to-top{bottom:calc(var(--notify-h) + 14px + env(safe-area-inset-bottom,0px))}
+}
+@media (prefers-reduced-motion:reduce){
+  .notify-bar{animation:none}
 }

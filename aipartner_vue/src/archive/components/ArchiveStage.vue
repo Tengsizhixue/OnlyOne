@@ -43,6 +43,7 @@
           :revealing="person.id === flashId"
           :reveal-index="person.id === flashId ? 0 : revealIndexMap[person.id] || 0"
           @toggle="togglePerson"
+          @author-changed="emit('author-changed', $event)"
         />
       </div>
     </div>
@@ -60,7 +61,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import PersonRow from './PersonRow.vue'
 import ExtraSection from './ExtraSection.vue'
 import { renderTokens } from '../render.js'
@@ -76,7 +77,7 @@ const props = defineProps({
   extrasUnlocked: { type: Array, default: () => [] },
 })
 
-const emit = defineEmits(['unlock', 'extra-unlocked'])
+const emit = defineEmits(['unlock', 'extra-unlocked', 'author-changed'])
 
 const REDUCED =
   typeof window !== 'undefined' &&
@@ -258,4 +259,39 @@ function togglePerson(person) {
     })
   }
 }
+
+// 顶部提醒条点名「谁下面有新留言」：展开他所在的分组、点开这个人，滚到留言区并亮一下
+function onJump(ev) {
+  const person = ev && ev.detail ? ev.detail.person : ''
+  if (!person) return
+  const hit = allPeople.value.find((item) => item.id === person)
+  if (!hit) return
+  openGroups[hit.groupId] = true
+  openOnly(hit.id)
+  nextTick(() => {
+    const cmt = document.querySelector(`.cmt[data-person="${person}"]`)
+    const target = cmt || document.getElementById('person-' + person)
+    if (!target) return
+    let landed = false
+    const land = () => {
+      if (landed) return
+      landed = true
+      target.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth', block: 'center' })
+      target.classList.add('is-flash')
+      setTimeout(() => target.classList.remove('is-flash'), 1800)
+    }
+    // 定位前先把这块留言拉到最新再滚：提醒和列表虽已同节拍，点提醒的这一刻
+    // 列表仍可能差半拍，刷完再滚才不会「跳过来却没看到那条」。
+    if (cmt) {
+      cmt.dispatchEvent(new CustomEvent('cmt-refresh', { detail: { then: land } }))
+      // 万一没人接这个事件，也别把跳转卡住
+      setTimeout(land, 700)
+    } else {
+      land()
+    }
+  })
+}
+
+onMounted(() => window.addEventListener('archive:jump', onJump))
+onBeforeUnmount(() => window.removeEventListener('archive:jump', onJump))
 </script>

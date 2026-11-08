@@ -15,7 +15,7 @@
     <p class="quote" :class="{ 'quote-del': person.deleted }" v-html="descHtml"></p>
 
     <!-- 公开留言：所有访客都能看到，存在服务器 sqlite 里 -->
-    <PersonComments :person-id="person.id" />
+    <PersonComments :person-id="person.id" @author-changed="$emit('author-changed', $event)" />
   </div>
 </template>
 
@@ -31,5 +31,5 @@ defineProps({
   revealIndex: { type: Number, default: 0 },
 })
 
-defineEmits(['toggle'])
+defineEmits(['toggle', 'author-changed'])
 </script>

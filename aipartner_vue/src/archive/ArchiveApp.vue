@@ -1,5 +1,8 @@
 <template>
   <div class="archive-page">
+    <!-- 顶部提醒：有人留言 / 有人回复了你的留言，点一下直接跳到那条 -->
+    <NotifyBar ref="notifyRef" :names="names" />
+
     <div aria-hidden="true" class="bg" :class="{ 'is-lit': lit }">
       <span class="warm"></span>
       <span class="lamp"></span>
@@ -34,6 +37,7 @@
             :extras-unlocked="extraUnlocked"
             @unlock="onUnlockPerson"
             @extra-unlocked="onExtraUnlocked"
+            @author-changed="onAuthorChanged"
           />
         </template>
       </div>
@@ -73,6 +77,7 @@ import { computed, onBeforeUnmount, onMounted, reactive, ref } from 'vue'
 import ArchiveStage from './components/ArchiveStage.vue'
 import StageInterlude from './components/StageInterlude.vue'
 import PhotoSection from './components/PhotoSection.vue'
+import NotifyBar from './components/NotifyBar.vue'
 import { getContent, getState, unlockPerson } from './api.js'
 import { initAmbientLight, initTouchFeedback } from './fx.js'
 
@@ -83,6 +88,8 @@ const photoUnlocked = ref({})
 const extraUnlocked = ref([])
 const justRevealed = ref(null)
 const stageFeedback = reactive({})
+// 顶部提醒条：作者模式切换后要让它按新口径立刻重算
+const notifyRef = ref(null)
 
 // 相册横跨两栏，挂在页面底部整行显示
 const photoAlbums = computed(() => content.value?.photos?.albums || [])
@@ -134,6 +141,21 @@ function onExtraUnlocked(stageId) {
   if (!extraUnlocked.value.includes(stageId)) {
     extraUnlocked.value = [...extraUnlocked.value, stageId]
   }
+}
+
+// 进 / 出作者模式后重新问一次进度：作者模式下服务端会把所有人名一起给回来，
+// 退出后又要变回「只显示已经揭示过的人」，所以必须整份重取，不能只加不减。
+async function onAuthorChanged() {
+  try {
+    const state = await getState()
+    names.value = state.names || {}
+    photoUnlocked.value = state.photos || {}
+    extraUnlocked.value = state.extras || {}
+    stateError.value = ''
+  } catch (e) {
+    // 静默：cookie 已经生效，刷新页面就能拿到正确状态
+  }
+  notifyRef.value?.refresh?.()
 }
 
 async function onUnlockPerson(stageId, value) {  const name = (value || '').trim()
