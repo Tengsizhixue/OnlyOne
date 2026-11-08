@@ -46,3 +46,7 @@ desktop.ini
 *.json
 *.sqlite3
 *.sqlite3-*
+
+# 档案页的编辑源与中间产物（含真实姓名，不能进公开仓库）
+FastAPIProject/archive/source.html
+FastAPIProject/archive/*_ai.html
