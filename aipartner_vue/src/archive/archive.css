@@ -281,7 +281,13 @@ button{font:inherit;color:inherit}
 
   /* 姓名两列：88 人单列滚动过长，390px 下每列约 155px，放三个字绰绰有余。
      展开的那条跨满整行，描述仍然按整幅宽排版。 */
-  .roster{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:10px}
+  /* dense 是必须的：展开的那条描述要跨满整行，默认（稀疏）放置会把它独占一行，
+     于是同一行右侧那个人被顶到描述下面、右边空出一格，看着就像「人不见了」。
+     dense 让后面的人回填右边空格，两列始终是满的。 */
+  .roster{
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:10px;
+    grid-auto-flow:row dense;
+  }
   .p{min-width:0}
   /* 展开的描述跨满整行，人名本身留在原来那格，点开不会跳到左边 */
   .p-body{grid-column:1/-1;min-width:0}
@@ -918,13 +924,16 @@ button{font:inherit;color:inherit}
 /* ==========================================================================
    纯文字阶段（初二到高一）：只有标题 + 一句引子 + 几行总结，没有人名
    ========================================================================== */
-/* 这一栏很短，别让离屏时 520px 的估算高度把整行撑出一大块空白 */
-.interlude-col{content-visibility:visible;contain-intrinsic-size:none}
+/* 这一栏很短，别让离屏时 520px 的估算高度把整行撑出一大块空白；
+   收起时整张卡只有一行标题，上下留白收到 12px，别用一张大卡片装一行字。 */
+.interlude-col{content-visibility:visible;contain-intrinsic-size:none;padding:12px 22px}
+.interlude-col[open]{padding-bottom:20px}
 /* 标题行即折叠开关；右侧状态字沿用页面里其他折叠块的写法 */
 .interlude-summary{
-  display:flex;align-items:center;gap:10px;margin-bottom:16px;
+  display:flex;align-items:center;gap:10px;margin-bottom:0;
   cursor:pointer;list-style:none;user-select:none;
 }
+.interlude-col[open] .interlude-summary{margin-bottom:16px}
 .interlude-summary::-webkit-details-marker{display:none}
 .interlude-state{margin-left:auto;color:#8996a6;font-size:11px;letter-spacing:.08em;white-space:nowrap}
 .interlude-state::after{content:"展开"}
