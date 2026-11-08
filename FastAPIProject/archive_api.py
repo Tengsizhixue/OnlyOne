@@ -9,7 +9,7 @@
 环境变量：
     ARCHIVE_COOKIE_SECURE=1   线上 HTTPS 时设为 1
     ARCHIVE_ADMIN_TOKEN=...   用于 POST /admin/reload 重载内容
-    ARCHIVE_AUTHOR_KEY=...    作者暗号；不设就用默认的 210318
+    ARCHIVE_AUTHOR_KEY=...    作者暗号；不设就关掉作者模式（源码里不留默认口令）
 """
 
 from __future__ import annotations
@@ -62,6 +62,8 @@ URL_RE = re.compile(
     r"(https?://|www\.|\b[a-z0-9-]+\.(?:com|cn|net|org|xyz|top|site|me|cc|io)\b)",
     re.IGNORECASE,
 )
+# 形如作者暗号的纯数字串（前端也按同样的规则判断「这可能是口令」）
+CODE_LIKE_RE = re.compile(r"\d{6}")
 
 # 作者身份：没有账号系统，靠一句暗号换一个服务端签名的 cookie。
 # 暗号本身不写进源码也不入库，只在环境变量里；签名的值由暗号派生，
@@ -69,7 +71,9 @@ URL_RE = re.compile(
 AUTHOR_COOKIE = "arch_author"
 AUTHOR_TTL = 60 * 60 * 24 * 30      # 30 天
 AUTHOR_CMD = "#作者"                 # 留言框里以此开头的，当作登录命令而不是留言
-AUTHOR_DEFAULT_KEY = "210318"       # 没配 ARCHIVE_AUTHOR_KEY 时用的暗号
+# 暗号只从环境变量读，源码里绝不写死：仓库是公开的，写死等于把口令一起公开。
+# 两个键名都认（ARCHIVE_AUTHOR_KEY 优先）；都没配就当作者模式关闭。
+AUTHOR_KEY_ENVS = ("ARCHIVE_AUTHOR_KEY", "AUTHOR_DEFAULT_KEY")
 AUTHOR_TRIES = 5                     # 10 分钟内最多试错几次
 AUTHOR_WINDOW = 600
 _author_tries: dict[str, list[float]] = {}
@@ -443,8 +447,15 @@ def _check_rate(request: Request) -> None:
 
 # ---------------------------------------------------------------- 作者身份
 def _author_key() -> str:
-    """请求时再读，改 .env 后重启即生效。没配就用默认暗号。"""
-    return os.getenv("ARCHIVE_AUTHOR_KEY", "").strip() or AUTHOR_DEFAULT_KEY
+    """请求时再读，改 .env 后重启即生效；两个键都没配就返回空，作者模式关闭。"""
+    for name in AUTHOR_KEY_ENVS:
+        value = os.getenv(name, "").strip()
+        # .env 里写成 KEY = "123456" 时带上引号，这里一并去掉
+        if len(value) > 1 and value[0] == value[-1] and value[0] in {"'", '"'}:
+            value = value[1:-1].strip()
+        if value:
+            return value
+    return ""
 
 
 def _author_signature() -> str:
@@ -755,8 +766,13 @@ def add_comment(body: CommentIn, request: Request, response: Response) -> dict:
     # 暗号就是口令本身：整条内容正好等于暗号时，当作登录而不是留言。
     # 「#作者 暗号」的老写法也留着，以后换成更长的口令照样能用。
     # 失败一律回同一句话，不暴露这里有作者模式。
+    key = _author_key()
     cmd = text.startswith(AUTHOR_CMD)
-    if cmd or hmac.compare_digest(text.encode("utf-8"), _author_key().encode("utf-8")):
+    # 没配暗号（作者模式关闭）时，形如暗号的 6 位数字一律不发出去：
+    # 万一服务器漏配 .env，输进去的口令不会变成一条公开留言。
+    if not key and not cmd and CODE_LIKE_RE.fullmatch(text):
+        raise HTTPException(status_code=403, detail="这条不能发。")
+    if cmd or (key and hmac.compare_digest(text.encode("utf-8"), key.encode("utf-8"))):
         _check_author_rate(request)
         key = text[len(AUTHOR_CMD):] if cmd else text
         if not _author_ok(key):
