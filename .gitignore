@@ -47,6 +47,15 @@ desktop.ini
 *.sqlite3
 *.sqlite3-*
 
-# 档案页的编辑源与中间产物（含真实姓名，不能进公开仓库）
+# 档案页的私密数据：只放在服务器上，不进仓库
+# content.json 是脱敏后的产物（真名都换成了 {{pNNN}}），只有它可以进仓库
+FastAPIProject/archive/answers.json
+FastAPIProject/archive/aliases.json
+FastAPIProject/archive/extras.json
+FastAPIProject/archive/photos.json
+FastAPIProject/archive/interlude.json
+FastAPIProject/archive/state.sqlite3
+
+# 编辑源与中间产物（含真实姓名）
 FastAPIProject/archive/source.html
 FastAPIProject/archive/*_ai.html

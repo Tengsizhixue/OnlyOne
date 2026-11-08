@@ -236,7 +236,7 @@ def parse(raw: str):
             # now 是作者现在自己写的看法，排在标签第一位；缺了前端就不显示这个标签
             "now": mask_names(item.get("now", ""), refs=True),
             "ai": mask_names(item["ai"], refs=True),
-            # raw 可选：某同学这类只保留 AI 总结的条目没有原文
+            # raw 可选：只保留 AI 总结的条目没有原文
             "raw": mask_names(item.get("raw", ""), refs=True),
         }
         for item in spec["items"]
