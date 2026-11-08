@@ -219,6 +219,24 @@ function openOnly(id) {
   openPeople[id] = true
 }
 
+// 展开 / 收起都会改变上方内容的高度，刚点的那个人名会跟着在屏幕上位移。
+// 做法是记下它改动前的位置，等 DOM 更新完把差值补回去：画面看起来没动，
+// 既不会把内容顶到屏幕最上方，也不会让手指底下的东西窜位。
+function keepInPlace(el, mutate) {
+  if (!el) {
+    mutate()
+    return
+  }
+  const before = el.getBoundingClientRect().top
+  mutate()
+  nextTick(() => {
+    if (!el.isConnected) return
+    // 浏览器自己有 scroll anchoring 时这里通常已经是 0，不会重复纠正
+    const delta = el.getBoundingClientRect().top - before
+    if (Math.abs(delta) > 1) window.scrollBy(0, delta)
+  })
+}
+
 function togglePerson(person) {
   // 划去的人：如果同阶段存在同名且未划去的条目，跳过去
   if (person.deleted && props.names[person.id]) {
@@ -238,26 +256,15 @@ function togglePerson(person) {
       return
     }
   }
+  const el = document.getElementById('person-' + person.id)
   if (openPeople[person.id]) {
-    openPeople[person.id] = false
-    // 收起长文时把人名拉回视口：否则内容一收缩，刚才那行已经跑到屏幕外
-    nextTick(() => {
-      const el = document.getElementById('person-' + person.id)
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    keepInPlace(el, () => {
+      openPeople[person.id] = false
     })
     return
   }
-  // 手机上换人时，上一条描述会塌掉，页面高度骤减，手指底下的内容会窜位；
-  // 把新点开的这个名字顶到视口上方，位置就稳了。
-  const hadOther =
-    !!(COMPACT && COMPACT.matches) && Object.keys(openPeople).some((key) => openPeople[key])
-  openOnly(person.id)
-  if (hadOther) {
-    nextTick(() => {
-      const el = document.getElementById('person-' + person.id)
-      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    })
-  }
+  // 手机上换人时上一条描述会塌掉，页面高度骤减；保持新点开的名字原地不动
+  keepInPlace(el, () => openOnly(person.id))
 }
 
 // 顶部提醒条点名「谁下面有新留言」：展开他所在的分组、点开这个人，滚到留言区并亮一下
